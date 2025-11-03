@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pa-assistant Wireframes - Excel-like Tables</title>
+    <!-- 
+    UX Design Decision: Result Explanation UI
+    Date: November 3, 2025
+    Decision: Option 1 (Modal) - IMPLEMENTED in "Self-Review & Manager Evaluation" screen
+    Rationale: Most Excel-like experience, familiar to users, provides adequate space for detailed explanations
+    Backup Options: Option 2 (Collapsible) and Option 3 (Two-Panel) kept as reference for future consideration
+    -->
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #e3f2fd;
+            border-bottom: 2px solid #1976d2;
+            padding: 0 20px;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+        
+        .tab:hover {
+            background: rgba(25, 118, 210, 0.1);
+            color: #1976d2;
+        }
+        
+        .tab.active {
+            color: #1976d2;
+            border-bottom-color: #1976d2;
+            background: white;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            background: #fafafa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1e40af;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .input, .textarea, .select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        .input:focus, .textarea:focus, .select:focus {
+            outline: none;
+            border-color: #1e40af;
+            box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.1);
+        }
+        
+        .textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .button-primary {
+            background: #1e40af;
+            color: white;
+        }
+        
+        .button-primary:hover {
+            background: #1e3a8a;
+        }
+        
+        .button-secondary {
+            background: #16a34a;
+            color: white;
+        }
+        
+        .button-secondary:hover {
+            background: #15803d;
+        }
+        
+        /* Excel-like Table Styles */
+        .excel-table-container {
+            overflow: auto;
+            border: 1px solid #c0c0c0;
+            background: white;
+            position: relative;
+        }
+        
+        .excel-table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+            background: white;
+        }
+        
+        .excel-table th {
+            background: #e7e7e7;
+            border: 1px solid #c0c0c0;
+            padding: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+            text-align: left;
+            position: relative;
+            user-select: none;
+        }
+        
+        .excel-table td {
+            border: 1px solid #d0d0d0;
+            padding: 0;
+            position: relative;
+            background: white;
+        }
+        
+        .excel-table tr:hover td {
+            background: #f5f9ff;
+        }
+        
+        .cell-content {
+            padding: 8px;
+            min-height: 34px;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+        }
+        
+        .cell-input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            background: transparent;
+            min-height: 34px;
+        }
+        
+        .cell-input:focus {
+            outline: 2px solid #1e40af;
+            outline-offset: -2px;
+            background: white;
+        }
+        
+        /* Column Resize Handle */
+        .resize-handle-col {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 4px;
+            height: 100%;
+            cursor: col-resize;
+            z-index: 10;
+            background: transparent;
+            transform: translateX(50%);
+        }
+        
+        .resize-handle-col:hover,
+        .resize-handle-col.resizing {
+            background: #1e40af;
+        }
+        
+        /* Row Resize Handle */
+        .resize-handle-row {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            cursor: row-resize;
+            z-index: 10;
+            background: transparent;
+            transform: translateY(50%);
+        }
+        
+        .resize-handle-row:hover,
+        .resize-handle-row.resizing {
+            background: #1e40af;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        
+        .alert-info {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            color: #0d47a1;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>pa-assistant Wireframes</h1>
+            <span style="font-size: 14px;">Excel-like Table Experience</span>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showScreen(0)">Target Setting</button>
+            <button class="tab" onclick="showScreen(1)">Self-Review & Manager Evaluation</button>
+            <button class="tab" onclick="showScreen(2)">Manager Dashboard</button>
+            <button class="tab" onclick="showScreen(3)" style="margin-left: auto; font-style: italic; color: #999; border-left: 2px solid #ddd;">💾 Backup: Option 1 (Modal Demo)</button>
+            <button class="tab" onclick="showScreen(4)" style="font-style: italic; color: #999;">💾 Backup: Option 2 (Collapsible)</button>
+            <button class="tab" onclick="showScreen(5)" style="font-style: italic; color: #999;">💾 Backup: Option 3 (Two-Panel)</button>
+        </div>
+        
+        <!-- Screen 1: Target Setting -->
+        <div id="screen-0" class="screen active">
+            <div class="content">
+                <div class="section">
+                    <div class="section-title">Employee Information</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="label">Employee ID</label>
+                            <input type="text" class="input" value="EMP12345" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Employee Name</label>
+                            <input type="text" class="input" value="John Doe" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Current Grade</label>
+                            <input type="text" class="input" value="APE2/D1" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Department</label>
+                            <input type="text" class="input" value="Engineering" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Manager</label>
+                            <input type="text" class="input" value="Jane Smith" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Employment Status</label>
+                            <input type="text" class="input" value="Active" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Period of Appraisal</div>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label class="label">From</label>
+                            <input type="date" class="input" value="2025-04-01">
+                        </div>
+                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                            <label class="label">To</label>
+                            <input type="date" class="input" value="2026-03-31">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Current Role</div>
+                    <p style="color: #666; font-style: italic; margin-bottom: 10px;">Concretely describe your roles for this year</p>
+                    <textarea class="textarea" placeholder="Describe your current role and key responsibilities..."></textarea>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Long-term Goal</div>
+                    <p style="color: #666; font-style: italic; margin-bottom: 10px;">Concretely describe your challenge targets for 3-5 years</p>
+                    <textarea class="textarea" placeholder="Describe your long-term career goals..."></textarea>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Performance Targets (3-5 targets)</div>
+                    
+                    <div class="alert alert-info">
+                        <strong>Company Core Values:</strong> Integrity, Result-driven, Commitment, Agility<br>
+                        <em>Each target should align with at least one core value to ensure organizational alignment.</em>
+                    </div>
+                    
+                    <div class="excel-table-container" id="targets-table-container">
+                        <table class="excel-table" id="targets-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 150px;">Dimension/Task<div class="resize-handle-col"></div></th>
+                                    <th style="width: 250px;">Targets (KPI)<div class="resize-handle-col"></div></th>
+                                    <th style="width: 80px;">Weight (%)<div class="resize-handle-col"></div></th>
+                                    <th style="width: 100px;">Difficulty<div class="resize-handle-col"></div></th>
+                                    <th style="width: 200px;">Core Values Alignment<div class="resize-handle-col"></div></th>
+                                    <th style="width: 100px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="text" class="cell-input" value="Project Delivery"><div class="resize-handle-row"></div></td>
+                                    <td><input type="text" class="cell-input" value="Complete Q4 Project deliverables on-time"><div class="resize-handle-row"></div></td>
+                                    <td><input type="number" class="cell-input" value="25"><div class="resize-handle-row"></div></td>
+                                    <td>
+                                        <select class="cell-input">
+                                            <option>L1</option>
+                                            <option selected>L2</option>
+                                            <option>L3</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content" style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;">
+                                            <label style="font-size: 12px; white-space: nowrap;"><input type="checkbox" checked> Integrity</label>
+                                            <label style="font-size: 12px; white-space: nowrap;"><input type="checkbox" checked> Result-driven</label>
+                                            <label style="font-size: 12px; white-space: nowrap;"><input type="checkbox"> Commitment</label>
+                                            <label style="font-size: 12px; white-space: nowrap;"><input type="checkbox"> Agility</label>
+                                        </div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content">
+                                            <button class="button" style="background: #f44336; color: white; width: 100%;">Remove</button>
+                                        </div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="text" class="cell-input" value="Code Quality"><div class="resize-handle-row"></div></td>
+                                    <td><input type="text" class="cell-input" value="Improve code quality metrics and reduce bug rate"><div class="resize-handle-row"></div></td>
+                                    <td><input type="number" class="cell-input" value="20"><div class="resize-handle-row"></div></td>
+                                    <td>
+                                        <select class="cell-input">
+                                            <option>L1</option>
+                                            <option selected>L2</option>
+                                            <option>L3</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content" style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;">
+                                            <label style="font-size: 12px; white-space: nowrap;"><input type="checkbox" checked> Integrity</label>
+                                            <label style="font-size: 12px; white-space: nowrap;"><input type="checkbox"> Result-driven</label>
+                                            <label style="font-size: 12px; white-space: nowrap;"><input type="checkbox" checked> Commitment</label>
+                                            <label style="font-size: 12px; white-space: nowrap;"><input type="checkbox"> Agility</label>
+                                        </div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content">
+                                            <button class="button" style="background: #f44336; color: white; width: 100%;">Remove</button>
+                                        </div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="text" class="cell-input" placeholder="Add dimension..."><div class="resize-handle-row"></div></td>
+                                    <td><input type="text" class="cell-input" placeholder="Add targets..."><div class="resize-handle-row"></div></td>
+                                    <td><input type="number" class="cell-input" placeholder="%"><div class="resize-handle-row"></div></td>
+                                    <td>
+                                        <select class="cell-input">
+                                            <option>L1</option>
+                                            <option>L2</option>
+                                            <option>L3</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content" style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;">
+                                            <label style="font-size: 12px; white-space: nowrap;"><input type="checkbox"> Integrity</label>
+                                            <label style="font-size: 12px; white-space: nowrap;"><input type="checkbox"> Result-driven</label>
+                                            <label style="font-size: 12px; white-space: nowrap;"><input type="checkbox"> Commitment</label>
+                                            <label style="font-size: 12px; white-space: nowrap;"><input type="checkbox"> Agility</label>
+                                        </div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content">
+                                            <button class="button button-primary" style="width: 100%;">Add</button>
+                                        </div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-top: 15px;">
+                        <strong>Total Weight: 45%</strong> | <span style="color: red;">Must total 100%</span>
+                    </div>
+                    
+                    <div class="alert alert-warning" style="margin-top: 15px;">
+                        <strong>Core Values Coverage:</strong><br>
+                        <span style="color: #28a745;"> Integrity (2 targets)</span> | 
+                        <span style="color: #28a745;"> Result-driven (1 target)</span> | 
+                        <span style="color: #ffc107;"> Commitment (1 target)</span> | 
+                        <span style="color: #dc3545;"> Agility (0 targets)</span>
+                    </div>
+                </div>
+                
+                <div class="section" style="text-align: center;">
+                    <button class="button button-primary">Submit Targets for Approval</button>
+                    <button class="button" style="background: #9e9e9e; color: white; margin-left: 10px;">Save Draft</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Screen 2: Employee Self-Review & Manager Evaluation -->
+        <div id="screen-1" class="screen">
+            <div class="content">
+                <!-- Role-based Access Control Demo -->
+                <div class="alert alert-info">
+                    <strong>🔐 Role-Based Access Control</strong><br>
+                    <strong>Current User:</strong> <select id="roleSelector" onchange="toggleUserRole()" style="padding: 5px; border-radius: 4px; margin: 5px 0;">
+                        <option value="employee">Employee (John Doe)</option>
+                        <option value="manager">Manager (Jane Smith)</option>
+                        <option value="hradmin">HR Admin (Alice Brown - Read Only)</option>
+                    </select>
+                    <div style="margin-top: 10px; font-size: 13px;">
+                        <strong>Access Rules:</strong><br>
+                        • <span style="color: #1e40af;">Blue sections (Individual Evaluation)</span> → Editable by <strong>Employee only</strong> (read-only for Manager & HR Admin)<br>
+                        • <span style="color: #f59e0b;">Orange sections (Manager Evaluation)</span> → Editable by <strong>Manager only</strong> (read-only for Employee & HR Admin)<br>
+                        • <strong>Result Explanation</strong> (Employee's detailed evidence) → Employee writes, Manager & HR Admin read<br>
+                        • <strong>Manager's Feedback</strong> (Manager's comments on each target) → Manager writes, Employee & HR Admin read<br>
+                        • <strong>Overall Performance Summary</strong> (Manager's overall feedback) → Manager writes, Employee & HR Admin read<br>
+                        • <strong>HR Admin:</strong> Read-only access to all fields (Note: HR Admin can also be a Manager in different context)<br>
+                        • Backend validates all changes based on user role + workflow state
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Employee Information</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="label">Employee ID</label>
+                            <input type="text" class="input" value="EMP12345" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Employee Name</label>
+                            <input type="text" class="input" value="John Doe" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Current Grade</label>
+                            <input type="text" class="input" value="APE2/D1" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Department</label>
+                            <input type="text" class="input" value="Engineering" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Manager</label>
+                            <input type="text" class="input" value="Jane Smith" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="label">Period of Appraisal</label>
+                            <input type="text" class="input" value="Apr 2025 - Mar 2026" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Performance Evaluation</div>
+                    
+                    <div class="excel-table-container" id="evaluation-table-container">
+                        <table class="excel-table" id="evaluation-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" style="width: 180px; vertical-align: middle;">Target Description<div class="resize-handle-col"></div></th>
+                                    <th colspan="5" style="background: #e3f2fd; text-align: center;">Individual Target Evaluation<div class="resize-handle-col"></div></th>
+                                    <th colspan="4" style="background: #fff3e0; text-align: center;">Evaluation from Manager</th>
+                                </tr>
+                                <tr>
+                                    <th style="width: 80px; background: #e3f2fd;">Weight (%)<div class="resize-handle-col"></div></th>
+                                    <th style="width: 90px; background: #e3f2fd;">Difficulty<div class="resize-handle-col"></div></th>
+                                    <th style="width: 80px; background: #e3f2fd;">Rating<div class="resize-handle-col"></div></th>
+                                    <th style="width: 100px; background: #e3f2fd;">Total Point<div class="resize-handle-col"></div></th>
+                                    <th style="width: 250px; background: #e3f2fd;">Result Explanation<div class="resize-handle-col"></div></th>
+                                    <th style="width: 80px; background: #fff3e0;">Weight (%)<div class="resize-handle-col"></div></th>
+                                    <th style="width: 90px; background: #fff3e0;">Difficulty<div class="resize-handle-col"></div></th>
+                                    <th style="width: 80px; background: #fff3e0;">Rating<div class="resize-handle-col"></div></th>
+                                    <th style="width: 100px; background: #fff3e0;">Total Point</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="cell-content" style="font-weight: 600;">Complete Q4 Project deliverables on-time</div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <!-- Individual Target Evaluation -->
+                                    <td style="background: #f8fbff;">
+                                        <input type="number" class="cell-input" value="25" readonly style="background: transparent;">
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #f8fbff;">
+                                        <select class="cell-input" disabled style="background: transparent;">
+                                            <option>L1</option>
+                                            <option selected>L2</option>
+                                            <option>L3</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #f8fbff;">
+                                        <select class="cell-input">
+                                            <option value="1">1 - Poor</option>
+                                            <option value="2">2 - Below Expectation</option>
+                                            <option value="3">3 - Meets Expectation</option>
+                                            <option value="4" selected>4 - Exceeds Expectation</option>
+                                            <option value="5">5 - Outstanding</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #f8fbff;">
+                                        <div class="cell-content" style="font-weight: 600; color: #1e40af;">200</div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #f8fbff;">
+                                        <div class="cell-content" style="cursor: pointer; color: #1e40af; padding: 8px;" 
+                                             onclick="openEvaluationModal('target1', 'Complete Q4 Project deliverables on-time', 4, 25, 'L2', 150, 'Successfully delivered all Q4 milestones ahead of schedule. Implemented new CI/CD pipeline that reduced deployment time by 40%.', 5, 250)"
+                                             title="Double-click to expand and edit">
+                                            <div style="text-decoration: underline;">Successfully delivered all Q4 milestones... (click to expand)</div>
+                                            <div style="font-size: 11px; color: #666; margin-top: 4px;">💡 Click to open full editor with AI help</div>
+                                        </div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <!-- Evaluation from Manager -->
+                                    <td style="background: #fffbf5;">
+                                        <input type="number" class="cell-input" value="25" readonly style="background: transparent;">
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #fffbf5;">
+                                        <select class="cell-input" disabled style="background: transparent;">
+                                            <option>L1</option>
+                                            <option selected>L2</option>
+                                            <option>L3</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #fffbf5;">
+                                        <select class="cell-input">
+                                            <option value="1">1 - Poor</option>
+                                            <option value="2">2 - Below Expectation</option>
+                                            <option value="3">3 - Meets Expectation</option>
+                                            <option value="4">4 - Exceeds Expectation</option>
+                                            <option value="5" selected>5 - Outstanding</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #fffbf5;">
+                                        <div class="cell-content" style="font-weight: 600; color: #f59e0b;">250</div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="cell-content" style="font-weight: 600;">Improve code quality metrics and reduce bug rate</div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <!-- Individual Target Evaluation -->
+                                    <td style="background: #f8fbff;">
+                                        <input type="number" class="cell-input" value="20" readonly style="background: transparent;">
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #f8fbff;">
+                                        <select class="cell-input" disabled style="background: transparent;">
+                                            <option>L1</option>
+                                            <option selected>L2</option>
+                                            <option>L3</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #f8fbff;">
+                                        <select class="cell-input">
+                                            <option value="1">1 - Poor</option>
+                                            <option value="2">2 - Below Expectation</option>
+                                            <option value="3" selected>3 - Meets Expectation</option>
+                                            <option value="4">4 - Exceeds Expectation</option>
+                                            <option value="5">5 - Outstanding</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #f8fbff;">
+                                        <div class="cell-content" style="font-weight: 600; color: #1e40af;">120</div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #f8fbff;">
+                                        <div class="cell-content" style="cursor: pointer; color: #1e40af; padding: 8px;" 
+                                             onclick="openEvaluationModal('target2', 'Improve code quality metrics and reduce bug rate', 3, 20, 'L2', 90, 'Maintained code coverage above 80%. Reduced production bugs by 25% compared to last quarter.', 4, 120)"
+                                             title="Click to expand and edit">
+                                            <div style="text-decoration: underline;">Maintained code coverage above 80%... (click to expand)</div>
+                                            <div style="font-size: 11px; color: #666; margin-top: 4px;">💡 Click to open full editor with AI help</div>
+                                        </div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <!-- Evaluation from Manager -->
+                                    <td style="background: #fffbf5;">
+                                        <input type="number" class="cell-input" value="20" readonly style="background: transparent;">
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #fffbf5;">
+                                        <select class="cell-input" disabled style="background: transparent;">
+                                            <option>L1</option>
+                                            <option selected>L2</option>
+                                            <option>L3</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #fffbf5;">
+                                        <select class="cell-input">
+                                            <option value="1">1 - Poor</option>
+                                            <option value="2">2 - Below Expectation</option>
+                                            <option value="3">3 - Meets Expectation</option>
+                                            <option value="4" selected>4 - Exceeds Expectation</option>
+                                            <option value="5">5 - Outstanding</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #fffbf5;">
+                                        <div class="cell-content" style="font-weight: 600; color: #f59e0b;">160</div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="cell-content" style="font-weight: 600;">Mentor junior developers and improve team productivity</div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <!-- Individual Target Evaluation -->
+                                    <td style="background: #f8fbff;">
+                                        <input type="number" class="cell-input" value="15" readonly style="background: transparent;">
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #f8fbff;">
+                                        <select class="cell-input" disabled style="background: transparent;">
+                                            <option selected>L1</option>
+                                            <option>L2</option>
+                                            <option>L3</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #f8fbff;">
+                                        <select class="cell-input">
+                                            <option value="1">1 - Poor</option>
+                                            <option value="2">2 - Below Expectation</option>
+                                            <option value="3">3 - Meets Expectation</option>
+                                            <option value="4" selected>4 - Exceeds Expectation</option>
+                                            <option value="5">5 - Outstanding</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #f8fbff;">
+                                        <div class="cell-content" style="font-weight: 600; color: #1e40af;">180</div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #f8fbff;">
+                                        <div class="cell-content" style="cursor: pointer; color: #1e40af; padding: 8px;" 
+                                             onclick="openEvaluationModal('target3', 'Mentor junior developers and improve team productivity', 4, 15, 'L1', 60, 'Successfully mentored 2 junior developers. Organized weekly knowledge sharing sessions with 90% team participation.', 5, 75)"
+                                             title="Click to expand and edit">
+                                            <div style="text-decoration: underline;">Click here to add detailed explanation...</div>
+                                            <div style="font-size: 11px; color: #666; margin-top: 4px;">💡 Click to open full editor with AI help</div>
+                                        </div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <!-- Evaluation from Manager -->
+                                    <td style="background: #fffbf5;">
+                                        <input type="number" class="cell-input" value="15" readonly style="background: transparent;">
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #fffbf5;">
+                                        <select class="cell-input" disabled style="background: transparent;">
+                                            <option selected>L1</option>
+                                            <option>L2</option>
+                                            <option>L3</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #fffbf5;">
+                                        <select class="cell-input">
+                                            <option value="1">1 - Poor</option>
+                                            <option value="2">2 - Below Expectation</option>
+                                            <option value="3">3 - Meets Expectation</option>
+                                            <option value="4">4 - Exceeds Expectation</option>
+                                            <option value="5" selected>5 - Outstanding</option>
+                                        </select>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                    <td style="background: #fffbf5;">
+                                        <div class="cell-content" style="font-weight: 600; color: #f59e0b;">225</div>
+                                        <div class="resize-handle-row"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 4px;">
+                            <strong style="color: #1e40af;">Employee Self-Evaluation Total: 500</strong>
+                        </div>
+                        <div style="background: #fff3e0; padding: 15px; border-radius: 4px;">
+                            <strong style="color: #f59e0b;">Manager Evaluation Total: 635</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Manager's Overall Feedback</div>
+                    <div class="form-group">
+                        <label class="label">Overall Performance Summary</label>
+                        <textarea id="overall-summary" class="textarea" style="min-height: 120px; background: #fffbf5;" placeholder="Provide overall feedback on employee's performance..."></textarea>
+                        <button class="button button-secondary" style="margin-top: 10px;">
+                            <span style="margin-right: 5px;">🤖</span> AI Help - Synthesize Feedback
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="section" style="text-align: center;">
+                    <button class="button button-primary">Submit Evaluation</button>
+                    <button class="button" style="background: #9e9e9e; color: white; margin-left: 10px;">Save Draft</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Screen 3: Manager Dashboard (placeholder) -->
+        <div id="screen-2" class="screen">
+            <div class="content">
+                <h2>Manager Dashboard Screen</h2>
+                <p>Dashboard showing all direct reports with completion status.</p>
+            </div>
+        </div>
+        
+        
+        <!-- Screen 4: BACKUP - Option 1 Modal Demo (for reference only) -->
+        <div id="screen-3" class="screen">
+            <div class="content">
+                <div class="alert alert-warning" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                    <strong>⚠️ BACKUP REFERENCE ONLY</strong><br>
+                    This is Option 1 demonstration screen kept as backup. The actual implementation is in "Self-Review & Manager Evaluation" tab.
+                </div>
+                
+                <div class="alert alert-info">
+                    <strong>Option 1: Expandable Modal (CHOSEN & IMPLEMENTED)</strong><br>
+                    Double-click any Result Explanation cell to open a large modal with full editing space and AI assistance. Most Excel-like approach.
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Employee Self-Evaluation (Option 1: Modal)</div>
+                    
+                    <div class="excel-table-container">
+                        <table class="excel-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="6" style="background: #e3f2fd; text-align: center; font-weight: 700;">Individual Target Evaluation</th>
+                                    <th colspan="4" style="background: #fff3e0; text-align: center; font-weight: 700;">Evaluation from Manager</th>
+                                </tr>
+                                <tr>
+                                    <th style="width: 200px;">Target Description<div class="resize-handle-col"></div></th>
+                                    <th style="width: 80px;">Weight (%)<div class="resize-handle-col"></div></th>
+                                    <th style="width: 100px;">Difficulty<div class="resize-handle-col"></div></th>
+                                    <th style="width: 80px;">Rating<div class="resize-handle-col"></div></th>
+                                    <th style="width: 100px;">Total Point<div class="resize-handle-col"></div></th>
+                                    <th style="width: 200px;">Result Explanation<div class="resize-handle-col"></div></th>
+                                    <th style="width: 80px;">Weight (%)<div class="resize-handle-col"></div></th>
+                                    <th style="width: 100px;">Difficulty<div class="resize-handle-col"></div></th>
+                                    <th style="width: 80px;">Rating<div class="resize-handle-col"></div></th>
+                                    <th style="width: 100px;">Total Point</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="background: #f8fbff;"><div class="cell-content">Complete Q4 Project deliverables on-time</div></td>
+                                    <td style="background: #f8fbff;"><div class="cell-content">25</div></td>
+                                    <td style="background: #f8fbff;"><div class="cell-content">L2 (x1.5)</div></td>
+                                    <td style="background: #f8fbff;"><input type="number" class="cell-input" value="4" min="1" max="5"></td>
+                                    <td style="background: #f8fbff;"><div class="cell-content" style="font-weight: 600;">150</div></td>
+                                    <td style="background: #f8fbff; position: relative;">
+                                        <div class="cell-content" style="cursor: pointer; color: #1e40af; text-decoration: underline;" onclick="openModal('target1')">
+                                            Successfully delivered all Q4 milestones... (click to expand)
+                                        </div>
+                                    </td>
+                                    <td style="background: #fffbf5;"><div class="cell-content">25</div></td>
+                                    <td style="background: #fffbf5;"><div class="cell-content">L2 (x1.5)</div></td>
+                                    <td style="background: #fffbf5;"><input type="number" class="cell-input" value="5" min="1" max="5"></td>
+                                    <td style="background: #fffbf5;"><div class="cell-content" style="font-weight: 600;">187.5</div></td>
+                                </tr>
+                                <tr>
+                                    <td style="background: #f8fbff;"><div class="cell-content">Improve code quality metrics and reduce bug rate</div></td>
+                                    <td style="background: #f8fbff;"><div class="cell-content">20</div></td>
+                                    <td style="background: #f8fbff;"><div class="cell-content">L2 (x1.5)</div></td>
+                                    <td style="background: #f8fbff;"><input type="number" class="cell-input" value="5" min="1" max="5"></td>
+                                    <td style="background: #f8fbff;"><div class="cell-content" style="font-weight: 600;">150</div></td>
+                                    <td style="background: #f8fbff; position: relative;">
+                                        <div class="cell-content" style="cursor: pointer; color: #1e40af; text-decoration: underline;" onclick="openModal('target2')">
+                                            Reduced bug rate by 30% through... (click to expand)
+                                        </div>
+                                    </td>
+                                    <td style="background: #fffbf5;"><div class="cell-content">20</div></td>
+                                    <td style="background: #fffbf5;"><div class="cell-content">L2 (x1.5)</div></td>
+                                    <td style="background: #fffbf5;"><input type="number" class="cell-input" value="5" min="1" max="5"></td>
+                                    <td style="background: #fffbf5;"><div class="cell-content" style="font-weight: 600;">150</div></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Screen 5: BACKUP - Option 2 Collapsible Row (for future consideration) -->
+        <div id="screen-4" class="screen">
+            <div class="content">
+                <div class="alert alert-warning" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                    <strong>⚠️ BACKUP REFERENCE ONLY</strong><br>
+                    This design option is kept as backup for future consideration. Not currently implemented.
+                </div>
+                
+                <div class="alert alert-info">
+                    <strong>Option 2: Collapsible Row Detail (Creative Alternative)</strong><br>
+                    Click the expand icon (▼) to reveal a full-width panel below each row for detailed explanations. Keeps context visible.
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Employee Self-Evaluation (Option 2: Collapsible)</div>
+                    
+                    <div class="excel-table-container">
+                        <table class="excel-table" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;"></th>
+                                    <th colspan="5" style="background: #e3f2fd; text-align: center; font-weight: 700;">Individual Target Evaluation</th>
+                                    <th colspan="4" style="background: #fff3e0; text-align: center; font-weight: 700;">Evaluation from Manager</th>
+                                </tr>
+                                <tr>
+                                    <th style="width: 40px;">▼</th>
+                                    <th style="width: 200px;">Target Description<div class="resize-handle-col"></div></th>
+                                    <th style="width: 80px;">Weight<div class="resize-handle-col"></div></th>
+                                    <th style="width: 100px;">Difficulty<div class="resize-handle-col"></div></th>
+                                    <th style="width: 80px;">Rating<div class="resize-handle-col"></div></th>
+                                    <th style="width: 100px;">Total Point<div class="resize-handle-col"></div></th>
+                                    <th style="width: 80px;">Weight<div class="resize-handle-col"></div></th>
+                                    <th style="width: 100px;">Difficulty<div class="resize-handle-col"></div></th>
+                                    <th style="width: 80px;">Rating<div class="resize-handle-col"></div></th>
+                                    <th style="width: 100px;">Total Point</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: center; cursor: pointer; background: #f0f0f0;" onclick="toggleDetail(this, 'detail1')">
+                                        <span style="font-size: 16px;">▼</span>
+                                    </td>
+                                    <td style="background: #f8fbff;"><div class="cell-content">Complete Q4 Project deliverables on-time</div></td>
+                                    <td style="background: #f8fbff;"><div class="cell-content">25</div></td>
+                                    <td style="background: #f8fbff;"><div class="cell-content">L2 (x1.5)</div></td>
+                                    <td style="background: #f8fbff;"><input type="number" class="cell-input" value="4" min="1" max="5"></td>
+                                    <td style="background: #f8fbff;"><div class="cell-content" style="font-weight: 600;">150</div></td>
+                                    <td style="background: #fffbf5;"><div class="cell-content">25</div></td>
+                                    <td style="background: #fffbf5;"><div class="cell-content">L2 (x1.5)</div></td>
+                                    <td style="background: #fffbf5;"><input type="number" class="cell-input" value="5" min="1" max="5"></td>
+                                    <td style="background: #fffbf5;"><div class="cell-content" style="font-weight: 600;">187.5</div></td>
+                                </tr>
+                                <tr id="detail1" style="display: none;">
+                                    <td colspan="10" style="background: #f0f8ff; padding: 20px; border: 2px solid #1e40af;">
+                                        <div style="display: flex; gap: 20px;">
+                                            <div style="flex: 1;">
+                                                <strong style="color: #1e40af; display: block; margin-bottom: 10px;">📝 Result Explanation (Employee)</strong>
+                                                <textarea class="textarea" style="min-height: 150px; width: 100%;">Successfully delivered all Q4 milestones ahead of schedule. Key achievements:
+
+1. Implemented new feature X with 99.9% uptime
+2. Reduced deployment time by 40% through automation
+3. Mentored 3 junior developers on best practices
+
+Evidence: Project tracking dashboard shows 100% completion rate, customer satisfaction score of 4.8/5.0, and zero critical bugs in production.</textarea>
+                                                <button class="button button-secondary" style="margin-top: 10px;">🤖 Get AI Help</button>
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <strong style="color: #f57c00; display: block; margin-bottom: 10px;">💼 Manager's Notes</strong>
+                                                <textarea class="textarea" style="min-height: 150px; width: 100%; background: #fff8f0;">Exceptional performance. Employee exceeded expectations by delivering ahead of schedule and mentoring team members. Recommend for promotion consideration.</textarea>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center; cursor: pointer; background: #f0f0f0;" onclick="toggleDetail(this, 'detail2')">
+                                        <span style="font-size: 16px;">▼</span>
+                                    </td>
+                                    <td style="background: #f8fbff;"><div class="cell-content">Improve code quality metrics and reduce bug rate</div></td>
+                                    <td style="background: #f8fbff;"><div class="cell-content">20</div></td>
+                                    <td style="background: #f8fbff;"><div class="cell-content">L2 (x1.5)</div></td>
+                                    <td style="background: #f8fbff;"><input type="number" class="cell-input" value="5" min="1" max="5"></td>
+                                    <td style="background: #f8fbff;"><div class="cell-content" style="font-weight: 600;">150</div></td>
+                                    <td style="background: #fffbf5;"><div class="cell-content">20</div></td>
+                                    <td style="background: #fffbf5;"><div class="cell-content">L2 (x1.5)</div></td>
+                                    <td style="background: #fffbf5;"><input type="number" class="cell-input" value="5" min="1" max="5"></td>
+                                    <td style="background: #fffbf5;"><div class="cell-content" style="font-weight: 600;">150</div></td>
+                                </tr>
+                                <tr id="detail2" style="display: none;">
+                                    <td colspan="10" style="background: #f0f8ff; padding: 20px; border: 2px solid #1e40af;">
+                                        <div style="display: flex; gap: 20px;">
+                                            <div style="flex: 1;">
+                                                <strong style="color: #1e40af; display: block; margin-bottom: 10px;">📝 Result Explanation (Employee)</strong>
+                                                <textarea class="textarea" style="min-height: 150px; width: 100%;">Reduced bug rate by 30% through implementing comprehensive testing strategy and code review processes...</textarea>
+                                                <button class="button button-secondary" style="margin-top: 10px;">🤖 Get AI Help</button>
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <strong style="color: #f57c00; display: block; margin-bottom: 10px;">💼 Manager's Notes</strong>
+                                                <textarea class="textarea" style="min-height: 150px; width: 100%; background: #fff8f0;"></textarea>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Screen 6: BACKUP - Option 3 Two-Panel Layout (for future consideration) -->
+        <div id="screen-5" class="screen">
+            <div class="content">
+                <div class="alert alert-warning" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                    <strong>⚠️ BACKUP REFERENCE ONLY</strong><br>
+                    This design option is kept as backup for future consideration. Not currently implemented.
+                </div>
+                
+                <div class="alert alert-info">
+                    <strong>Option 3: Two-Panel Layout (Creative Alternative)</strong><br>
+                    Click any row to see full details in a dedicated right-side panel. Best for reviewing multiple targets sequentially.
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Employee Self-Evaluation (Option 3: Two-Panel)</div>
+                    
+                    <div style="display: flex; gap: 20px;">
+                        <!-- Left Panel: Table -->
+                        <div style="flex: 1; min-width: 800px;">
+                            <div class="excel-table-container">
+                                <table class="excel-table">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="5" style="background: #e3f2fd; text-align: center; font-weight: 700;">Individual Target Evaluation</th>
+                                            <th colspan="4" style="background: #fff3e0; text-align: center; font-weight: 700;">Evaluation from Manager</th>
+                                        </tr>
+                                        <tr>
+                                            <th style="width: 200px;">Target Description</th>
+                                            <th style="width: 60px;">Weight</th>
+                                            <th style="width: 80px;">Difficulty</th>
+                                            <th style="width: 60px;">Rating</th>
+                                            <th style="width: 80px;">Total</th>
+                                            <th style="width: 60px;">Weight</th>
+                                            <th style="width: 80px;">Difficulty</th>
+                                            <th style="width: 60px;">Rating</th>
+                                            <th style="width: 80px;">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr style="cursor: pointer;" onclick="selectRow(this, 1)">
+                                            <td style="background: #f8fbff;"><div class="cell-content">Complete Q4 Project deliverables on-time</div></td>
+                                            <td style="background: #f8fbff;"><div class="cell-content">25</div></td>
+                                            <td style="background: #f8fbff;"><div class="cell-content">L2</div></td>
+                                            <td style="background: #f8fbff;"><div class="cell-content">4</div></td>
+                                            <td style="background: #f8fbff;"><div class="cell-content" style="font-weight: 600;">150</div></td>
+                                            <td style="background: #fffbf5;"><div class="cell-content">25</div></td>
+                                            <td style="background: #fffbf5;"><div class="cell-content">L2</div></td>
+                                            <td style="background: #fffbf5;"><div class="cell-content">5</div></td>
+                                            <td style="background: #fffbf5;"><div class="cell-content" style="font-weight: 600;">187.5</div></td>
+                                        </tr>
+                                        <tr style="cursor: pointer;" onclick="selectRow(this, 2)">
+                                            <td style="background: #f8fbff;"><div class="cell-content">Improve code quality metrics</div></td>
+                                            <td style="background: #f8fbff;"><div class="cell-content">20</div></td>
+                                            <td style="background: #f8fbff;"><div class="cell-content">L2</div></td>
+                                            <td style="background: #f8fbff;"><div class="cell-content">5</div></td>
+                                            <td style="background: #f8fbff;"><div class="cell-content" style="font-weight: 600;">150</div></td>
+                                            <td style="background: #fffbf5;"><div class="cell-content">20</div></td>
+                                            <td style="background: #fffbf5;"><div class="cell-content">L2</div></td>
+                                            <td style="background: #fffbf5;"><div class="cell-content">5</div></td>
+                                            <td style="background: #fffbf5;"><div class="cell-content" style="font-weight: 600;">150</div></td>
+                                        </tr>
+                                        <tr style="cursor: pointer;" onclick="selectRow(this, 3)">
+                                            <td style="background: #f8fbff;"><div class="cell-content">Lead team knowledge sharing</div></td>
+                                            <td style="background: #f8fbff;"><div class="cell-content">15</div></td>
+                                            <td style="background: #f8fbff;"><div class="cell-content">L1</div></td>
+                                            <td style="background: #f8fbff;"><div class="cell-content">4</div></td>
+                                            <td style="background: #f8fbff;"><div class="cell-content" style="font-weight: 600;">60</div></td>
+                                            <td style="background: #fffbf5;"><div class="cell-content">15</div></td>
+                                            <td style="background: #fffbf5;"><div class="cell-content">L1</div></td>
+                                            <td style="background: #fffbf5;"><div class="cell-content">4</div></td>
+                                            <td style="background: #fffbf5;"><div class="cell-content" style="font-weight: 600;">60</div></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Panel: Detail View -->
+                        <div style="flex: 1; min-width: 400px; background: #fafafa; border: 2px solid #1e40af; border-radius: 8px; padding: 20px; max-height: 600px; overflow-y: auto;">
+                            <div id="detail-panel">
+                                <h3 style="color: #1e40af; margin-bottom: 15px;">📋 Target Details</h3>
+                                <p style="color: #666; font-style: italic;">Click a row to view detailed explanation and ratings</p>
+                                
+                                <div id="detail-content" style="display: none;">
+                                    <div style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 6px; border-left: 4px solid #1e40af;">
+                                        <strong style="display: block; margin-bottom: 5px; color: #1e40af;">Target:</strong>
+                                        <p id="detail-target">Complete Q4 Project deliverables on-time</p>
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 20px;">
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                                            <div style="padding: 10px; background: #e3f2fd; border-radius: 4px;">
+                                                <small style="color: #666;">Employee Rating</small>
+                                                <div style="font-size: 24px; font-weight: 700; color: #1e40af;">4/5</div>
+                                            </div>
+                                            <div style="padding: 10px; background: #fff3e0; border-radius: 4px;">
+                                                <small style="color: #666;">Manager Rating</small>
+                                                <div style="font-size: 24px; font-weight: 700; color: #f57c00;">5/5</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 20px;">
+                                        <strong style="color: #1e40af; display: block; margin-bottom: 10px;">📝 Employee's Result Explanation</strong>
+                                        <textarea class="textarea" style="min-height: 200px; width: 100%; font-size: 13px;">Successfully delivered all Q4 milestones ahead of schedule. Key achievements:
+
+1. Implemented new feature X with 99.9% uptime
+2. Reduced deployment time by 40% through automation
+3. Mentored 3 junior developers on best practices
+
+Evidence: Project tracking dashboard shows 100% completion rate, customer satisfaction score of 4.8/5.0, and zero critical bugs in production.</textarea>
+                                        <button class="button button-secondary" style="margin-top: 10px; width: 100%;">🤖 Get AI Help</button>
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 20px;">
+                                        <strong style="color: #f57c00; display: block; margin-bottom: 10px;">💼 Manager's Feedback</strong>
+                                        <textarea class="textarea" style="min-height: 150px; width: 100%; background: #fff8f0; font-size: 13px;">Exceptional performance. Employee exceeded expectations by delivering ahead of schedule and mentoring team members. Recommend for promotion consideration.</textarea>
+                                    </div>
+                                    
+                                    <button class="button button-primary" style="width: 100%;">Save Changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for Option 1 -->
+    <div id="explanationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: white; width: 90%; max-width: 900px; max-height: 90vh; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); display: flex; flex-direction: column;">
+            <div style="padding: 20px; border-bottom: 2px solid #1e40af; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3 style="color: #1e40af; margin: 0;">✏️ Edit Result Explanation & Manager Feedback</h3>
+                    <p id="modal-role-hint" style="margin: 5px 0 0 0; font-size: 12px; color: #666;">
+                        <span id="employee-hint" style="display: inline;">Employee mode: You can edit Result Explanation only</span>
+                        <span id="manager-hint" style="display: none;">Manager mode: You can edit Manager's Feedback only</span>
+                        <span id="hradmin-hint" style="display: none;">HR Admin mode: Read-only access (no editing allowed)</span>
+                    </p>
+                </div>
+                <button onclick="closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666;">&times;</button>
+            </div>
+            <div style="padding: 20px; flex: 1; overflow-y: auto;">
+                <div style="margin-bottom: 15px;">
+                    <strong style="display: block; margin-bottom: 5px; color: #333;">Target:</strong>
+                    <p id="modal-target" style="padding: 10px; background: #f0f0f0; border-radius: 4px; margin: 0;">Complete Q4 Project deliverables on-time</p>
+                </div>
+                
+                <!-- Employee Self-Evaluation Section -->
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="color: #1e40af; margin: 0 0 10px 0;">👤 Individual Target Evaluation</h4>
+                    <div style="margin-bottom: 15px;">
+                        <strong style="display: block; margin-bottom: 5px; color: #333;">Your Rating: <span id="modal-emp-rating" style="color: #1e40af; font-size: 18px;">4/5</span></strong>
+                        <div id="modal-emp-details" style="font-size: 12px; color: #666;">Weight: 25% | Difficulty: L2 (x1.5) | Total Point: 150</div>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Result Explanation:</label>
+                        <textarea id="modal-textarea" class="textarea" style="min-height: 250px; width: 100%; font-size: 14px;">Successfully delivered all Q4 milestones ahead of schedule. Key achievements:
+
+1. Implemented new feature X with 99.9% uptime
+2. Reduced deployment time by 40% through automation
+3. Mentored 3 junior developers on best practices
+
+Evidence: Project tracking dashboard shows 100% completion rate, customer satisfaction score of 4.8/5.0, and zero critical bugs in production.</textarea>
+                    </div>
+                </div>
+                
+                <!-- Manager Evaluation Section -->
+                <div style="background: #fff3e0; padding: 15px; border-radius: 8px;">
+                    <h4 style="color: #f59e0b; margin: 0 0 10px 0;">👔 Evaluation from Manager</h4>
+                    <div style="margin-bottom: 15px;">
+                        <strong style="display: block; margin-bottom: 5px; color: #333;">Manager Rating: <span id="modal-mgr-rating" style="color: #f59e0b; font-size: 18px;">5/5</span></strong>
+                        <div id="modal-mgr-details" style="font-size: 12px; color: #666;">Weight: 25% | Difficulty: L2 (x1.5) | Total Point: 187.5</div>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Manager's Feedback:</label>
+                        <textarea id="modal-mgr-feedback" class="textarea" style="min-height: 150px; width: 100%; font-size: 14px; background: white;">Exceptional performance! Not only delivered on time but exceeded expectations by implementing additional features that improved customer satisfaction. Demonstrated strong leadership by mentoring team members. Outstanding work!</textarea>
+                    </div>
+                </div>
+            </div>
+            <div style="padding: 20px; border-top: 1px solid #e0e0e0; display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="button button-secondary">🤖 Get AI Help</button>
+                <button class="button" style="background: #9e9e9e; color: white;" onclick="closeModal()">Cancel</button>
+                <button class="button button-primary" onclick="saveModal()">Save & Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Role-based Access Control Demo
+        function toggleUserRole() {
+            const role = document.getElementById('roleSelector').value;
+            const evaluationTable = document.getElementById('evaluation-table');
+            
+            if (!evaluationTable) return;
+            
+            // Get all employee-editable cells (blue background)
+            const employeeCells = evaluationTable.querySelectorAll('td[style*="background: #f8fbff"]');
+            // Get all manager-editable cells (orange background)
+            const managerCells = evaluationTable.querySelectorAll('td[style*="background: #fffbf5"]');
+            
+            // Control modal fields based on role
+            const modalEmployeeTextarea = document.getElementById('modal-textarea');
+            const modalManagerFeedback = document.getElementById('modal-mgr-feedback');
+            const employeeHint = document.getElementById('employee-hint');
+            const managerHint = document.getElementById('manager-hint');
+            const hradminHint = document.getElementById('hradmin-hint');
+            
+            // Control Overall Performance Summary textarea
+            const overallSummary = document.getElementById('overall-summary');
+            
+            if (role === 'employee') {
+                // Employee can edit blue sections, manager sections are read-only
+                employeeCells.forEach(cell => {
+                    const inputs = cell.querySelectorAll('input, select, textarea, .cell-content[onclick]');
+                    inputs.forEach(input => {
+                        if (input.classList && input.classList.contains('cell-content')) {
+                            input.style.pointerEvents = 'auto';
+                            input.style.opacity = '1';
+                        } else {
+                            input.disabled = false;
+                            input.readOnly = false;
+                            input.style.opacity = '1';
+                        }
+                    });
+                });
+                
+                managerCells.forEach(cell => {
+                    const inputs = cell.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => {
+                        input.disabled = true;
+                        input.readOnly = true;
+                        input.style.opacity = '0.5';
+                        input.style.cursor = 'not-allowed';
+                    });
+                });
+                
+                // Overall Performance Summary is read-only for employee
+                if (overallSummary) {
+                    overallSummary.disabled = true;
+                    overallSummary.readOnly = true;
+                    overallSummary.style.opacity = '0.5';
+                    overallSummary.style.cursor = 'not-allowed';
+                    overallSummary.style.background = '#f5f5f5';
+                }
+                
+                // Modal: Employee can edit Result Explanation, Manager's Feedback is read-only
+                if (modalEmployeeTextarea) {
+                    modalEmployeeTextarea.disabled = false;
+                    modalEmployeeTextarea.readOnly = false;
+                    modalEmployeeTextarea.style.opacity = '1';
+                    modalEmployeeTextarea.style.cursor = 'text';
+                    modalEmployeeTextarea.style.background = 'white';
+                }
+                if (modalManagerFeedback) {
+                    modalManagerFeedback.disabled = true;
+                    modalManagerFeedback.readOnly = true;
+                    modalManagerFeedback.style.opacity = '0.6';
+                    modalManagerFeedback.style.cursor = 'not-allowed';
+                    modalManagerFeedback.style.background = '#f5f5f5';
+                }
+                if (employeeHint) employeeHint.style.display = 'inline';
+                if (managerHint) managerHint.style.display = 'none';
+                if (hradminHint) hradminHint.style.display = 'none';
+                
+            } else if (role === 'manager') {
+                // Manager can edit orange sections, employee sections are read-only
+                managerCells.forEach(cell => {
+                    const inputs = cell.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => {
+                        input.disabled = false;
+                        input.readOnly = false;
+                        input.style.opacity = '1';
+                        input.style.cursor = 'default';
+                    });
+                });
+                
+                employeeCells.forEach(cell => {
+                    const inputs = cell.querySelectorAll('input, select, textarea, .cell-content[onclick]');
+                    inputs.forEach(input => {
+                        if (input.classList && input.classList.contains('cell-content')) {
+                            // Keep modal clickable for manager (they need to READ employee's explanation and WRITE feedback)
+                            input.style.pointerEvents = 'auto';
+                            input.style.opacity = '1';
+                            input.style.cursor = 'pointer';
+                        } else {
+                            input.disabled = true;
+                            input.readOnly = true;
+                            input.style.opacity = '0.5';
+                            input.style.cursor = 'not-allowed';
+                        }
+                    });
+                });
+                
+                // Overall Performance Summary is editable for manager
+                if (overallSummary) {
+                    overallSummary.disabled = false;
+                    overallSummary.readOnly = false;
+                    overallSummary.style.opacity = '1';
+                    overallSummary.style.cursor = 'text';
+                    overallSummary.style.background = '#fffbf5';
+                }
+                
+                // Modal: Manager can edit Manager's Feedback, Result Explanation is read-only
+                if (modalEmployeeTextarea) {
+                    modalEmployeeTextarea.disabled = true;
+                    modalEmployeeTextarea.readOnly = true;
+                    modalEmployeeTextarea.style.opacity = '0.6';
+                    modalEmployeeTextarea.style.cursor = 'not-allowed';
+                    modalEmployeeTextarea.style.background = '#f5f5f5';
+                }
+                if (modalManagerFeedback) {
+                    modalManagerFeedback.disabled = false;
+                    modalManagerFeedback.readOnly = false;
+                    modalManagerFeedback.style.opacity = '1';
+                    modalManagerFeedback.style.cursor = 'text';
+                    modalManagerFeedback.style.background = 'white';
+                }
+                if (employeeHint) employeeHint.style.display = 'none';
+                if (managerHint) managerHint.style.display = 'inline';
+                if (hradminHint) hradminHint.style.display = 'none';
+                
+            } else if (role === 'hradmin') {
+                // HR Admin can only read - all fields disabled
+                employeeCells.forEach(cell => {
+                    const inputs = cell.querySelectorAll('input, select, textarea, .cell-content[onclick]');
+                    inputs.forEach(input => {
+                        if (input.classList && input.classList.contains('cell-content')) {
+                            // Keep modal clickable for HR Admin (read-only viewing)
+                            input.style.pointerEvents = 'auto';
+                            input.style.opacity = '1';
+                            input.style.cursor = 'pointer';
+                        } else {
+                            input.disabled = true;
+                            input.readOnly = true;
+                            input.style.opacity = '0.5';
+                            input.style.cursor = 'not-allowed';
+                        }
+                    });
+                });
+                
+                managerCells.forEach(cell => {
+                    const inputs = cell.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => {
+                        input.disabled = true;
+                        input.readOnly = true;
+                        input.style.opacity = '0.5';
+                        input.style.cursor = 'not-allowed';
+                    });
+                });
+                
+                // Overall Performance Summary is read-only for HR Admin
+                if (overallSummary) {
+                    overallSummary.disabled = true;
+                    overallSummary.readOnly = true;
+                    overallSummary.style.opacity = '0.5';
+                    overallSummary.style.cursor = 'not-allowed';
+                    overallSummary.style.background = '#f5f5f5';
+                }
+                
+                // Modal: HR Admin can only read both fields
+                if (modalEmployeeTextarea) {
+                    modalEmployeeTextarea.disabled = true;
+                    modalEmployeeTextarea.readOnly = true;
+                    modalEmployeeTextarea.style.opacity = '0.6';
+                    modalEmployeeTextarea.style.cursor = 'not-allowed';
+                    modalEmployeeTextarea.style.background = '#f5f5f5';
+                }
+                if (modalManagerFeedback) {
+                    modalManagerFeedback.disabled = true;
+                    modalManagerFeedback.readOnly = true;
+                    modalManagerFeedback.style.opacity = '0.6';
+                    modalManagerFeedback.style.cursor = 'not-allowed';
+                    modalManagerFeedback.style.background = '#f5f5f5';
+                }
+                if (employeeHint) employeeHint.style.display = 'none';
+                if (managerHint) managerHint.style.display = 'none';
+                if (hradminHint) hradminHint.style.display = 'inline';
+            }
+        }
+        
+        // Tab switching
+        function showScreen(index) {
+            const screens = document.querySelectorAll('.screen');
+            const tabs = document.querySelectorAll('.tab');
+            
+            screens.forEach(screen => screen.classList.remove('active'));
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            screens[index].classList.add('active');
+            tabs[index].classList.add('active');
+        }
+        
+        // Modal functions for Option 1
+        function openModal(targetId) {
+            document.getElementById('explanationModal').style.display = 'flex';
+        }
+        
+        // Enhanced modal function for main evaluation screen
+        function openEvaluationModal(targetId, targetName, empRating, weight, difficulty, empTotal, empExplanation, mgrRating, mgrTotal) {
+            // Update modal content with target information
+            document.getElementById('modal-target').textContent = targetName;
+            document.getElementById('modal-emp-rating').textContent = empRating + '/5';
+            document.getElementById('modal-emp-details').textContent = `Weight: ${weight}% | Difficulty: ${difficulty} | Total Point: ${empTotal}`;
+            document.getElementById('modal-textarea').value = empExplanation;
+            document.getElementById('modal-mgr-rating').textContent = mgrRating + '/5';
+            document.getElementById('modal-mgr-details').textContent = `Weight: ${weight}% | Difficulty: ${difficulty} | Total Point: ${mgrTotal}`;
+            
+            // Show modal
+            document.getElementById('explanationModal').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('explanationModal').style.display = 'none';
+        }
+        
+        function saveModal() {
+            alert('Changes saved!');
+            closeModal();
+        }
+        
+        // Collapsible row functions for Option 2
+        function toggleDetail(button, detailId) {
+            const detailRow = document.getElementById(detailId);
+            const icon = button.querySelector('span');
+            
+            if (detailRow.style.display === 'none') {
+                detailRow.style.display = 'table-row';
+                icon.textContent = '▲';
+            } else {
+                detailRow.style.display = 'none';
+                icon.textContent = '▼';
+            }
+        }
+        
+        // Two-panel selection for Option 3
+        let selectedRow = null;
+        function selectRow(row, targetIndex) {
+            // Remove previous selection
+            if (selectedRow) {
+                selectedRow.style.background = '';
+            }
+            
+            // Highlight selected row
+            row.style.background = '#e3f2fd';
+            selectedRow = row;
+            
+            // Show detail panel
+            document.getElementById('detail-content').style.display = 'block';
+            
+            // Update detail content based on targetIndex
+            const targets = [
+                'Complete Q4 Project deliverables on-time',
+                'Improve code quality metrics and reduce bug rate',
+                'Lead team knowledge sharing sessions'
+            ];
+            document.getElementById('detail-target').textContent = targets[targetIndex - 1];
+        }
+        
+        // Excel-like table resizing
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTableResizing();
+        });
+        
+        function initializeTableResizing() {
+            const tables = document.querySelectorAll('.excel-table');
+            
+            tables.forEach(table => {
+                // Column resizing
+                const colHandles = table.querySelectorAll('.resize-handle-col');
+                colHandles.forEach((handle, index) => {
+                    let startX, startWidth, th;
+                    
+                    handle.addEventListener('mousedown', function(e) {
+                        e.preventDefault();
+                        th = this.closest('th');
+                        startX = e.pageX;
+                        startWidth = th.offsetWidth;
+                        handle.classList.add('resizing');
+                        
+                        document.addEventListener('mousemove', handleColumnResize);
+                        document.addEventListener('mouseup', stopColumnResize);
+                    });
+                    
+                    function handleColumnResize(e) {
+                        if (!th) return;
+                        const width = startWidth + (e.pageX - startX);
+                        if (width > 50) { // Minimum width
+                            th.style.width = width + 'px';
+                            // Update all cells in this column
+                            const colIndex = Array.from(th.parentElement.children).indexOf(th);
+                            const rows = table.querySelectorAll('tbody tr');
+                            rows.forEach(row => {
+                                if (row.children[colIndex]) {
+                                    row.children[colIndex].style.width = width + 'px';
+                                }
+                            });
+                        }
+                    }
+                    
+                    function stopColumnResize() {
+                        if (handle) {
+                            handle.classList.remove('resizing');
+                        }
+                        document.removeEventListener('mousemove', handleColumnResize);
+                        document.removeEventListener('mouseup', stopColumnResize);
+                    }
+                });
+                
+                // Row resizing
+                const rowHandles = table.querySelectorAll('.resize-handle-row');
+                rowHandles.forEach(handle => {
+                    let startY, startHeight, td;
+                    
+                    handle.addEventListener('mousedown', function(e) {
+                        e.preventDefault();
+                        td = this.parentElement;
+                        const tr = td.parentElement;
+                        startY = e.pageY;
+                        startHeight = tr.offsetHeight;
+                        handle.classList.add('resizing');
+                        
+                        document.addEventListener('mousemove', handleRowResize);
+                        document.addEventListener('mouseup', stopRowResize);
+                    });
+                    
+                    function handleRowResize(e) {
+                        if (!td) return;
+                        const tr = td.parentElement;
+                        const height = startHeight + (e.pageY - startY);
+                        if (height > 30) { // Minimum height
+                            tr.style.height = height + 'px';
+                            // Update all cells in this row
+                            Array.from(tr.children).forEach(cell => {
+                                cell.style.height = height + 'px';
+                            });
+                        }
+                    }
+                    
+                    function stopRowResize() {
+                        if (handle) {
+                            handle.classList.remove('resizing');
+                        }
+                        document.removeEventListener('mousemove', handleRowResize);
+                        document.removeEventListener('mouseup', stopRowResize);
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
