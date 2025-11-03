@@ -51,11 +51,22 @@ The core problem is lack of structured support. Excel provides no guidance for w
 - **FR013**: HR Admin shall configure AI backend (Ollama local, Cloud API, or web-based tool with auto-open/prompt generation) without code deployment
 - **FR014**: System shall provide accessible help pages with process flows, definitions, examples, and guidance throughout all workflows
 
+**User Interface & Experience**
+- **FR015**: System shall implement glassmorphism design language with frosted glass effects, transparency, backdrop blur, soft shadows, and subtle gradients
+- **FR016**: System shall provide Excel-familiar interface with table-based data entry, keyboard navigation (Tab, Enter, Arrow keys), and inline editing patterns
+- **FR017**: System shall support Excel-like table resizing for columns and rows with visual feedback and handle positioning
+- **FR018**: System shall implement Role-Based Access Control (RBAC) with visual indicators: blue sections (employee-editable), orange sections (manager-editable), disabled states for read-only access
+- **FR019**: System shall support HR Admin role with read-only access to all fields, including modal windows for Result Explanation viewing
+- **FR020**: System shall provide Modal UI for Result Explanation with AI assistance, allowing employees to edit their explanations and managers to read them and write feedback
+- **FR021**: System shall display company/department goals throughout target setting and evaluation phases to connect individual work to business context
+
 ### Non-Functional Requirements
 
 - **NFR001**: System shall support 200 concurrent users with page load times < 2 seconds and AI response times < 10 seconds
 - **NFR002**: System shall implement role-based access control, data encryption at rest and in transit, and audit logging for all sensitive operations
 - **NFR003**: System shall provide Excel-familiar UI with table-based data entry, keyboard navigation, and glassmorphism design aesthetics
+- **NFR004**: System shall meet **WCAG 2.1 AA accessibility standards** with full keyboard navigation, screen reader support, and high contrast compliance
+- **NFR005**: System shall implement **desktop-first responsive design** optimized for modern browsers with horizontal scrolling for wide tables
 
 ---
 
@@ -99,14 +110,28 @@ The core problem is lack of structured support. Excel provides no guidance for w
 
 4. **Contextual Guidance** - Company and department goals visible in sidebar throughout target setting and evaluation; inline help tooltips and accessible help pages reduce support burden
 
+5. **Glassmorphism Aesthetic** - Frosted glass effects with transparency and backdrop blur create modern, professional feel that reduces HR process anxiety
+
+6. **Role-Based Visual Clarity** - Blue sections (employee-editable), orange sections (manager-editable), clear visual indicators for read-only access, supporting HR Admin read-only role
+
+7. **Modal-First Result Explanation** - Excel-like modal approach for detailed explanations with AI assistance, allowing employees to edit and managers to read and provide feedback
+
+8. **Accessibility First** - WCAG 2.1 AA compliance with full keyboard navigation, screen reader support, and high contrast despite glassmorphism effects
+
+9. **Desktop-Optimized Responsive Design** - Fixed layout optimized for desktop browsers with horizontal scrolling for wide tables, no mobile optimization required for MVP
+
 ---
 
 ## User Interface Design Goals
 
 - **Glassmorphism Aesthetic** - Frosted glass effects with transparency, backdrop blur, soft shadows, and subtle gradients create modern, professional feel that reduces HR process anxiety
 - **Responsive Feedback** - Loading states, success confirmations, and validation messages provide immediate user feedback for all actions
-- **Accessible Design** - Clear contrast despite glassmorphism effects, keyboard navigation support, screen reader compatibility
+- **Accessible Design** - **WCAG 2.1 AA compliance** with clear contrast despite glassmorphism effects, keyboard navigation support, screen reader compatibility, and high contrast focus indicators
 - **Consistent Patterns** - Unified design language across all workflows ensures predictable, intuitive navigation
+- **Excel-Like Table Interactions** - Column and row resizing, familiar data entry patterns, keyboard shortcuts for power users
+- **Role-Based Visual Design** - Color-coded sections (blue for employee, orange for manager), disabled states for read-only access, clear permission boundaries
+- **Modal UI for Complex Tasks** - Result Explanation modal with AI assistance, side-by-side employee/manager sections, clear edit permissions
+- **Desktop-First Responsive Design** - Optimized for desktop browsers with fixed layout (max 1200px), horizontal scrolling for tables, no mobile optimization for MVP
 
 ---
 
