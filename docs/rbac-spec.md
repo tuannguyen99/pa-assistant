@@ -33,6 +33,32 @@ This document describes a minimal RBAC data model, audit schema, and API contrac
   - effectiveFrom: datetime
   - effectiveTo: datetime | null
 
+  **Purpose:** Handles exceptional cases where someone other than the direct manager needs to review an employee.
+  
+  **When to use:**
+  - Manager is on extended leave → delegate reviews to another manager
+  - Organizational restructure mid-cycle → reassign reviews to new manager
+  - Matrix organization → employee has multiple reviewers for different projects
+  - Temporary coverage → senior manager steps in for absent direct manager
+  
+  **Example Scenario:**
+  ```
+  Alice (Manager) goes on maternity leave in February.
+  Bob (Senior Manager) needs to complete reviews for Alice's 5 direct reports.
+  
+  HR Admin creates RoleAssignment records:
+  - reviewerId: Bob's userId
+  - revieweeId: Each of Alice's direct reports (5 records)
+  - reason: "Alice on maternity leave - Feb to May 2025"
+  - effectiveFrom: 2025-02-01
+  - effectiveTo: 2025-05-31
+  
+  Result: Bob can now access and complete reviews for Alice's team.
+  System checks: (review.reviewerId == Bob.id) OR (RoleAssignment exists for Bob→employee)
+  ```
+  
+  **Default behavior:** Most reviews don't need RoleAssignment. The system uses the `managerId` field on User model to determine who reviews whom. RoleAssignment is only for exceptions.
+
 - AuditEntry
   - id: string (uuid)
   - actorId: string
@@ -42,6 +68,110 @@ This document describes a minimal RBAC data model, audit schema, and API contrac
   - targetId: string
   - details: object // JSON blob with optional metadata (diffs, ai_assisted: true)
   - timestamp: datetime
+
+  **Purpose:** Creates a permanent, tamper-proof log of every sensitive action in the system for compliance, security, and transparency.
+  
+  **When audit entries are created:**
+  - User switches roles (employee → manager → HR admin)
+  - Manager edits another employee's review
+  - Employee or manager accepts AI-generated content
+  - HR Admin closes a fiscal year (locks all reviews)
+  - HR Admin edits archived/closed review data
+  - HR Admin changes user roles or creates departments
+  - Any configuration change (grade systems, score-to-rank mappings)
+  
+  **Key fields explained:**
+  - `actorId`: WHO performed the action (userId)
+  - `actorRole`: WHICH ROLE they were using (important for multi-role users)
+  - `action`: WHAT they did (verb describing the action)
+  - `targetType` + `targetId`: WHAT OBJECT was affected
+  - `details`: Additional context (before/after values, AI assistance flag, reason text)
+  
+  **Example Scenarios:**
+  
+  **Scenario 1: Manager accepts AI-synthesized feedback**
+  ```javascript
+  {
+    id: "audit-001",
+    actorId: "user-mgr-123",
+    actorRole: "manager",
+    action: "accept_ai_synthesis",
+    targetType: "review",
+    targetId: "review-456",
+    details: {
+      ai_assisted: true,
+      section: "manager_feedback",
+      originalLength: 50,
+      synthesizedLength: 250
+    },
+    timestamp: "2025-03-15T14:30:00Z"
+  }
+  ```
+  
+  **Scenario 2: HR Admin closes fiscal year**
+  ```javascript
+  {
+    id: "audit-002",
+    actorId: "user-hr-789",
+    actorRole: "hr_admin",
+    action: "close_fy",
+    targetType: "fiscal_year",
+    targetId: "fy-2024",
+    details: {
+      reason: "End of review cycle - all reviews completed",
+      reviewsAffected: 198,
+      dateRange: "2024-04-01 to 2025-03-31"
+    },
+    timestamp: "2025-04-01T09:00:00Z"
+  }
+  ```
+  
+  **Scenario 3: User switches from employee role to manager role**
+  ```javascript
+  {
+    id: "audit-003",
+    actorId: "user-alice-456",
+    actorRole: "employee", // role they were in before switch
+    action: "switch_role",
+    targetType: "user",
+    targetId: "user-alice-456",
+    details: {
+      fromRole: "employee",
+      toRole: "manager",
+      context: "Switching to review direct reports"
+    },
+    timestamp: "2025-03-10T10:15:00Z"
+  }
+  ```
+  
+  **Scenario 4: HR Admin edits archived review (exceptional case)**
+  ```javascript
+  {
+    id: "audit-004",
+    actorId: "user-hr-789",
+    actorRole: "hr_admin",
+    action: "edit_archived_review",
+    targetType: "review",
+    targetId: "review-old-123",
+    details: {
+      warning: "Editing closed fiscal year data",
+      fiscalYear: 2023,
+      archivedAt: "2024-04-01T00:00:00Z",
+      reason: "Legal requirement - correct employee name spelling",
+      fieldChanged: "employeeName",
+      oldValue: "Jon Smith",
+      newValue: "John Smith"
+    },
+    timestamp: "2025-06-20T16:45:00Z"
+  }
+  ```
+  
+  **Why audit logging matters:**
+  - **Compliance:** Proves who did what and when for legal/regulatory audits
+  - **Security:** Detects unauthorized access or suspicious patterns
+  - **Transparency:** Employees and managers can see that AI content is clearly marked
+  - **Accountability:** HR Admins' actions on sensitive data are recorded
+  - **Troubleshooting:** Helps debug issues ("Who changed this? When?")
 
 ## Implementation notes
 
