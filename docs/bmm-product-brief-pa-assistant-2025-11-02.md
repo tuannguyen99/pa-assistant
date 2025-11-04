@@ -250,6 +250,24 @@ The system digitizes the existing Excel format with intelligence:
 ---
 
 ## Target Users
+### Role behaviour & multi-role support
+
+Many people in the organisation will hold more than one role for the purposes of performance reviews. The system explicitly supports multi-role assignment so that a single user account may act as a reviewee, a reviewer, or both depending on the relationship and the review cycle. Key rules and behaviours:
+
+- Users may have multiple roles simultaneously (Employee, Manager, HR Admin). A single account can therefore be a reviewee (being reviewed) and a reviewer (reviewing others) during the same cycle.
+- Manager-as-reviewer: A user assigned the Manager role has reviewer privileges for their direct reports (view/edit their evaluations, run AI synthesis for manager assessment, approve final assessments).
+- Manager-as-reviewee: When a manager is being reviewed (they are a reviewee for their higher-level manager), the higher-level manager is assigned as the reviewer and the manager-under-review sees the standard reviewee interface (self-evaluation, view of manager comments after finalization per company policy).
+- HR Admin role: HR Admins have system-wide oversight (content management, configuration, completion monitoring). HR Admins may also be reviewees or reviewers for their own line reports. When acting as a reviewer for direct reports, HR Admins use the same manager review workflow; when acting as a reviewee they receive reviews like any employee. Where appropriate, HR Admin reviewer actions are clearly flagged in audit logs and UI to avoid conflicts of interest.
+- Clear role indicator: The UI displays the active role (Reviewee / Reviewer / Admin) and the context (e.g., "Reviewing: Alice Tan — as Manager", "Your review by: Dept Head") so users understand which hat they are wearing while interacting with the app.
+- Permission scoping and visibility: Permissions are scoped to the relationship graph (manager→direct reports). A user only gets edit/reviewer access for people they are explicitly assigned to review. HR Admins can be granted elevated visibility but all edits and finalizations are audited.
+- Audit & transparency: All actions taken while acting in a reviewer capacity (including AI-assisted synthesis acceptance or edits) are recorded with an explicit actor role (e.g., "HR Admin (Reviewer): edited manager comment") and timestamps. AI-assisted content remains marked and original inputs remain visible to support trust and traceability.
+
+Examples:
+
+- A senior engineer (Employee role) writes a self-review (reviewee). Their direct Manager (Manager role) reviews and finalises the review (reviewer). The senior engineer can also be a Manager for junior engineers at the same time and will have reviewer access for those direct reports.
+- An HR Admin updates company-level guidance and also completes their own self-evaluation. Their HR activities are separated in the UI from their personal review activities and all HR-admin edits to others' records are auditable.
+
+These clarifications are intended to make role-switching behaviour explicit for developers, HR, and product stakeholders so RBAC, UI indicators and audit logging can be implemented consistently.
 
 ### Primary User Segment: Department Head Managers
 
@@ -442,6 +460,14 @@ All three user segments share a common need: **connecting individual work to bro
 - Login for 3 roles: Employee, Manager, HR Admin
 - Basic permissions and data access control
 - Employee grade/level tracking (APE1/C4, APE2/D1, etc.)
+
+Additional role management details:
+- Multi-role accounts: The system allows assigning multiple roles to a single user account (for example: an HR Admin who is also a Manager and an Employee). Role assignments are configurable by HR Admins.
+- Contextual active-role UI: The front-end shows the currently active role and provides quick switching where allowed (for example, to switch from performing HR admin tasks to reviewing a direct report). Role switching respects permission boundaries and is recorded in audit logs.
+- Reviewer assignment rules: By default the assigned Manager in employee master data is the reviewer. If a manager is the reviewee, the manager's assigned higher-level manager becomes the reviewer. HR may override reviewer assignments in exceptional cases (delegation, temporary reorg) with changes recorded in the audit log.
+- Permission boundaries: Reviewer permissions are limited to those records explicitly assigned; HR Admins can be granted broader visibility but all updates and approvals performed by HR are auditable and flagged in the UI to avoid conflicts of interest.
+- Explicit consent and visibility: When HR or a Manager edits AI-assisted or derived content on behalf of someone else, the system indicates that the content was modified by a user acting in reviewer/admin capacity and preserves the original inputs for traceability.
+
 
 **1a. Employee Data Management**
 - **HR Admin Functions**:

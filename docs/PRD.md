@@ -29,8 +29,23 @@ The core problem is lack of structured support. Excel provides no guidance for w
 
 **User Management & Authentication**
 - **FR001**: System shall support three user roles (Employee, Manager, HR Admin) with role-based access control
+
+### Role behaviour & multi-role support
+
+Many users will hold more than one role during the review process and the system must make this explicit and easy to manage. The PRD requires the following behaviours:
+
+- Multi-role accounts: A single user account may be assigned multiple roles (Employee, Manager, HR Admin). Role assignments must be editable by HR Admins.
+- Active-role indicator: The UI shall display the active role and context at the top of the page (e.g., "Acting as: Reviewer — Reviewing: Akira Sato" or "Acting as: Reviewee — Your self-evaluation").
+- Reviewer scoping: Reviewer permissions are scoped to explicit manager→direct-report assignments. When a manager is a reviewee, the manager's higher-level manager becomes the reviewer by default. HR may reassign reviewers for delegation or temporary reorgs; these changes shall be recorded in the audit log.
+- Permission boundaries: Reviewer actions (viewing/editing others' evaluations, accepting AI-synthesized content) are allowed only for records assigned to the reviewer. HR Admins may have broader visibility but any edits/approvals performed by HR shall be clearly flagged and auditable.
+- Audit & traceability: All actions performed while acting in a reviewer or admin capacity shall be recorded with actor role, action type, timestamp, and whether AI-assisted content was created/accepted/edited. Original inputs must remain visible alongside AI-assisted outputs.
+
+These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and audit schema.
+
 - **FR002**: HR Admin shall be able to add, edit, and import employee records (CSV/Excel bulk import) including Employee ID, name, grade/level, department, manager, email, job title, and employment status
 - **FR003**: System shall auto-populate employee information (name, grade, department, manager) when Employee ID is entered on forms
+
+**FR001a**: System shall allow assigning multiple roles to a single user account and provide HR interfaces to edit these assignments. Role switching in the UI shall be possible where appropriate and shall be recorded in audit logs.
 
 **Target Setting Workflow**
 - **FR004**: Employees shall create 3-5 performance targets with task description, KPI, weight percentage (auto-validated to total 100%), and difficulty level (L1-L3), with ability to modify targets during self-evaluation (modifications flagged and sent to manager for review)

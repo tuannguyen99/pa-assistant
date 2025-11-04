@@ -65,6 +65,37 @@ So that employees, managers, and admins can securely access the system.
 
 **Prerequisites:** Story 1.1
 
+**Story 1.10: RBAC & Multi-Role Support Implementation**
+
+As a developer,
+I want the system to support multi-role user accounts and enforce reviewer scoping,
+So that a single account can act as Employee, Manager, and/or HR Admin with clear permission boundaries and auditability.
+
+**Acceptance Criteria:**
+1. Data model includes User.roles (array) and Review.assignment linking reviewer→reviewee
+2. HR Admin UI can assign/remove roles from user accounts
+3. Reviewer permissions are scoped to explicit assignments (manager→direct reports) and cannot access/edit records outside their scope
+4. Role-switching UI exists for users with multiple roles and switching is recorded in audit logs
+5. Audit entries record actorId, actorRole, action, targetRecord, timestamp, and ai_assisted flag where appropriate
+6. Unit and integration tests cover role scoping and audit logging
+
+**Prerequisites:** Story 1.2
+
+**Story 1.11: Active-Role UI & Role Switch Component**
+
+As a user with multiple roles,
+I want a clear UI header showing the active role and a safe way to switch contexts,
+So that I always know whether I'm acting as a reviewee, a reviewer, or an admin and actions are unambiguous.
+
+**Acceptance Criteria:**
+1. Header component displays active role and context (e.g., "Acting as: Reviewer — Reviewing: Akira Sato")
+2. Role switch control (dropdown or button) visible only when user has multiple roles
+3. Switching role updates available UI actions immediately and is recorded in audit logs
+4. Microcopy explains permission changes when switching roles
+5. Design matches UX spec (color-coded sections; blue employee, orange manager, read-only HR Admin)
+
+**Prerequisites:** Story 1.2, Story 1.3
+
 **Story 1.3: Employee Data Management**
 
 As an HR Admin,
