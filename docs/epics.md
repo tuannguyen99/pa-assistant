@@ -78,6 +78,7 @@ So that a single account can act as Employee, Manager, and/or HR Admin with clea
 4. Role-switching UI exists for users with multiple roles and switching is recorded in audit logs
 5. Audit entries record actorId, actorRole, action, targetRecord, timestamp, and ai_assisted flag where appropriate
 6. Unit and integration tests cover role scoping and audit logging
+7. Implementation follows data model and API contracts defined in [rbac-spec.md](./rbac-spec.md)
 
 **Prerequisites:** Story 1.2
 
@@ -93,8 +94,9 @@ So that I always know whether I'm acting as a reviewee, a reviewer, or an admin 
 3. Switching role updates available UI actions immediately and is recorded in audit logs
 4. Microcopy explains permission changes when switching roles
 5. Design matches UX spec (color-coded sections; blue employee, orange manager, read-only HR Admin)
+6. Implementation follows guidance in [ui-role-header.md](./ui-role-header.md)
 
-**Prerequisites:** Story 1.2, Story 1.3
+**Prerequisites:** Story 1.2, Story 1.10
 
 **Story 1.3: Employee Data Management**
 
@@ -202,6 +204,23 @@ So that the system works with our infrastructure and policies.
 5. No code deployment required for changes
 
 **Prerequisites:** Story 1.8
+
+**Story 1.12: HR Admin Configuration — Fiscal Year, Departments, Employee Types & Grade Systems**
+
+As an HR Admin,
+I want to configure fiscal years, departments, employee types and grade systems, and score→rank conversion tables,
+So that the performance review process matches company policy and grade-specific rank mapping is applied consistently.
+
+**Acceptance Criteria:**
+1. UI for creating/closing Fiscal Years with active windows noted and closing locked behind confirmation and reason input
+2. UI to create/edit departments and assign Head of Department
+3. UI to create employee types and configure grade lists per type (persisted)
+4. UI to create/edit score→rank conversion tables per employee type/grade tier
+5. All changes create AuditEntry records with details and optional reason field
+6. End-to-end test: create FY, add departments, configure Engineer grade list and conversion table, run an evaluation and verify rank mapping
+7. API implementation follows endpoints defined in [rbac-spec.md](./rbac-spec.md#hr-admin-configuration-endpoints-examples)
+
+**Prerequisites:** Story 1.2, Story 1.9
 
 ## Epic 2: Dashboards, Scoring & Production Readiness
 

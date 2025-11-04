@@ -30,6 +30,8 @@ The core problem is lack of structured support. Excel provides no guidance for w
 **User Management & Authentication**
 - **FR001**: System shall support three user roles (Employee, Manager, HR Admin) with role-based access control
 
+> **Implementation Reference:** See [rbac-spec.md](./rbac-spec.md) for detailed RBAC data model, audit schema, and API contracts. See [ui-role-header.md](./ui-role-header.md) for UI component implementation guidance.
+
 ### Role behaviour & multi-role support
 
 Many users will hold more than one role during the review process and the system must make this explicit and easy to manage. The PRD requires the following behaviours:
@@ -66,12 +68,19 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 - **FR013**: HR Admin shall configure AI backend (Ollama local, Cloud API, or web-based tool with auto-open/prompt generation) without code deployment
 - **FR014**: System shall provide accessible help pages with process flows, definitions, examples, and guidance throughout all workflows
 
+**HR Admin Configuration**
+- **FR022**: HR Admin shall be able to create and close Review Fiscal Years (FY) for the system. Creating a FY sets the active review window and locks/unlocks target-setting and evaluation workflows; closing a FY marks the cycle as finalised and prevents further edits except by HR Admin with audit logging.
+- **FR023**: HR Admin shall be able to configure company departments and assign a Head of Department (HoD) for each department. Department configuration must be visible during target setting and evaluation and used to scope dashboards and reports.
+- **FR024**: HR Admin shall be able to configure employee types (e.g., "Engineer", "Back-Office") and the associated grade systems. Each employee type must include a configurable list of valid grades (for example: Engineers = [E0, E1, E2, SE1, SE2, SE3, APE1, APE2, APE3]; Back-Office = [C0, C1, C2, C3, C4, APE1,...]).
+- **FR025**: HR Admin shall be able to configure score-to-rank conversion tables per employee type and grade tier. The conversion must be editable in the admin UI and applied automatically when calculating final rank during evaluation.
+- **FR026**: All HR Admin configuration actions (create/modify/close FY, department changes, employee type/grade edits, score→rank updates) shall generate AuditEntry records capturing actorId, actorRole, action, details and timestamp. Config changes must include an optional "reason" field in the UI to support governance.
+
 **User Interface & Experience**
 - **FR015**: System shall implement glassmorphism design language with frosted glass effects, transparency, backdrop blur, soft shadows, and subtle gradients
 - **FR016**: System shall provide Excel-familiar interface with table-based data entry, keyboard navigation (Tab, Enter, Arrow keys), and inline editing patterns
 - **FR017**: System shall support Excel-like table resizing for columns and rows with visual feedback and handle positioning
 - **FR018**: System shall implement Role-Based Access Control (RBAC) with visual indicators: blue sections (employee-editable), orange sections (manager-editable), disabled states for read-only access
-- **FR019**: System shall support HR Admin role with read-only access to all fields, including modal windows for Result Explanation viewing
+- **FR019**: System shall support HR Admin role with read-only access to all employee/manager review fields (with audit logging for any edits), plus full configuration access for system settings (see FR022-FR026)
 - **FR020**: System shall provide Modal UI for Result Explanation with AI assistance, allowing employees to edit their explanations and managers to read them and write feedback
 - **FR021**: System shall display company/department goals throughout target setting and evaluation phases to connect individual work to business context
 

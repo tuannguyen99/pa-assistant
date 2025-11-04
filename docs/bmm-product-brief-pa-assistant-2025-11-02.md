@@ -578,6 +578,15 @@ Additional role management details:
 - Test connection functionality
 - Switch providers without code deployment
 
+**HR Admin Configuration (expanded)**
+- Review Fiscal Year (FY): HR Admin can create new FY entries (e.g., 2025) that set active windows for target-setting and evaluations. HR can close a FY to finalise the cycle; closed FYs lock further edits to target/evaluation fields except via HR Admin override (all overrides are auditable).
+- Departments: HR Admin can create/edit company departments and assign a Head of Department. Departments are visible across target-setting screens and used to scope manager dashboards and reports.
+- Employee Types & Grade Systems: HR Admin can define employee types (for example: "Engineer", "Back-Office") and configure the valid grade lists for each type. Example grade lists:
+  - Engineer: E0, E1, E2, SE1, SE2, SE3, APE1, APE2, APE3
+  - Back-Office: C0, C1, C2, C3, C4, APE1
+- Score-to-Rank Conversion Tables: HR Admin can configure conversion mappings from final numeric score ranges to rank labels (A+, A, B+, B, C, etc.) per employee type/grade tier. These mappings are applied when finalising evaluations and visible to users during the review.
+
+
 **10. Modern UI/UX Design**
 - **Glassmorphism Design Language**:
   - Frosted glass effects with transparency and backdrop blur

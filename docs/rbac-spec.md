@@ -1,5 +1,7 @@
 # RBAC & Audit Spec — pa-assistant
 
+> **Document Purpose:** This spec provides the technical implementation details for multi-role support, audit logging, and HR Admin capabilities defined in the PRD (FR001, FR001a, FR019, FR022-FR026). See [PRD.md](./PRD.md) for business requirements and [ui-role-header.md](./ui-role-header.md) for UI implementation guidance.
+
 This document describes a minimal RBAC data model, audit schema, and API contract to implement multi-role support and traceability.
 
 ## Data model (simplified)
@@ -60,6 +62,45 @@ This document describes a minimal RBAC data model, audit schema, and API contrac
 - POST /api/audit
   - internal use only; created by server whenever sensitive operations occur
 
+## HR Admin configuration endpoints (examples)
+
+> **Note:** These endpoints implement the HR Admin configuration requirements FR022-FR026 from the PRD. All configuration changes must create AuditEntry records with optional reason fields for governance.
+
+- POST /api/admin/fy
+  - body: { year: 2025, startDate: "2025-04-01", endDate: "2026-03-31", action: "create" }
+  - only HR Admins allowed; server creates AuditEntry { action: "create_fy", details }
+
+- POST /api/admin/fy/:id/close
+  - body: { reason: "End of cycle" }
+  - only HR Admins allowed; server creates AuditEntry { action: "close_fy", details }
+
+- POST /api/admin/departments
+  - body: { name: "Engineering", headId: "user-uuid" }
+  - only HR Admins allowed; server creates AuditEntry { action: "create_department", details }
+
+- POST /api/admin/employee-types
+  - body: { type: "Engineer", grades: ["E0","E1","E2","SE1","SE2","SE3","APE1","APE2","APE3"] }
+  - server creates AuditEntry { action: "create_employee_type", details }
+
+- POST /api/admin/score-to-rank
+  - body: { type: "Engineer", grade: "APE2", mappings: [{min:3.75, max:4.5, rank:"A+"}, ...] }
+  - server creates AuditEntry { action: "update_score_to_rank", details }
+
+## HR Admin Capabilities Summary
+
+HR Admins have two distinct permission sets:
+
+1. **Read-only access to review data**: HR Admins can view all employee and manager fields, including Result Explanation modals, but cannot edit review content without explicit audit logging and UI flagging (per FR019).
+
+2. **Full configuration access** (FR022-FR026):
+   - Create/close Fiscal Years (FY) — locks/unlocks target-setting and evaluation workflows
+   - Configure company departments and assign Heads of Department
+   - Configure employee types (e.g., Engineer, Back-Office) and associated grade systems
+   - Configure score-to-rank conversion tables per employee type/grade tier
+   - All configuration actions generate AuditEntry records with optional reason field for governance
+
+These dual responsibilities ensure HR Admins can manage system configuration without compromising the integrity of individual performance reviews.
+
 ## Testing
 
 - Unit tests for permission matrix:
@@ -73,9 +114,11 @@ This document describes a minimal RBAC data model, audit schema, and API contrac
 - Store audit logs in append-only store where possible
 - Limit retention based on company policy; ensure logs are exportable for compliance reviews
 
+
 ## Notes
 
 This spec is intentionally minimal and developer-friendly. Expand with concrete database schema (SQL migration), policy decision points (e.g., delegation workflows), and any SSO claims mapping (if integrating with LDAP/SSO).
+
 # RBAC & Audit Spec — pa-assistant
 
 This document describes a minimal RBAC data model, audit schema, and API contract to implement multi-role support and traceability.
