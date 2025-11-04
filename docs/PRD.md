@@ -91,6 +91,29 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 - **NFR003**: System shall provide Excel-familiar UI with table-based data entry, keyboard navigation, and glassmorphism design aesthetics
 - **NFR004**: System shall meet **WCAG 2.1 AA accessibility standards** with full keyboard navigation, screen reader support, and high contrast compliance
 - **NFR005**: System shall implement **desktop-first responsive design** optimized for modern browsers with horizontal scrolling for wide tables
+- **NFR006**: System shall implement automated database backup with daily incremental backups and weekly full backups, stored in secure off-site location with 30-day retention minimum
+- **NFR007**: System shall preserve historical review data as read-only after fiscal year completion, enabling multi-year trend analysis and statistical reporting while preventing accidental modification of closed review cycles
+
+### Database Management & Historical Data
+
+**Backup Strategy:**
+- **Automated Daily Backups**: Incremental backups performed automatically at 2 AM local time when system usage is minimal
+- **Weekly Full Backups**: Complete database snapshots created every Sunday, retained for 90 days minimum
+- **Backup Storage**: Encrypted backups stored in separate physical/cloud location from primary database
+- **Recovery Testing**: Monthly automated restore tests to verify backup integrity
+- **Retention Policy**: Daily backups retained for 30 days, weekly backups for 90 days, annual snapshots retained for 7 years (compliance requirement)
+- **Backup Technologies**: SQLite file-based backups for MVP (simple file copy + verification), with migration path to pg_dump (PostgreSQL) or mysqldump (MySQL) for production scale
+
+**Historical Data Management:**
+- **Fiscal Year Closure**: When HR Admin closes a fiscal year (FR022), all review records for that year are marked as `archived: true` and become read-only
+- **Read-Only Enforcement**: Backend API rejects any PUT/PATCH/DELETE requests to archived records (except by HR Admin with audit logging)
+- **Historical Data Access**: Archived reviews remain queryable for:
+  - Employee career progression views (multi-year performance trends)
+  - Manager historical team analytics
+  - HR statistical analysis and reporting
+  - Compliance audits and legal discovery
+- **Data Retention**: Review data retained indefinitely for HR analytics; audit logs retained for 7 years minimum (compliance requirement)
+- **Archive Indicators**: UI displays clear "Archived - FY 2024" badges on historical reviews to prevent confusion with active cycle
 
 ---
 

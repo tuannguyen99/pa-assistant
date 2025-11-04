@@ -275,6 +275,25 @@ So that performance data remains secure and compliant.
 
 **Prerequisites:** Story 2.2
 
+**Story 2.3a: Database Backup & Historical Data Management**
+
+As an HR Admin and System Administrator,
+I want automated database backups and read-only historical data preservation,
+So that review data is protected from loss and previous fiscal years remain available for analysis without risk of modification.
+
+**Acceptance Criteria:**
+1. Automated daily incremental backups at 2 AM with verification checksums
+2. Automated weekly full backups on Sunday with 90-day retention
+3. Encrypted backup storage in separate location from primary database
+4. Monthly automated restore tests to verify backup integrity
+5. Fiscal year closure sets `archived: true` on all reviews for that year
+6. API rejects PUT/PATCH/DELETE requests to archived reviews (except HR Admin with audit logging)
+7. UI displays "Archived - FY 20XX" badges on historical reviews
+8. Historical reviews remain queryable for analytics and reporting
+9. Implementation follows backup strategy and API enforcement defined in [rbac-spec.md](./rbac-spec.md#database-backup--historical-data)
+
+**Prerequisites:** Story 2.2, Story 1.12
+
 **Story 2.4: Production Deployment Preparation**
 
 As a developer,
