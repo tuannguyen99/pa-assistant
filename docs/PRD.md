@@ -49,16 +49,45 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 
 **FR001a**: System shall allow assigning multiple roles to a single user account and provide HR interfaces to edit these assignments. Role switching in the UI shall be possible where appropriate and shall be recorded in audit logs.
 
+**Workflow States & Process**
+
+> **Detailed Workflow:** See [performance-review-workflow.md](./performance-review-workflow.md) for complete process description, state transitions, workflow diagrams, and timeline.
+
+**Target Setting States:**
+- `draft` - Employee creating targets
+- `submitted_to_manager` - Awaiting manager review
+- `revision_requested` - Manager requested changes
+- `manager_approved` - Manager approved targets
+- `submitted_to_hr` - Submitted to HR for visibility
+- `target_setting_complete` - Ready for evaluation phase
+
+**Performance Evaluation States:**
+- `self_eval_draft` - Employee working on self-evaluation
+- `self_eval_submitted` - Awaiting manager evaluation
+- `manager_eval_in_progress` - Manager reviewing
+- `manager_eval_complete` - Manager finished evaluation
+- `submitted_to_hr_final` - Submitted to HR for consolidation
+- `hr_review_complete` - Ready for board review
+- `board_approved` - Board approved final decisions
+- `feedback_delivered` - Manager delivered final feedback
+- `archived` - Fiscal year closed (read-only)
+
 **Target Setting Workflow**
 - **FR004**: Employees shall create 3-5 performance targets with task description, KPI, weight percentage (auto-validated to total 100%), and difficulty level (L1-L3), with ability to modify targets during self-evaluation (modifications flagged and sent to manager for review)
-- **FR005**: Managers shall review and approve employee targets with ability to request revisions
+- **FR005**: Managers shall review and approve employee targets with ability to request revisions; optional 1-on-1 meeting for target discussion
+- **FR005a**: Managers shall submit consolidated department targets to HR for alignment review and company-wide visibility
 - **FR006**: System shall store approved targets for the entire review cycle year
 
-**Performance Evaluation**
+**Performance Evaluation Workflow**
 - **FR007**: System shall automatically calculate target scores using formula: Total Points = Weight × Difficulty × Rating
 - **FR008**: System shall automatically convert final scores to performance ranks based on configurable grade-tier mappings (e.g., APE2/D1 vs APE1/C4)
-- **FR009**: Employees shall complete self-evaluations with AI-assisted writing for result explanations, clearly marked as "AI-assisted" with full edit capability
-- **FR010**: Managers shall complete evaluations viewing employee self-review side-by-side, with AI synthesis of multiple inputs (employee review + manager comments) clearly marked as "AI-assisted"
+- **FR009**: Employees shall complete self-evaluations with AI-assisted writing for result explanations, clearly marked as "AI-assisted" with full edit capability; employees may modify original targets with visible flagging and manager notification
+- **FR010**: Managers shall complete evaluations viewing employee self-review side-by-side, with AI synthesis of multiple inputs (employee review + manager comments) clearly marked as "AI-assisted"; optional 1-on-1 review meeting
+- **FR010a**: Managers shall submit completed department evaluations to HR with scores and ranks for company-wide consolidation
+- **FR010b**: HR Admin shall consolidate all department submissions, verify calculations, and prepare company-wide performance reports for Board review
+- **FR010c**: System shall support Board of Managers decision meeting workflow with final approval state transition
+- **FR010d**: Managers shall deliver final feedback to employees in 1-on-1 meetings, communicating performance rank and board decisions
+- **FR010e**: HR Admin shall close fiscal year after feedback delivery, marking all reviews as archived (read-only) with historical data preservation
 
 **Dashboard & Monitoring**
 - **FR011**: Managers shall access dashboard showing all direct reports with completion status indicators (Not Started, In Progress, Pending Review, Completed)

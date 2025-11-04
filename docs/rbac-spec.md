@@ -20,10 +20,21 @@ This document describes a minimal RBAC data model, audit schema, and API contrac
   - revieweeId: string
   - reviewerId: string
   - cycleYear: number
-  - status: string // not_started | in_progress | pending_manager_review | completed
+  - status: string // Evaluation states: self_eval_draft | self_eval_submitted | manager_eval_in_progress | manager_eval_complete | submitted_to_hr_final | hr_review_complete | board_approved | feedback_delivered | archived
   - archived: boolean // true when fiscal year is closed (implements NFR007)
   - archivedAt: datetime | null // timestamp when fiscal year was closed
   - archivedBy: string | null // HR Admin userId who closed the fiscal year
+
+- TargetSetting (separate table for target setting phase)
+  - id: string (uuid)
+  - employeeId: string
+  - managerId: string
+  - cycleYear: number
+  - status: string // Target states: draft | submitted_to_manager | revision_requested | manager_approved | submitted_to_hr | target_setting_complete
+  - targets: object[] // Array of 3-5 targets with task, KPI, weight, difficulty
+  - submittedAt: datetime | null
+  - approvedAt: datetime | null
+  - submittedToHRAt: datetime | null
 
 - RoleAssignment (optional explicit mapping for delegated reviewers)
   - id: string
