@@ -26,7 +26,7 @@ pa-assistant positions AI as a **professional writing assistant** that helps art
 - Built-in guidance and help system
 - Flexible AI backend (Ollama local or cloud APIs)
 - **Modern Glassmorphism UI with Excel-like table interactions**
-- **Interactive wireframes with Excel-like table resizing (wireframes-new.html)**
+- **Interactive wireframes v1.7 with role-based dashboards (wireframes-v1.7.html)**
 - **Role-Based Access Control (RBAC) for shared evaluation screens**
 - **HR Admin role with read-only access to all fields**
 - **AI-assisted Result Explanation with Modal UI approach**
