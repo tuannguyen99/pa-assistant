@@ -636,15 +636,262 @@
     </div>
 
     <!-- Navigation Tabs -->
-    <div class="tabs">
-        <button class="tab active" onclick="showTab('self-review')">Self-Review & Manager Evaluation</button>
-        <button class="tab" onclick="showTab('target-setting')">Target Setting</button>
-        <button class="tab" onclick="showTab('dept-dashboard')">Department Dashboard (Manager)</button>
-        <button class="tab" onclick="showTab('hr-dashboard')">HR Consolidation Dashboard</button>
+    <div class="tabs" id="navTabs">
+        <button class="tab active" onclick="showTab('target-setting')">Target Setting</button>
+        <button class="tab" onclick="showTab('self-review')">Self-Review & Manager Evaluation</button>
+        <button class="tab employee-only" onclick="showTab('personal-dashboard')">Personal Dashboard</button>
+        <button class="tab manager-only" onclick="showTab('dept-dashboard')" style="display: none;">Department Dashboard</button>
+        <button class="tab hradmin-only" onclick="showTab('hr-dashboard')" style="display: none;">HR Consolidation Dashboard</button>
     </div>
 
-    <!-- Tab 1: Self-Review & Manager Evaluation -->
-    <div id="self-review" class="tab-content active">
+    <!-- Tab 1: Target Setting -->
+    <div id="target-setting" class="tab-content active">
+        <h2 style="color: #1e293b; margin-bottom: 24px;">Target Setting (Step 1.1)</h2>
+        
+        <div class="annotation">
+            <strong>Workflow Context:</strong> Phase 1 - Target Setting occurs at the beginning of fiscal year (April-May). 
+            Employee creates 3-5 targets, manager reviews and approves (Step 1.2), then submits consolidated department targets to HR (Step 1.3).
+        </div>
+
+        <!-- Employee Information Section -->
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+            <h3 style="color: #1e40af; margin-bottom: 16px; font-size: 16px;">Employee Information</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">Employee ID</label>
+                    <input type="text" value="EMP12345" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">Employee Name</label>
+                    <input type="text" value="John Doe" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">Current Grade</label>
+                    <input type="text" value="SE2" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">Department</label>
+                    <input type="text" value="Engineering" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">Manager</label>
+                    <input type="text" value="Jane Smith" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">Employment Status</label>
+                    <input type="text" value="Active" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Period of Appraisal Section -->
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+            <h3 style="color: #1e40af; margin-bottom: 16px; font-size: 16px;">Period of Appraisal</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">From</label>
+                    <input type="date" value="2025-04-01">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">To</label>
+                    <input type="date" value="2026-03-31">
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Role Section -->
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+            <h3 style="color: #1e40af; margin-bottom: 8px; font-size: 16px;">Current Role</h3>
+            <p style="color: #64748b; font-style: italic; margin-bottom: 12px; font-size: 13px;">Concretely describe your roles for this year</p>
+            <textarea placeholder="Describe your current role and key responsibilities..." style="min-height: 100px;"></textarea>
+        </div>
+
+        <!-- Long-term Goal Section -->
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+            <h3 style="color: #1e40af; margin-bottom: 8px; font-size: 16px;">Long-term Goal</h3>
+            <p style="color: #64748b; font-style: italic; margin-bottom: 12px; font-size: 13px;">Concretely describe your challenge targets for 3-5 years</p>
+            <textarea placeholder="Describe your long-term career goals and development aspirations..." style="min-height: 100px;"></textarea>
+        </div>
+
+        <!-- Performance Targets Section -->
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+            <h3 style="color: #1e40af; margin-bottom: 16px; font-size: 16px;">Performance Targets (3-5 targets)</h3>
+            
+            <div style="padding: 12px; background: #dbeafe; border-radius: 6px; margin-bottom: 16px; font-size: 13px; border-left: 4px solid #1e40af;">
+                <strong style="color: #1e40af;">Company Core Values:</strong> Integrity, Result-driven, Commitment, Agility<br>
+                <em style="color: #1e3a8a;">Each target should align with at least one core value to ensure organizational alignment.</em>
+            </div>
+
+            <div class="excel-table-container">
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%">Dimension/Task</th>
+                            <th style="width: 25%">Targets (KPI)</th>
+                            <th style="width: 10%">Weight (%)</th>
+                            <th style="width: 10%">Difficulty</th>
+                            <th style="width: 25%">Core Values Alignment</th>
+                            <th style="width: 15%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" value="Project Delivery" /></td>
+                            <td><input type="text" value="Complete customer dashboard feature with 95% user satisfaction" /></td>
+                            <td><input type="number" value="30" min="0" max="100" /></td>
+                            <td>
+                                <select>
+                                    <option value="L1">L1 - Easy</option>
+                                    <option value="L2" selected>L2 - Medium</option>
+                                    <option value="L3">L3 - Hard</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox" checked> Integrity
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox" checked> Result-driven
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Commitment
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Agility
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px; width: 100%;">🤖 AI Help</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" value="Code Quality" /></td>
+                            <td><input type="text" value="Reduce bug count in production by 40%" /></td>
+                            <td><input type="number" value="25" min="0" max="100" /></td>
+                            <td>
+                                <select>
+                                    <option value="L1">L1 - Easy</option>
+                                    <option value="L2" selected>L2 - Medium</option>
+                                    <option value="L3">L3 - Hard</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox" checked> Integrity
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Result-driven
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox" checked> Commitment
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Agility
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px; width: 100%;">🤖 AI Help</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" value="Team Leadership" /></td>
+                            <td><input type="text" value="Mentor 2 junior developers to independent contributor level" /></td>
+                            <td><input type="number" value="20" min="0" max="100" /></td>
+                            <td>
+                                <select>
+                                    <option value="L1">L1 - Easy</option>
+                                    <option value="L2">L2 - Medium</option>
+                                    <option value="L3" selected>L3 - Hard</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Integrity
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Result-driven
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox" checked> Commitment
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox" checked> Agility
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px; width: 100%;">🤖 AI Help</button>
+                            </td>
+                        </tr>
+                        <tr style="background: #f1f5f9;">
+                            <td><input type="text" placeholder="Add dimension..." style="background: white;" /></td>
+                            <td><input type="text" placeholder="Add targets..." style="background: white;" /></td>
+                            <td><input type="number" placeholder="%" min="0" max="100" style="background: white;" /></td>
+                            <td>
+                                <select style="background: white;">
+                                    <option value="">Select...</option>
+                                    <option value="L1">L1 - Easy</option>
+                                    <option value="L2">L2 - Medium</option>
+                                    <option value="L3">L3 - Hard</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Integrity
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Result-driven
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Commitment
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Agility
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary" style="padding: 4px 8px; font-size: 11px; width: 100%;">➕ Add Target</button>
+                            </td>
+                        </tr>
+                        <tr style="background: #f0f9ff; font-weight: 600;">
+                            <td colspan="2" style="text-align: right; padding-right: 20px; color: #0c4a6e;">
+                                Total Weight:
+                            </td>
+                            <td style="font-size: 16px; color: #dc2626;">
+                                75%
+                            </td>
+                            <td colspan="3" style="color: #dc2626; font-size: 12px;">
+                                ⚠️ Must equal 100%
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="padding: 12px; background: #fef3c7; border-radius: 6px; margin-top: 16px; font-size: 13px; border-left: 4px solid #f59e0b;">
+                <strong style="color: #92400e;">Core Values Coverage:</strong><br>
+                <span style="color: #16a34a;">✓ Integrity (2 targets)</span> | 
+                <span style="color: #16a34a;">✓ Result-driven (1 target)</span> | 
+                <span style="color: #f59e0b;">⚠ Commitment (2 targets)</span> | 
+                <span style="color: #16a34a;">✓ Agility (1 target)</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center;">
+            <button class="btn btn-secondary" style="padding: 12px 24px;">💾 Save Draft</button>
+            <button class="btn btn-primary" style="padding: 12px 24px;">📤 Submit Targets for Manager Approval</button>
+        </div>
+    </div>
+
+    <!-- Tab 2: Self-Review & Manager Evaluation -->
+    <div id="self-review" class="tab-content">
         <h2 style="color: #1e293b; margin-bottom: 24px;">Employee Self-Review & Manager Evaluation</h2>
         
         <div class="annotation">
@@ -654,131 +901,187 @@
             Multi-role users can switch contexts using the header dropdown.
         </div>
 
+        <!-- Employee Information Section -->
+        
         <div class="excel-table-container">
             <table class="excel-table">
                 <thead>
                     <tr>
-                        <th style="width: 5%">#</th>
-                        <th style="width: 20%">Target Description</th>
-                        <th style="width: 10%">KPI</th>
-                        <th style="width: 8%">Weight</th>
-                        <th style="width: 8%">Difficulty</th>
-                        <th style="width: 12%">Self Rating</th>
-                        <th style="width: 12%">Manager Rating</th>
-                        <th style="width: 10%">Total Point</th>
-                        <th style="width: 15%">Details</th>
+                        <th rowspan="2" style="width: 180px; vertical-align: middle;">Target Description</th>
+                        <th colspan="5" style="background: #e3f2fd; text-align: center;">Individual Target Evaluation</th>
+                        <th colspan="4" style="background: #fff3e0; text-align: center;">Evaluation from Manager</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 80px; background: #e3f2fd;">Weight (%)</th>
+                        <th style="width: 90px; background: #e3f2fd;">Difficulty</th>
+                        <th style="width: 80px; background: #e3f2fd;">Rating</th>
+                        <th style="width: 100px; background: #e3f2fd;">Total Point</th>
+                        <th style="width: 250px; background: #e3f2fd;">Result Explanation</th>
+                        <th style="width: 80px; background: #fff3e0;">Weight (%)</th>
+                        <th style="width: 90px; background: #fff3e0;">Difficulty</th>
+                        <th style="width: 80px; background: #fff3e0;">Rating</th>
+                        <th style="width: 100px; background: #fff3e0;">Total Point</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>1</td>
-                        <td>Develop new customer dashboard feature with 95% user satisfaction</td>
-                        <td>User Satisfaction Score</td>
-                        <td>30%</td>
-                        <td>L2</td>
-                        <td class="employee-editable">
-                            <select style="width: 100%;">
-                                <option value="">Select...</option>
-                                <option value="5">5 - Exceeded</option>
-                                <option value="4" selected>4 - Above Target</option>
-                                <option value="3">3 - Met Target</option>
-                                <option value="2">2 - Below Target</option>
-                                <option value="1">1 - Not Met</option>
+                        <td style="font-weight: 600; padding: 12px;">Complete Q4 Project deliverables on-time</td>
+                        <!-- Individual Target Evaluation -->
+                        <td style="background: #f8fbff; padding: 12px;">
+                            <input type="number" value="25" readonly style="background: transparent; border: none; width: 100%; font-weight: 500;">
+                        </td>
+                        <td style="background: #f8fbff; padding: 12px;">
+                            <select disabled style="background: transparent; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px; width: 100%;">
+                                <option>L1</option>
+                                <option selected>L2</option>
+                                <option>L3</option>
                             </select>
                         </td>
-                        <td class="manager-editable">
-                            <select style="width: 100%;">
-                                <option value="">Select...</option>
-                                <option value="5">5 - Exceeded</option>
-                                <option value="4">4 - Above Target</option>
-                                <option value="3" selected>3 - Met Target</option>
-                                <option value="2">2 - Below Target</option>
-                                <option value="1">1 - Not Met</option>
+                        <td style="background: #f8fbff; padding: 12px;">
+                            <select style="border: 1px solid #3b82f6; border-radius: 4px; padding: 6px; width: 100%;">
+                                <option value="1">1 - Poor</option>
+                                <option value="2">2 - Below Expectation</option>
+                                <option value="3">3 - Meets Expectation</option>
+                                <option value="4" selected>4 - Exceeds Expectation</option>
+                                <option value="5">5 - Outstanding</option>
                             </select>
                         </td>
-                        <td class="manager-editable" style="font-weight: 600; color: #16a34a;">1.8</td>
-                        <td>
-                            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="openModal('modal1')">
-                                📄 View Details
-                            </button>
+                        <td style="background: #f8fbff; padding: 12px; font-weight: 600; color: #1e40af;">150</td>
+                        <td style="background: #f8fbff; padding: 8px; cursor: pointer; color: #1e40af;" onclick="openModal('modal1')" title="Click to expand and edit">
+                            <div style="text-decoration: underline;">Successfully delivered all Q4 milestones... (click to expand)</div>
+                            <div style="font-size: 11px; color: #666; margin-top: 4px;">💡 Click to open full editor with AI help</div>
                         </td>
+                        <!-- Evaluation from Manager -->
+                        <td style="background: #fffbf5; padding: 12px;">
+                            <input type="number" value="25" readonly style="background: transparent; border: none; width: 100%; font-weight: 500;">
+                        </td>
+                        <td style="background: #fffbf5; padding: 12px;">
+                            <select disabled style="background: transparent; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px; width: 100%;">
+                                <option>L1</option>
+                                <option selected>L2</option>
+                                <option>L3</option>
+                            </select>
+                        </td>
+                        <td style="background: #fffbf5; padding: 12px;">
+                            <select style="border: 1px solid #f97316; border-radius: 4px; padding: 6px; width: 100%;">
+                                <option value="1">1 - Poor</option>
+                                <option value="2">2 - Below Expectation</option>
+                                <option value="3">3 - Meets Expectation</option>
+                                <option value="4">4 - Exceeds Expectation</option>
+                                <option value="5" selected>5 - Outstanding</option>
+                            </select>
+                        </td>
+                        <td style="background: #fffbf5; padding: 12px; font-weight: 600; color: #f59e0b;">187.5</td>
                     </tr>
                     <tr>
-                        <td>2</td>
-                        <td>Reduce bug count in production by 40%</td>
-                        <td>Production Bug Count</td>
-                        <td>25%</td>
-                        <td>L2</td>
-                        <td class="employee-editable">
-                            <select style="width: 100%;">
-                                <option value="">Select...</option>
-                                <option value="5" selected>5 - Exceeded</option>
-                                <option value="4">4 - Above Target</option>
-                                <option value="3">3 - Met Target</option>
-                                <option value="2">2 - Below Target</option>
-                                <option value="1">1 - Not Met</option>
+                        <td style="font-weight: 600; padding: 12px;">Improve code quality metrics and reduce bug rate</td>
+                        <!-- Individual Target Evaluation -->
+                        <td style="background: #f8fbff; padding: 12px;">
+                            <input type="number" value="20" readonly style="background: transparent; border: none; width: 100%; font-weight: 500;">
+                        </td>
+                        <td style="background: #f8fbff; padding: 12px;">
+                            <select disabled style="background: transparent; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px; width: 100%;">
+                                <option>L1</option>
+                                <option selected>L2</option>
+                                <option>L3</option>
                             </select>
                         </td>
-                        <td class="manager-editable">
-                            <select style="width: 100%;">
-                                <option value="">Select...</option>
-                                <option value="5">5 - Exceeded</option>
-                                <option value="4" selected>4 - Above Target</option>
-                                <option value="3">3 - Met Target</option>
-                                <option value="2">2 - Below Target</option>
-                                <option value="1">1 - Not Met</option>
+                        <td style="background: #f8fbff; padding: 12px;">
+                            <select style="border: 1px solid #3b82f6; border-radius: 4px; padding: 6px; width: 100%;">
+                                <option value="1">1 - Poor</option>
+                                <option value="2">2 - Below Expectation</option>
+                                <option value="3" selected>3 - Meets Expectation</option>
+                                <option value="4">4 - Exceeds Expectation</option>
+                                <option value="5">5 - Outstanding</option>
                             </select>
                         </td>
-                        <td class="manager-editable" style="font-weight: 600; color: #16a34a;">2.0</td>
-                        <td>
-                            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="openModal('modal2')">
-                                📄 View Details
-                            </button>
+                        <td style="background: #f8fbff; padding: 12px; font-weight: 600; color: #1e40af;">90</td>
+                        <td style="background: #f8fbff; padding: 8px; cursor: pointer; color: #1e40af;" onclick="openModal('modal2')" title="Click to expand and edit">
+                            <div style="text-decoration: underline;">Maintained code coverage above 80%... (click to expand)</div>
+                            <div style="font-size: 11px; color: #666; margin-top: 4px;">💡 Click to open full editor with AI help</div>
                         </td>
+                        <!-- Evaluation from Manager -->
+                        <td style="background: #fffbf5; padding: 12px;">
+                            <input type="number" value="20" readonly style="background: transparent; border: none; width: 100%; font-weight: 500;">
+                        </td>
+                        <td style="background: #fffbf5; padding: 12px;">
+                            <select disabled style="background: transparent; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px; width: 100%;">
+                                <option>L1</option>
+                                <option selected>L2</option>
+                                <option>L3</option>
+                            </select>
+                        </td>
+                        <td style="background: #fffbf5; padding: 12px;">
+                            <select style="border: 1px solid #f97316; border-radius: 4px; padding: 6px; width: 100%;">
+                                <option value="1">1 - Poor</option>
+                                <option value="2">2 - Below Expectation</option>
+                                <option value="3">3 - Meets Expectation</option>
+                                <option value="4" selected>4 - Exceeds Expectation</option>
+                                <option value="5">5 - Outstanding</option>
+                            </select>
+                        </td>
+                        <td style="background: #fffbf5; padding: 12px; font-weight: 600; color: #f59e0b;">120</td>
                     </tr>
                     <tr>
-                        <td>3</td>
-                        <td>Mentor 2 junior developers to independent contributor level</td>
-                        <td>Mentee Performance Level</td>
-                        <td>20%</td>
-                        <td>L3</td>
-                        <td class="employee-editable">
-                            <select style="width: 100%;">
-                                <option value="">Select...</option>
-                                <option value="5">5 - Exceeded</option>
-                                <option value="4" selected>4 - Above Target</option>
-                                <option value="3">3 - Met Target</option>
-                                <option value="2">2 - Below Target</option>
-                                <option value="1">1 - Not Met</option>
+                        <td style="font-weight: 600; padding: 12px;">Mentor junior developers and improve team productivity</td>
+                        <!-- Individual Target Evaluation -->
+                        <td style="background: #f8fbff; padding: 12px;">
+                            <input type="number" value="15" readonly style="background: transparent; border: none; width: 100%; font-weight: 500;">
+                        </td>
+                        <td style="background: #f8fbff; padding: 12px;">
+                            <select disabled style="background: transparent; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px; width: 100%;">
+                                <option selected>L1</option>
+                                <option>L2</option>
+                                <option>L3</option>
                             </select>
                         </td>
-                        <td class="manager-editable">
-                            <select style="width: 100%;">
-                                <option value="">Select...</option>
-                                <option value="5">5 - Exceeded</option>
-                                <option value="4" selected>4 - Above Target</option>
-                                <option value="3">3 - Met Target</option>
-                                <option value="2">2 - Below Target</option>
-                                <option value="1">1 - Not Met</option>
+                        <td style="background: #f8fbff; padding: 12px;">
+                            <select style="border: 1px solid #3b82f6; border-radius: 4px; padding: 6px; width: 100%;">
+                                <option value="1">1 - Poor</option>
+                                <option value="2">2 - Below Expectation</option>
+                                <option value="3">3 - Meets Expectation</option>
+                                <option value="4" selected>4 - Exceeds Expectation</option>
+                                <option value="5">5 - Outstanding</option>
                             </select>
                         </td>
-                        <td class="manager-editable" style="font-weight: 600; color: #16a34a;">2.4</td>
-                        <td>
-                            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">
-                                📄 View Details
-                            </button>
+                        <td style="background: #f8fbff; padding: 12px; font-weight: 600; color: #1e40af;">60</td>
+                        <td style="background: #f8fbff; padding: 8px; cursor: pointer; color: #1e40af;" onclick="openModal('modal2')" title="Click to expand and edit">
+                            <div style="text-decoration: underline;">Successfully mentored 2 junior developers... (click to expand)</div>
+                            <div style="font-size: 11px; color: #666; margin-top: 4px;">💡 Click to open full editor with AI help</div>
                         </td>
-                    </tr>
-                    <tr style="background: #f0f9ff; font-weight: 600;">
-                        <td colspan="7" style="text-align: right; padding-right: 20px; color: #0c4a6e;">
-                            Overall Score:
+                        <!-- Evaluation from Manager -->
+                        <td style="background: #fffbf5; padding: 12px;">
+                            <input type="number" value="15" readonly style="background: transparent; border: none; width: 100%; font-weight: 500;">
                         </td>
-                        <td colspan="2" style="font-size: 18px; color: #0c4a6e;">
-                            6.2 / 7.5 → Rank: B+
+                        <td style="background: #fffbf5; padding: 12px;">
+                            <select disabled style="background: transparent; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px; width: 100%;">
+                                <option selected>L1</option>
+                                <option>L2</option>
+                                <option>L3</option>
+                            </select>
                         </td>
+                        <td style="background: #fffbf5; padding: 12px;">
+                            <select style="border: 1px solid #f97316; border-radius: 4px; padding: 6px; width: 100%;">
+                                <option value="1">1 - Poor</option>
+                                <option value="2">2 - Below Expectation</option>
+                                <option value="3">3 - Meets Expectation</option>
+                                <option value="4">4 - Exceeds Expectation</option>
+                                <option value="5" selected>5 - Outstanding</option>
+                            </select>
+                        </td>
+                        <td style="background: #fffbf5; padding: 12px; font-weight: 600; color: #f59e0b;">75</td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border: 1px solid #bae6fd;">
+                <strong style="color: #1e40af; font-size: 16px;">Employee Self-Evaluation Total: 300</strong>
+            </div>
+            <div style="background: #fff3e0; padding: 15px; border-radius: 8px; border: 1px solid #fed7aa;">
+                <strong style="color: #f59e0b; font-size: 16px;">Manager Evaluation Total: 382.5</strong>
+            </div>
         </div>
 
         <div style="margin-top: 24px; padding: 20px; background: rgba(255, 243, 224, 0.3); border-radius: 8px; border-left: 4px solid #f97316;">
@@ -788,92 +1091,472 @@
         </div>
     </div>
 
-    <!-- Tab 2: Target Setting -->
-    <div id="target-setting" class="tab-content">
-        <h2 style="color: #1e293b; margin-bottom: 24px;">Target Setting (Step 1.1)</h2>
+    <!-- Tab 2: Self-Review & Manager Evaluation -->
+    <div id="self-review" class="tab-content">
+        <h2 style="color: #1e293b; margin-bottom: 24px;">Employee Self-Review & Manager Evaluation</h2>
         
         <div class="annotation">
-            <strong>Workflow Context:</strong> Phase 1 - Target Setting occurs at the beginning of fiscal year (April-May). 
+            <strong>v1.7 Update:</strong> This screen now includes the Active Role Header and Workflow State Indicator. Color-coded sections show edit permissions: 
             Employee creates 3-5 targets, manager reviews and approves (Step 1.2), then submits consolidated department targets to HR (Step 1.3).
         </div>
 
+        <!-- Employee Information Section -->
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+            <h3 style="color: #1e40af; margin-bottom: 16px; font-size: 16px;">Employee Information</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">Employee ID</label>
+                    <input type="text" value="EMP12345" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">Employee Name</label>
+                    <input type="text" value="John Doe" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">Current Grade</label>
+                    <input type="text" value="SE2" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">Department</label>
+                    <input type="text" value="Engineering" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">Manager</label>
+                    <input type="text" value="Jane Smith" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">Employment Status</label>
+                    <input type="text" value="Active" readonly style="background: #f1f5f9; cursor: not-allowed;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Period of Appraisal Section -->
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+            <h3 style="color: #1e40af; margin-bottom: 16px; font-size: 16px;">Period of Appraisal</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">From</label>
+                    <input type="date" value="2025-04-01">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 13px; font-weight: 500; color: #475569; margin-bottom: 6px;">To</label>
+                    <input type="date" value="2026-03-31">
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Role Section -->
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+            <h3 style="color: #1e40af; margin-bottom: 8px; font-size: 16px;">Current Role</h3>
+            <p style="color: #64748b; font-style: italic; margin-bottom: 12px; font-size: 13px;">Concretely describe your roles for this year</p>
+            <textarea placeholder="Describe your current role and key responsibilities..." style="min-height: 100px;"></textarea>
+        </div>
+
+        <!-- Long-term Goal Section -->
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+            <h3 style="color: #1e40af; margin-bottom: 8px; font-size: 16px;">Long-term Goal</h3>
+            <p style="color: #64748b; font-style: italic; margin-bottom: 12px; font-size: 13px;">Concretely describe your challenge targets for 3-5 years</p>
+            <textarea placeholder="Describe your long-term career goals and development aspirations..." style="min-height: 100px;"></textarea>
+        </div>
+
+        <!-- Performance Targets Section -->
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e2e8f0;">
+            <h3 style="color: #1e40af; margin-bottom: 16px; font-size: 16px;">Performance Targets (3-5 targets)</h3>
+            
+            <div style="padding: 12px; background: #dbeafe; border-radius: 6px; margin-bottom: 16px; font-size: 13px; border-left: 4px solid #1e40af;">
+                <strong style="color: #1e40af;">Company Core Values:</strong> Integrity, Result-driven, Commitment, Agility<br>
+                <em style="color: #1e3a8a;">Each target should align with at least one core value to ensure organizational alignment.</em>
+            </div>
+
+            <div class="excel-table-container">
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%">Dimension/Task</th>
+                            <th style="width: 25%">Targets (KPI)</th>
+                            <th style="width: 10%">Weight (%)</th>
+                            <th style="width: 10%">Difficulty</th>
+                            <th style="width: 25%">Core Values Alignment</th>
+                            <th style="width: 15%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" value="Project Delivery" /></td>
+                            <td><input type="text" value="Complete customer dashboard feature with 95% user satisfaction" /></td>
+                            <td><input type="number" value="30" min="0" max="100" /></td>
+                            <td>
+                                <select>
+                                    <option value="L1">L1 - Easy</option>
+                                    <option value="L2" selected>L2 - Medium</option>
+                                    <option value="L3">L3 - Hard</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox" checked> Integrity
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox" checked> Result-driven
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Commitment
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Agility
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px; width: 100%;">🤖 AI Help</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" value="Code Quality" /></td>
+                            <td><input type="text" value="Reduce bug count in production by 40%" /></td>
+                            <td><input type="number" value="25" min="0" max="100" /></td>
+                            <td>
+                                <select>
+                                    <option value="L1">L1 - Easy</option>
+                                    <option value="L2" selected>L2 - Medium</option>
+                                    <option value="L3">L3 - Hard</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox" checked> Integrity
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Result-driven
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox" checked> Commitment
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Agility
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px; width: 100%;">🤖 AI Help</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" value="Team Leadership" /></td>
+                            <td><input type="text" value="Mentor 2 junior developers to independent contributor level" /></td>
+                            <td><input type="number" value="20" min="0" max="100" /></td>
+                            <td>
+                                <select>
+                                    <option value="L1">L1 - Easy</option>
+                                    <option value="L2">L2 - Medium</option>
+                                    <option value="L3" selected>L3 - Hard</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Integrity
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Result-driven
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox" checked> Commitment
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox" checked> Agility
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px; width: 100%;">🤖 AI Help</button>
+                            </td>
+                        </tr>
+                        <tr style="background: #f1f5f9;">
+                            <td><input type="text" placeholder="Add dimension..." style="background: white;" /></td>
+                            <td><input type="text" placeholder="Add targets..." style="background: white;" /></td>
+                            <td><input type="number" placeholder="%" min="0" max="100" style="background: white;" /></td>
+                            <td>
+                                <select style="background: white;">
+                                    <option value="">Select...</option>
+                                    <option value="L1">L1 - Easy</option>
+                                    <option value="L2">L2 - Medium</option>
+                                    <option value="L3">L3 - Hard</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Integrity
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Result-driven
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Commitment
+                                    </label>
+                                    <label style="font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox"> Agility
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary" style="padding: 4px 8px; font-size: 11px; width: 100%;">➕ Add Target</button>
+                            </td>
+                        </tr>
+                        <tr style="background: #f0f9ff; font-weight: 600;">
+                            <td colspan="2" style="text-align: right; padding-right: 20px; color: #0c4a6e;">
+                                Total Weight:
+                            </td>
+                            <td style="font-size: 16px; color: #dc2626;">
+                                75%
+                            </td>
+                            <td colspan="3" style="color: #dc2626; font-size: 12px;">
+                                ⚠️ Must equal 100%
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="padding: 12px; background: #fef3c7; border-radius: 6px; margin-top: 16px; font-size: 13px; border-left: 4px solid #f59e0b;">
+                <strong style="color: #92400e;">Core Values Coverage:</strong><br>
+                <span style="color: #16a34a;">✓ Integrity (2 targets)</span> | 
+                <span style="color: #16a34a;">✓ Result-driven (1 target)</span> | 
+                <span style="color: #f59e0b;">⚠ Commitment (2 targets)</span> | 
+                <span style="color: #16a34a;">✓ Agility (1 target)</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center;">
+            <button class="btn btn-secondary" style="padding: 12px 24px;">💾 Save Draft</button>
+            <button class="btn btn-primary" style="padding: 12px 24px;">📤 Submit Targets for Manager Approval</button>
+        </div>
+    </div>
+
+    <!-- Tab 3: Personal Dashboard (Employee) - NEW in v1.7 -->
+    <div id="personal-dashboard" class="tab-content">
+        <h2 style="color: #1e293b; margin-bottom: 24px;">Personal Performance Dashboard</h2>
+        
+        <div class="annotation">
+            <strong>v1.7 NEW COMPONENT:</strong> Personal Dashboard shows employee's historical performance data, 
+            grade/rank progression over fiscal years, and comparative analytics to help track career growth.
+        </div>
+
+        <!-- Current FY Status -->
+        <div class="dept-summary">
+            <h3 style="color: #0c4a6e; margin-bottom: 16px;">FY 2024 - Current Year Status</h3>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value">3</div>
+                    <div class="summary-label">Active Targets</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">In Progress</div>
+                    <div class="summary-label" style="font-size: 11px;">Self-Evaluation</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">SE2</div>
+                    <div class="summary-label">Current Grade</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">B+</div>
+                    <div class="summary-label">Last Year Rank</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historical Performance Table -->
+        <h3 style="color: #1e293b; margin: 24px 0 16px;">Historical Performance (Last 5 Years)</h3>
+        
         <div class="excel-table-container">
             <table class="excel-table">
                 <thead>
                     <tr>
-                        <th style="width: 5%">#</th>
-                        <th style="width: 35%">Target Description</th>
-                        <th style="width: 20%">KPI (Key Performance Indicator)</th>
-                        <th style="width: 12%">Weight (%)</th>
-                        <th style="width: 12%">Difficulty</th>
+                        <th style="width: 15%">Fiscal Year</th>
+                        <th style="width: 12%">Grade</th>
+                        <th style="width: 12%">Final Score</th>
+                        <th style="width: 10%">Rank</th>
+                        <th style="width: 15%">Targets Met</th>
+                        <th style="width: 20%">Key Achievements</th>
                         <th style="width: 16%">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>1</td>
-                        <td><input type="text" value="Develop new customer dashboard feature with 95% user satisfaction" /></td>
-                        <td><input type="text" value="User Satisfaction Score" /></td>
-                        <td><input type="number" value="30" min="0" max="100" /></td>
+                        <td style="font-weight: 600;">FY 2024</td>
+                        <td>SE2</td>
+                        <td style="color: #9ca3af;">In Progress</td>
+                        <td style="color: #9ca3af;">Pending</td>
+                        <td style="color: #9ca3af;">-</td>
+                        <td style="color: #9ca3af; font-size: 12px;">Current year (not yet completed)</td>
                         <td>
-                            <select>
-                                <option value="L1">L1 - Easy</option>
-                                <option value="L2" selected>L2 - Medium</option>
-                                <option value="L3">L3 - Hard</option>
-                            </select>
+                            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;">
+                                📝 Continue Self-Eval
+                            </button>
                         </td>
+                    </tr>
+                    <tr style="background: rgba(227, 242, 253, 0.2);">
+                        <td style="font-weight: 600;">FY 2023</td>
                         <td>
-                            <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">🤖 AI Help</button>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                SE2
+                                <span style="background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">↑ Promoted</span>
+                            </div>
+                        </td>
+                        <td style="font-weight: 600; color: #1e40af;">4.1</td>
+                        <td style="font-weight: 600; color: #3b82f6;">B+</td>
+                        <td>5/5 (100%)</td>
+                        <td style="font-size: 12px;">Led migration project, mentored 2 juniors</td>
+                        <td>
+                            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="alert('View archived FY 2023 review details')">
+                                👁️ View Details
+                            </button>
                         </td>
                     </tr>
                     <tr>
-                        <td>2</td>
-                        <td><input type="text" value="Reduce bug count in production by 40%" /></td>
-                        <td><input type="text" value="Production Bug Count" /></td>
-                        <td><input type="number" value="25" min="0" max="100" /></td>
+                        <td style="font-weight: 600;">FY 2022</td>
+                        <td>SE1</td>
+                        <td style="font-weight: 600; color: #1e40af;">3.8</td>
+                        <td style="font-weight: 600; color: #3b82f6;">B+</td>
+                        <td>4/5 (80%)</td>
+                        <td style="font-size: 12px;">Delivered 3 major features, improved code quality</td>
                         <td>
-                            <select>
-                                <option value="L1">L1 - Easy</option>
-                                <option value="L2" selected>L2 - Medium</option>
-                                <option value="L3">L3 - Hard</option>
-                            </select>
-                        </td>
-                        <td>
-                            <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">🤖 AI Help</button>
+                            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">
+                                👁️ View Details
+                            </button>
                         </td>
                     </tr>
                     <tr>
-                        <td>3</td>
-                        <td><input type="text" value="Mentor 2 junior developers to independent contributor level" /></td>
-                        <td><input type="text" value="Mentee Performance Level" /></td>
-                        <td><input type="number" value="20" min="0" max="100" /></td>
+                        <td style="font-weight: 600;">FY 2021</td>
+                        <td>SE1</td>
+                        <td style="font-weight: 600; color: #1e40af;">3.5</td>
+                        <td style="font-weight: 600; color: #4338ca;">B</td>
+                        <td>4/5 (80%)</td>
+                        <td style="font-size: 12px;">Completed onboarding, first independent project</td>
                         <td>
-                            <select>
-                                <option value="L1">L1 - Easy</option>
-                                <option value="L2">L2 - Medium</option>
-                                <option value="L3" selected>L3 - Hard</option>
-                            </select>
-                        </td>
-                        <td>
-                            <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;">🤖 AI Help</button>
+                            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">
+                                👁️ View Details
+                            </button>
                         </td>
                     </tr>
-                    <tr>
-                        <td colspan="3" style="text-align: right; font-weight: 600;">Total Weight:</td>
-                        <td style="font-weight: 700; color: #16a34a; font-size: 16px;">75%</td>
-                        <td colspan="2" style="color: #dc2626; font-size: 12px;">⚠️ Must equal 100%</td>
+                    <tr style="background: rgba(227, 242, 253, 0.2);">
+                        <td style="font-weight: 600;">FY 2020</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                SE1
+                                <span style="background: #dbeafe; color: #1e40af; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">↑ Joined</span>
+                            </div>
+                        </td>
+                        <td style="font-weight: 600; color: #1e40af;">3.3</td>
+                        <td style="font-weight: 600; color: #4338ca;">B</td>
+                        <td>3/4 (75%)</td>
+                        <td style="font-size: 12px;">First year - learned tech stack, contributed to team</td>
+                        <td>
+                            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">
+                                👁️ View Details
+                            </button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <div style="margin-top: 20px; display: flex; gap: 12px;">
-            <button class="btn btn-secondary">➕ Add Target (up to 5)</button>
-            <button class="btn btn-primary">📤 Submit to Manager</button>
+        <!-- Performance Trends Visualization -->
+        <h3 style="color: #1e293b; margin: 24px 0 16px;">Performance Trends</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <!-- Score Trend -->
+            <div style="background: white; border-radius: 8px; padding: 20px; border: 1px solid #e2e8f0;">
+                <h4 style="color: #1e40af; margin-bottom: 16px; font-size: 16px;">Score Progression</h4>
+                <div style="position: relative; height: 200px; display: flex; align-items: flex-end; gap: 12px; padding-top: 20px;">
+                    <!-- Simple bar chart -->
+                    <div style="flex: 1; text-align: center;">
+                        <div style="background: linear-gradient(to top, #3b82f6, #60a5fa); height: 66%; border-radius: 4px; margin-bottom: 8px;"></div>
+                        <div style="font-size: 11px; color: #64748b;">FY20</div>
+                        <div style="font-size: 13px; font-weight: 600; color: #1e40af;">3.3</div>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <div style="background: linear-gradient(to top, #3b82f6, #60a5fa); height: 70%; border-radius: 4px; margin-bottom: 8px;"></div>
+                        <div style="font-size: 11px; color: #64748b;">FY21</div>
+                        <div style="font-size: 13px; font-weight: 600; color: #1e40af;">3.5</div>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <div style="background: linear-gradient(to top, #3b82f6, #60a5fa); height: 76%; border-radius: 4px; margin-bottom: 8px;"></div>
+                        <div style="font-size: 11px; color: #64748b;">FY22</div>
+                        <div style="font-size: 13px; font-weight: 600; color: #1e40af;">3.8</div>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <div style="background: linear-gradient(to top, #16a34a, #4ade80); height: 82%; border-radius: 4px; margin-bottom: 8px;"></div>
+                        <div style="font-size: 11px; color: #64748b;">FY23</div>
+                        <div style="font-size: 13px; font-weight: 600; color: #16a34a;">4.1</div>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <div style="background: #e5e7eb; height: 50%; border-radius: 4px; margin-bottom: 8px; border: 2px dashed #9ca3af;"></div>
+                        <div style="font-size: 11px; color: #64748b;">FY24</div>
+                        <div style="font-size: 13px; font-weight: 600; color: #9ca3af;">TBD</div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px; padding: 12px; background: #f0f9ff; border-radius: 6px; font-size: 12px; color: #0c4a6e;">
+                    📈 <strong>Trend:</strong> Consistent improvement over 4 years (+24% total growth)
+                </div>
+            </div>
+
+            <!-- Rank History -->
+            <div style="background: white; border-radius: 8px; padding: 20px; border: 1px solid #e2e8f0;">
+                <h4 style="color: #1e40af; margin-bottom: 16px; font-size: 16px;">Rank History</h4>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 60px; font-size: 12px; color: #64748b;">FY 2023</div>
+                        <div style="flex: 1; background: #f1f5f9; border-radius: 4px; height: 32px; display: flex; align-items: center; padding: 0 12px;">
+                            <div style="background: #dbeafe; color: #1e40af; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 13px;">B+</div>
+                        </div>
+                        <div style="font-size: 11px; color: #16a34a;">↑ Promoted</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 60px; font-size: 12px; color: #64748b;">FY 2022</div>
+                        <div style="flex: 1; background: #f1f5f9; border-radius: 4px; height: 32px; display: flex; align-items: center; padding: 0 12px;">
+                            <div style="background: #dbeafe; color: #1e40af; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 13px;">B+</div>
+                        </div>
+                        <div style="font-size: 11px; color: #64748b;">→ Maintained</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 60px; font-size: 12px; color: #64748b;">FY 2021</div>
+                        <div style="flex: 1; background: #f1f5f9; border-radius: 4px; height: 32px; display: flex; align-items: center; padding: 0 12px;">
+                            <div style="background: #e0e7ff; color: #4338ca; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 13px;">B</div>
+                        </div>
+                        <div style="font-size: 11px; color: #64748b;">→ Maintained</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 60px; font-size: 12px; color: #64748b;">FY 2020</div>
+                        <div style="flex: 1; background: #f1f5f9; border-radius: 4px; height: 32px; display: flex; align-items: center; padding: 0 12px;">
+                            <div style="background: #e0e7ff; color: #4338ca; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 13px;">B</div>
+                        </div>
+                        <div style="font-size: 11px; color: #3b82f6;">New Hire</div>
+                    </div>
+                </div>
+                <div style="margin-top: 12px; padding: 12px; background: #f0fdf4; border-radius: 6px; font-size: 12px; color: #166534;">
+                    ⭐ <strong>Achievement:</strong> Promoted from SE1 to SE2 in FY 2023
+                </div>
+            </div>
+        </div>
+
+        <!-- Career Insights -->
+        <div style="margin-top: 24px; padding: 20px; background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); border-radius: 8px; border: 1px solid #e9d5ff;">
+            <h4 style="color: #6b21a8; margin-bottom: 12px; font-size: 16px;">💡 Career Insights & Recommendations</h4>
+            <ul style="margin-left: 20px; color: #7c3aed; font-size: 13px; line-height: 1.8;">
+                <li><strong>Consistent Performance:</strong> You've maintained B+ rank for 2 consecutive years, demonstrating reliability.</li>
+                <li><strong>Target Completion:</strong> 80-100% target achievement rate shows strong execution skills.</li>
+                <li><strong>Career Progression:</strong> Promoted to SE2 after 3 years. Continue current trajectory for SE3 consideration.</li>
+                <li><strong>Next Steps:</strong> To reach A rank, consider taking on higher difficulty (L3) targets and leadership initiatives.</li>
+            </ul>
         </div>
     </div>
 
-    <!-- Tab 3: Department Dashboard (Manager) - NEW in v1.7 -->
+    <!-- Tab 4: Department Dashboard (Manager) - NEW in v1.7 -->
     <div id="dept-dashboard" class="tab-content">
         <h2 style="color: #1e293b; margin-bottom: 24px;">Department Submission Dashboard</h2>
         
@@ -1133,6 +1816,93 @@
             </table>
         </div>
 
+        <h3 style="color: #1e293b; margin: 24px 0 16px;">All Employee Evaluations</h3>
+        
+        <div style="padding: 12px; background: #fef3c7; border-radius: 6px; margin-bottom: 16px; font-size: 13px; border-left: 4px solid #f59e0b;">
+            <strong style="color: #92400e;">HR Read-Only Access:</strong> Click any employee row to view their complete performance evaluation (target setting, self-review, and manager evaluation). All fields are read-only for HR Admin.
+        </div>
+
+        <div class="excel-table-container">
+            <table class="excel-table">
+                <thead>
+                    <tr>
+                        <th style="width: 5%">#</th>
+                        <th style="width: 15%">Employee ID</th>
+                        <th style="width: 20%">Employee Name</th>
+                        <th style="width: 12%">Grade</th>
+                        <th style="width: 18%">Department</th>
+                        <th style="width: 18%">Manager</th>
+                        <th style="width: 12%">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="cursor: pointer;" onclick="alert('Opening performance evaluation for John Doe (EMP12345)\n\n✓ Target Setting: Submitted\n✓ Self-Review: Completed\n✓ Manager Evaluation: Completed\n\nEmployee Score: 300\nManager Score: 382.5\nFinal Rank: B+\n\n(In real app, this would open a read-only modal showing the complete evaluation)')">
+                        <td>1</td>
+                        <td>EMP12345</td>
+                        <td><strong>John Doe</strong></td>
+                        <td>SE2</td>
+                        <td>Engineering</td>
+                        <td>Jane Smith</td>
+                        <td><span class="status-badge completed">✓ Completed</span></td>
+                    </tr>
+                    <tr style="cursor: pointer;" onclick="alert('Opening performance evaluation for Alice Johnson')">
+                        <td>2</td>
+                        <td>EMP23456</td>
+                        <td><strong>Alice Johnson</strong></td>
+                        <td>SE3</td>
+                        <td>Engineering</td>
+                        <td>Jane Smith</td>
+                        <td><span class="status-badge completed">✓ Completed</span></td>
+                    </tr>
+                    <tr style="cursor: pointer;" onclick="alert('Opening performance evaluation for Bob Martinez')">
+                        <td>3</td>
+                        <td>EMP34567</td>
+                        <td><strong>Bob Martinez</strong></td>
+                        <td>SE1</td>
+                        <td>Engineering</td>
+                        <td>Jane Smith</td>
+                        <td><span class="status-badge pending-review">Manager Review</span></td>
+                    </tr>
+                    <tr style="cursor: pointer;" onclick="alert('Opening performance evaluation for Carol White')">
+                        <td>4</td>
+                        <td>EMP45678</td>
+                        <td><strong>Carol White</strong></td>
+                        <td>MKT2</td>
+                        <td>Marketing</td>
+                        <td>Naoki Ito</td>
+                        <td><span class="status-badge completed">✓ Completed</span></td>
+                    </tr>
+                    <tr style="cursor: pointer;" onclick="alert('Opening performance evaluation for David Lee')">
+                        <td>5</td>
+                        <td>EMP56789</td>
+                        <td><strong>David Lee</strong></td>
+                        <td>SLS3</td>
+                        <td>Sales</td>
+                        <td>Keiko Suzuki</td>
+                        <td><span class="status-badge completed">✓ Completed</span></td>
+                    </tr>
+                    <tr style="cursor: pointer;" onclick="alert('Opening performance evaluation for Emma Davis')">
+                        <td>6</td>
+                        <td>EMP67890</td>
+                        <td><strong>Emma Davis</strong></td>
+                        <td>HR2</td>
+                        <td>HR & Admin</td>
+                        <td>Yuki Kobayashi</td>
+                        <td><span class="status-badge in-progress">Self-Review</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; gap: 12px; justify-content: center;">
+            <button class="btn btn-secondary">
+                📊 Export All Evaluations
+            </button>
+            <button class="btn btn-secondary">
+                🔍 Advanced Filter
+            </button>
+        </div>
+
         <div style="margin-top: 24px; padding: 20px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
             <h4 style="color: #92400e; margin-bottom: 8px;">📋 Fiscal Year Management</h4>
             <p style="font-size: 13px; color: #78350f; margin-bottom: 12px;">
@@ -1287,24 +2057,56 @@
         // Update role badge
         roleBadge.className = 'role-badge ' + role;
         
+        // Update tab visibility based on role
+        const employeeTabs = document.querySelectorAll('.employee-only');
+        const managerTabs = document.querySelectorAll('.manager-only');
+        const hradminTabs = document.querySelectorAll('.hradmin-only');
+        
         if (role === 'employee') {
             roleText.innerHTML = '👤 Employee';
             roleContext.textContent = 'Your self-evaluation';
             stateText.textContent = 'Draft';
             stateBadge.className = 'state-badge draft';
-            alert('✓ Switched to Employee role\n\nYou can now:\n• Edit your self-evaluation (blue sections)\n• View manager feedback (read-only)\n• Submit your review');
+            
+            // Show employee tabs, hide others
+            employeeTabs.forEach(tab => tab.style.display = 'block');
+            managerTabs.forEach(tab => tab.style.display = 'none');
+            hradminTabs.forEach(tab => tab.style.display = 'none');
+            
+            // Switch to Personal Dashboard
+            showTab('personal-dashboard');
+            
+            alert('✓ Switched to Employee role\n\nYou can now:\n• Edit your self-evaluation (blue sections)\n• View manager feedback (read-only)\n• Access your Personal Dashboard with historical performance\n• Submit your review');
         } else if (role === 'manager') {
             roleText.innerHTML = '👔 Manager';
             roleContext.textContent = 'Reviewing: Your Team (12 direct reports)';
             stateText.textContent = 'Manager Review';
             stateBadge.className = 'state-badge in-review';
-            alert('✓ Switched to Manager role\n\nYou can now:\n• Review employee submissions\n• Edit manager evaluation sections (orange)\n• View department dashboard\n• Submit consolidated reviews to HR');
+            
+            // Show manager tabs, hide employee-only and hradmin tabs
+            employeeTabs.forEach(tab => tab.style.display = 'none');
+            managerTabs.forEach(tab => tab.style.display = 'block');
+            hradminTabs.forEach(tab => tab.style.display = 'none');
+            
+            // Switch to Department Dashboard
+            showTab('dept-dashboard');
+            
+            alert('✓ Switched to Manager role\n\nYou can now:\n• Review employee submissions\n• Edit manager evaluation sections (orange)\n• View Department Dashboard with team statistics\n• Submit consolidated reviews to HR');
         } else if (role === 'hradmin') {
             roleText.innerHTML = '⚙️ HR Admin';
             roleContext.textContent = 'Company-Wide Access (Read-Only)';
             stateText.textContent = 'HR Consolidation';
             stateBadge.className = 'state-badge complete';
-            alert('✓ Switched to HR Admin role\n\nYou can now:\n• View all reviews (read-only)\n• Access HR consolidation dashboard\n• Generate board reports\n• Manage fiscal years and system config\n• View audit logs');
+            
+            // Show HR admin tabs, hide employee-only and manager-only tabs
+            employeeTabs.forEach(tab => tab.style.display = 'none');
+            managerTabs.forEach(tab => tab.style.display = 'none');
+            hradminTabs.forEach(tab => tab.style.display = 'block');
+            
+            // Switch to HR Dashboard
+            showTab('hr-dashboard');
+            
+            alert('✓ Switched to HR Admin role\n\nYou can now:\n• View all reviews (read-only)\n• Access HR Consolidation Dashboard\n• Generate board reports\n• Manage fiscal years and system config\n• View audit logs');
         }
         
         // Log role switch (in real app, this would call API)
