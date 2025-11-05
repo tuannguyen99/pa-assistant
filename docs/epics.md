@@ -222,6 +222,42 @@ So that the performance review process matches company policy and grade-specific
 
 **Prerequisites:** Story 1.2, Story 1.9
 
+**Story 1.13: Workflow State Indicator Component**
+
+As a user,
+I want to see my current position in the review workflow and available next actions,
+So that I understand where I am in the process and what I can do next.
+
+**Acceptance Criteria:**
+1. State badge displays current workflow state (Draft, Submitted to Manager, Manager Review, Archived, etc.)
+2. Visual timeline shows completed/current/upcoming phases in the 9-step workflow
+3. Context-aware action buttons for state transitions (Submit to Manager, Submit to HR)
+4. Hover tooltips explain state meaning and next steps
+5. Color-coded badges: gray=draft, blue=submitted, orange=in review, green=complete, purple=archived
+6. Notifications trigger on state transitions
+7. Audit trail link for viewing state change history
+8. Implementation follows UX spec Section 6.1 Workflow State Indicator
+
+**Prerequisites:** Story 1.4, Story 1.5, Story 1.6
+
+**Story 1.14: Active Role Header Component**
+
+As a user with multiple roles,
+I want a clear UI header showing my active role and ability to switch contexts,
+So that I always know whether I'm acting as an employee, manager, or HR admin.
+
+**Acceptance Criteria:**
+1. Header displays active role badge and context label (e.g., "Acting as: Reviewer — Reviewing: Akira Sato")
+2. Role switcher dropdown visible only for multi-role users
+3. Role switch updates UI permissions immediately and logs to audit trail
+4. Toast notification confirms role change with message
+5. Color-coded visual feedback: blue=employee, orange=manager, gray=HR admin
+6. Microcopy explains permission changes when switching
+7. All role switches recorded with timestamp and context in audit logs
+8. Implementation follows [ui-role-header.md](./ui-role-header.md) and UX spec Section 6.1 Active Role Header Component
+
+**Prerequisites:** Story 1.10, Story 1.11
+
 ## Epic 2: Dashboards, Scoring & Production Readiness
 
 **Expanded Goal:** Complete the user experience with dashboards and production-grade features that enable full-scale deployment and monitoring of the performance review process.
@@ -308,6 +344,45 @@ So that the system can handle 200 concurrent users reliably.
 5. Monitoring and logging configured
 
 **Prerequisites:** Story 2.3
+
+**Story 2.5: Department Submission Dashboard (for Managers)**
+
+As a manager,
+I want to track completion status across all my direct reports and submit consolidated department data to HR,
+So that I can manage my team's review process efficiently and meet submission deadlines.
+
+**Acceptance Criteria:**
+1. Employee list table shows all direct reports with completion status
+2. Aggregation summary displays department-wide statistics (average score, rank distribution, completion %)
+3. "Submit All to HR" button enabled only when all reviews complete
+4. Filter/sort controls for state, name, score, completion status
+5. Click employee row to open individual evaluation
+6. Export department summary for offline review
+7. Confirmation dialog before bulk submission to HR
+8. Real-time status updates as employees/managers complete reviews
+9. Implementation follows UX spec Section 6.1 Department Submission Dashboard
+
+**Prerequisites:** Story 2.1, Story 1.6
+
+**Story 2.6: HR Consolidation Dashboard**
+
+As an HR Admin,
+I want a company-wide view of all department submissions with consolidation and fiscal year management tools,
+So that I can prepare board presentations and manage the review cycle lifecycle.
+
+**Acceptance Criteria:**
+1. Department list shows all departments with submission status and aggregated metrics
+2. Company-wide statistics: total employees reviewed, rank distribution chart, average scores by department
+3. Board report generator creates presentation materials with one click
+4. Fiscal year controls: create new FY, close current FY with confirmation and reason input
+5. Filter/export tools for department/state filtering and data export
+6. Drill-down navigation: Department → Manager → Individual Review
+7. Real-time validation of calculation accuracy across all reviews
+8. Flagging of outliers or data quality issues
+9. Audit log viewing for all administrative actions
+10. Implementation follows UX spec Section 6.1 HR Consolidation Dashboard
+
+**Prerequisites:** Story 2.1, Story 1.12, Story 2.5
 
 ---
 
