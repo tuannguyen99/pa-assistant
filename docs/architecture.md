@@ -603,23 +603,23 @@ The review process follows a strict state machine with role-based transitions:
 | `manager_eval_in_progress` | `manager_eval_complete` | Manager | All targets re-rated, feedback per target, overall summary | Calculate preliminary score |
 | `manager_eval_complete` | `submitted_to_hr_final` | Manager | Final score calculated, rank assigned | Notify HR Admin, add to HR queue |
 | `submitted_to_hr_final` | `hr_review_complete` | HR Admin | Data integrity check passed | Mark as ready for board |
-| `hr_review_complete` | `board_approved` | HR Admin | Board meeting occurred | Notify manager to schedule feedback session |
+| `hr_review_complete` | `board_approved` | GD/BOM | Board meeting occurred | Notify manager to schedule feedback session |
 | `board_approved` | `feedback_delivered` | Manager | Feedback session completed | Log delivery timestamp, notify employee |
 | `feedback_delivered` | `archived` | HR Admin | Fiscal year closed | Set `archived=true`, prevent modifications (except HR flags) |
 
 **State Permissions:**
 
-| State | Employee | Manager | HR Admin |
-|-------|----------|---------|----------|
-| `self_eval_draft` | Read/Write | Read | Read |
-| `self_eval_submitted` | Read | Read | Read |
-| `manager_eval_in_progress` | Read | Read/Write | Read |
-| `manager_eval_complete` | Read | Read | Read |
-| `submitted_to_hr_final` | Read | Read | Read/Write (minimal) |
-| `hr_review_complete` | Read | Read | Read |
-| `board_approved` | Read | Read | Read |
-| `feedback_delivered` | Read | Read | Read |
-| `archived` | Read | Read | Read + Flag issues |
+| State | Employee | Manager | HR Admin | GD/BOM |
+|-------|----------|---------|----------|--------|
+| `self_eval_draft` | Read/Write | Read | Read | Read |
+| `self_eval_submitted` | Read | Read | Read | Read |
+| `manager_eval_in_progress` | Read | Read/Write | Read | Read |
+| `manager_eval_complete` | Read | Read | Read | Read |
+| `submitted_to_hr_final` | Read | Read | Read/Write (minimal) | Read |
+| `hr_review_complete` | Read | Read | Read | Read/Write (approve) |
+| `board_approved` | Read | Read | Read | Read |
+| `feedback_delivered` | Read | Read | Read | Read |
+| `archived` | Read | Read | Read + Flag issues | Read |
 
 **Implementation Example:**
 
@@ -730,7 +730,7 @@ export class ReviewStateMachine {
       [REVIEW_STATES.MANAGER_EVAL_COMPLETE]: ['manager'],
       [REVIEW_STATES.SUBMITTED_TO_HR_FINAL]: ['manager'],
       [REVIEW_STATES.HR_REVIEW_COMPLETE]: ['hr_admin'],
-      [REVIEW_STATES.BOARD_APPROVED]: ['hr_admin'],
+      [REVIEW_STATES.BOARD_APPROVED]: ['general_director', 'board_manager'],
       [REVIEW_STATES.FEEDBACK_DELIVERED]: ['manager'],
       [REVIEW_STATES.ARCHIVED]: ['hr_admin']
     }
@@ -805,7 +805,7 @@ export class ReviewStateMachine {
         [REVIEW_STATES.MANAGER_EVAL_COMPLETE]: ['manager'],
         [REVIEW_STATES.SUBMITTED_TO_HR_FINAL]: ['manager'],
         [REVIEW_STATES.HR_REVIEW_COMPLETE]: ['hr_admin'],
-        [REVIEW_STATES.BOARD_APPROVED]: ['hr_admin'],
+        [REVIEW_STATES.BOARD_APPROVED]: ['general_director', 'board_manager'],
         [REVIEW_STATES.FEEDBACK_DELIVERED]: ['manager'],
         [REVIEW_STATES.ARCHIVED]: ['hr_admin']
       }
@@ -870,7 +870,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 │    username: string (UQ) │ ◄─── Credentials auth
 │    passwordHash: string  │
 │    fullName: string      │
-│    roles: string[]       │ ◄─── ["employee","manager","hr_admin"]
+│    roles: string[]       │ ◄─── ["employee","manager","hr_admin","general_director","board_manager"]
 │                          │
 │    ldapDN: string (UQ)   │ ◄─── Future LDAP
 │    ldapSyncedAt: date    │

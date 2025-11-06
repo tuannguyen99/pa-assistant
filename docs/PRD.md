@@ -28,7 +28,7 @@ The core problem is lack of structured support. Excel provides no guidance for w
 ### Functional Requirements
 
 **User Management & Authentication**
-- **FR001**: System shall support three user roles (Employee, Manager, HR Admin) with role-based access control
+- **FR001**: System shall support five user roles (Employee, Manager, HR Admin, General Director, Board of Manager) with role-based access control
 
 > **Implementation Reference:** See [rbac-spec.md](./rbac-spec.md) for detailed RBAC data model, audit schema, and API contracts. See [ui-role-header.md](./ui-role-header.md) for UI component implementation guidance.
 
@@ -36,7 +36,7 @@ The core problem is lack of structured support. Excel provides no guidance for w
 
 Many users will hold more than one role during the review process and the system must make this explicit and easy to manage. The PRD requires the following behaviours:
 
-- Multi-role accounts: A single user account may be assigned multiple roles (Employee, Manager, HR Admin). Role assignments must be editable by HR Admins.
+- Multi-role accounts: A single user account may be assigned multiple roles (Employee, Manager, HR Admin, General Director, Board of Manager). Role assignments must be editable by HR Admins.
 - Active-role indicator: The UI shall display the active role and context at the top of the page (e.g., "Acting as: Reviewer — Reviewing: Akira Sato" or "Acting as: Reviewee — Your self-evaluation").
 - Reviewer scoping: Reviewer permissions are scoped to explicit manager→direct-report assignments. When a manager is a reviewee, the manager's higher-level manager becomes the reviewer by default. HR may reassign reviewers for delegation or temporary reorgs; these changes shall be recorded in the audit log.
 - Permission boundaries: Reviewer actions (viewing/editing others' evaluations, accepting AI-synthesized content) are allowed only for records assigned to the reviewer. HR Admins may have broader visibility but any edits/approvals performed by HR shall be clearly flagged and auditable.
@@ -73,9 +73,10 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 - `archived` - Fiscal year closed (read-only)
 
 **Target Setting Workflow**
-- **FR004**: Employees shall create 3-5 performance targets with task description, KPI, weight percentage (auto-validated to total 100%), and difficulty level (L1-L3), with ability to modify targets during self-evaluation (modifications flagged and sent to manager for review)
-- **FR005**: Managers shall review and approve employee targets with ability to request revisions; optional 1-on-1 meeting for target discussion
-- **FR005a**: Managers shall submit consolidated department targets to HR for alignment review and company-wide visibility
+- **FR004**: Employees shall create 3-5 performance targets with task description, KPI, weight percentage (auto-validated to total 100%), and difficulty level (L1-L3), with ability to modify targets at mid-year and during self-evaluation (modifications flagged and sent to manager for review)
+- **FR005**: Managers shall review employee targets with ability to send feedback and request revisions, then submit department targets to HR for alignment verification
+- **FR005a**: HR shall review all department targets to verify quality and alignment with company targets, with ability to send feedback to managers for employee updates
+- **FR005b**: System shall support mid-year target setting period where all employees can update their targets following the same review workflow (employee → manager → HR)
 - **FR006**: System shall store approved targets for the entire review cycle year
 
 **Performance Evaluation Workflow**
@@ -85,7 +86,7 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 - **FR010**: Managers shall complete evaluations viewing employee self-review side-by-side, with AI synthesis of multiple inputs (employee review + manager comments) clearly marked as "AI-assisted"; optional 1-on-1 review meeting
 - **FR010a**: Managers shall submit completed department evaluations to HR with scores and ranks for company-wide consolidation
 - **FR010b**: HR Admin shall consolidate all department submissions, verify calculations, and prepare company-wide performance reports for Board review
-- **FR010c**: System shall support Board of Managers decision meeting workflow with final approval state transition
+- **FR010c**: General Director and Board of Manager shall hold decision meeting to review company-wide data and approve final performance decisions (only GD/BOM can approve performance)
 - **FR010d**: Managers shall deliver final feedback to employees in 1-on-1 meetings, communicating performance rank and board decisions
 - **FR010e**: HR Admin shall close fiscal year after feedback delivery, marking all reviews as archived (read-only) with historical data preservation
 
