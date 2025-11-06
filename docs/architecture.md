@@ -433,254 +433,149 @@ pa-assistant/
 
 **User Request Flow (Example: Employee submits self-review)**
 
-```
-┌─────────┐
-│ Browser │
-└────┬────┘
-     │ 1. POST /api/reviews/:id
-     │    Authorization: Bearer <JWT>
-     │
-┌────▼─────────────────────────────────────────┐
-│ Next.js Middleware                           │
-│ - Extract JWT token                          │
-│ - Verify authentication                      │
-│ - Check role permissions                     │
-└────┬─────────────────────────────────────────┘
-     │ 2. Authorized request
-     │
-┌────▼─────────────────────────────────────────┐
-│ API Route Handler                            │
-│ /api/reviews/[id]/route.ts                   │
-│ - Validate request body (Zod)                │
-│ - Business logic                             │
-└────┬─────────────────────────────────────────┘
-     │ 3. Call services
-     │
-┌────▼─────────────────────────────────────────┐
-│ Service Layer                                │
-│ - AuthService.canAccessReview()              │
-│ - ScoreCalculator.calculate()                │
-│ - AuditLogger.log()                          │
-└────┬─────────────────────────────────────────┘
-     │ 4. Database operations
-     │
-┌────▼─────────────────────────────────────────┐
-│ Prisma ORM                                   │
-│ - Type-safe queries                          │
-│ - Transaction support                        │
-└────┬─────────────────────────────────────────┘
-     │ 5. SQL queries
-     │
-┌────▼─────────────────────────────────────────┐
-│ SQLite Database                              │
-│ - Atomic writes                              │
-│ - ACID compliance                            │
-└────┬─────────────────────────────────────────┘
-     │ 6. Response
-     │
-┌────▼─────────────────────────────────────────┐
-│ API Response (JSON)                          │
-│ { success: true, data: {...} }               │
-└────┬─────────────────────────────────────────┘
-     │ 7. Return to client
-     │
-┌────▼────┐
-│ Browser │
-│ Update  │
-│ UI      │
-└─────────┘
+```mermaid
+sequenceDiagram
+    actor Browser
+    participant Middleware as Next.js Middleware
+    participant API as API Route Handler<br/>/api/reviews/[id]/route.ts
+    participant Service as Service Layer
+    participant Prisma as Prisma ORM
+    participant DB as SQLite Database
+
+    Browser->>Middleware: 1. POST /api/reviews/:id<br/>Authorization: Bearer <JWT>
+    Middleware->>Middleware: Extract JWT token<br/>Verify authentication<br/>Check role permissions
+    
+    Middleware->>API: 2. Authorized request
+    API->>API: Validate request body (Zod)<br/>Business logic
+    
+    API->>Service: 3. Call services
+    Service->>Service: AuthService.canAccessReview()<br/>ScoreCalculator.calculate()<br/>AuditLogger.log()
+    
+    Service->>Prisma: 4. Database operations
+    Prisma->>Prisma: Type-safe queries<br/>Transaction support
+    
+    Prisma->>DB: 5. SQL queries
+    DB->>DB: Atomic writes<br/>ACID compliance
+    
+    DB-->>Prisma: Query results
+    Prisma-->>Service: Data returned
+    Service-->>API: 6. Response
+    API-->>Middleware: JSON response
+    Middleware-->>Browser: 7. { success: true, data: {...} }
+    Browser->>Browser: Update UI
 ```
 
 ### Multi-Role Access Control Flow
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                   User Account (Single Login)               │
-│   email: alice@company.com                                  │
-│   roles: ["employee", "manager", "hr_admin"]                │
-└───────────────────┬─────────────────────────────────────────┘
-                    │
-        ┌───────────┴────────────┬────────────────┐
-        │                        │                │
-┌───────▼──────┐      ┌──────────▼───────┐   ┌──▼──────────┐
-│  As Employee │      │   As Manager     │   │ As HR Admin │
-│              │      │                  │   │             │
-│ - Own review │      │ - Review direct  │   │ - View all  │
-│ - Set targets│      │   reports        │   │   reviews   │
-│ - Self-eval  │      │ - Approve targets│   │ - Config    │
-└──────────────┘      │ - Give feedback  │   │   system    │
-                      │ - Submit to HR   │   │ - Reports   │
-                      └──────────────────┘   └─────────────┘
-                               │
-                               │ Can delegate via
-                               │ RoleAssignment
-                               │
-                      ┌────────▼────────────┐
-                      │  Temporary Reviewer │
-                      │  (Bob covers Alice) │
-                      │  effectiveFrom:     │
-                      │    2025-02-01       │
-                      │  effectiveTo:       │
-                      │    2025-05-31       │
-                      └─────────────────────┘
+```mermaid
+graph TD
+    User["User Account (Single Login)<br/>email: alice@company.com<br/>roles: ['employee', 'manager', 'hr_admin']"]
+    
+    Employee["As Employee<br/>- Own review<br/>- Set targets<br/>- Self-eval"]
+    Manager["As Manager<br/>- Review direct reports<br/>- Approve targets<br/>- Give feedback<br/>- Submit to HR"]
+    HRAdmin["As HR Admin<br/>- View all reviews<br/>- Config system<br/>- Reports"]
+    
+    Delegate["Temporary Reviewer<br/>(Bob covers Alice)<br/>effectiveFrom: 2025-02-01<br/>effectiveTo: 2025-05-31"]
+    
+    User --> Employee
+    User --> Manager
+    User --> HRAdmin
+    Manager -.->|Can delegate via<br/>RoleAssignment| Delegate
 ```
 
 ### AI Integration Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      User Interface                         │
-│  Employee writing self-evaluation result explanation        │
-└───────────────────┬─────────────────────────────────────────┘
-                    │ Clicks "Get AI Help"
-                    │
-┌───────────────────▼─────────────────────────────────────────┐
-│                  AIService                                  │
-│  - Check mode: web or local                                 │
-│  - Load prompt template from database                       │
-│  - Combine with user context                                │
-└───────────────────┬─────────────────────────────────────────┘
-                    │
-        ┌───────────┴────────────┐
-        │                        │
-┌───────▼──────────┐   ┌─────────▼────────────┐
-│  Web-Based Mode  │   │  Local Ollama Mode   │
-│                  │   │                      │
-│ 1. Generate      │   │ 1. Generate prompt   │
-│    combined      │   │                      │
-│    prompt        │   │ 2. Call Ollama API   │
-│                  │   │    POST /api/generate│
-│ 2. Display in    │   │                      │
-│    modal for     │   │ 3. Get response      │
-│    copy/paste    │   │                      │
-│                  │   │ 4. Return result     │
-│ 3. User copies   │   │                      │
-│    to ChatGPT/   │   └──────────────────────┘
-│    Claude        │
-│                  │
-│ 4. User pastes   │
-│    result back   │
-│                  │
-└──────────────────┘
-        │
-        │ Both modes
-        │
-┌───────▼─────────────────────────────────────────────────────┐
-│  Display AI-generated content in modal                      │
-│  - Side-by-side comparison (original vs AI)                 │
-│  - "AI-assisted" badge                                      │
-│  - Full edit capability                                     │
-│  - Accept/Reject buttons                                    │
-└──────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    UI["User Interface<br/>Employee writing self-evaluation<br/>result explanation"]
+    AIService["AIService<br/>- Check mode: web or local<br/>- Load prompt template from database<br/>- Combine with user context"]
+    
+    WebMode["Web-Based Mode<br/>1. Generate combined prompt<br/>2. Display in modal for copy/paste<br/>3. User copies to ChatGPT/Claude<br/>4. User pastes result back"]
+    
+    LocalMode["Local Ollama Mode<br/>1. Generate prompt<br/>2. Call Ollama API (POST /api/generate)<br/>3. Get response<br/>4. Return result"]
+    
+    Display["Display AI-generated content in modal<br/>- Side-by-side comparison (original vs AI)<br/>- 'AI-assisted' badge<br/>- Full edit capability<br/>- Accept/Reject buttons"]
+    
+    UI -->|Clicks 'Get AI Help'| AIService
+    AIService --> WebMode
+    AIService --> LocalMode
+    WebMode --> Display
+    LocalMode --> Display
 ```
 
 ### Security Layers
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│ Layer 1: Network Security                                   │
-│ - HTTPS/TLS encryption for all traffic                      │
-│ - Secure cookie flags (HttpOnly, Secure, SameSite)         │
-└───────────────────────┬─────────────────────────────────────┘
-                        │
-┌───────────────────────▼─────────────────────────────────────┐
-│ Layer 2: Authentication                                     │
-│ - NextAuth.js with JWT tokens (8-hour expiration)           │
-│ - bcrypt password hashing (12 rounds)                       │
-│ - Session management                                        │
-└───────────────────────┬─────────────────────────────────────┘
-                        │
-┌───────────────────────▼─────────────────────────────────────┐
-│ Layer 3: Authorization (RBAC)                               │
-│ - Middleware: Route-level permission checks                 │
-│ - AuthService: Resource-level access control                │
-│ - Multi-role support with context switching                 │
-└───────────────────────┬─────────────────────────────────────┘
-                        │
-┌───────────────────────▼─────────────────────────────────────┐
-│ Layer 4: Data Protection                                    │
-│ - Row-level permissions via Prisma queries                  │
-│ - Archived review read-only enforcement                     │
-│ - Field-level access control (employee vs manager fields)   │
-└───────────────────────┬─────────────────────────────────────┘
-                        │
-┌───────────────────────▼─────────────────────────────────────┐
-│ Layer 5: Audit & Compliance                                 │
-│ - All sensitive operations logged to AuditEntry             │
-│ - Immutable audit trail (append-only)                       │
-│ - Role switches tracked with timestamp                      │
-└──────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    Layer1["Layer 1: Network Security<br/>- HTTPS/TLS encryption for all traffic<br/>- Secure cookie flags (HttpOnly, Secure, SameSite)"]
+    
+    Layer2["Layer 2: Authentication<br/>- NextAuth.js with JWT tokens (8-hour expiration)<br/>- bcrypt password hashing (12 rounds)<br/>- Session management"]
+    
+    Layer3["Layer 3: Authorization (RBAC)<br/>- Middleware: Route-level permission checks<br/>- AuthService: Resource-level access control<br/>- Multi-role support with context switching"]
+    
+    Layer4["Layer 4: Data Protection<br/>- Row-level permissions via Prisma queries<br/>- Archived review read-only enforcement<br/>- Field-level access control (employee vs manager fields)"]
+    
+    Layer5["Layer 5: Audit & Compliance<br/>- All sensitive operations logged to AuditEntry<br/>- Immutable audit trail (append-only)<br/>- Role switches tracked with timestamp"]
+    
+    Layer1 --> Layer2
+    Layer2 --> Layer3
+    Layer3 --> Layer4
+    Layer4 --> Layer5
 ```
 
 ### Review Workflow State Machine
 
 The review process follows a strict state machine with role-based transitions:
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         REVIEW WORKFLOW STATE MACHINE                       │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-                    ┌──────────────────────┐
-                    │  SELF_EVAL_DRAFT     │ ◄─── Initial State
-                    │  (Employee edits)    │
-                    └──────────┬───────────┘
-                               │ Employee: "Submit Self-Evaluation"
-                               │ Validation: All targets rated, result explanations provided
-                               ▼
-                    ┌──────────────────────┐
-                    │ SELF_EVAL_SUBMITTED  │
-                    │  (Read-only)         │
-                    └──────────┬───────────┘
-                               │ System: Auto-transition
-                               │ Action: Notify manager
-                               ▼
-                    ┌──────────────────────────┐
-                    │ MANAGER_EVAL_IN_PROGRESS │
-                    │  (Manager edits)         │
-                    └──────────┬───────────────┘
-                               │ Manager: "Submit Manager Evaluation"
-                               │ Validation: All targets rated, feedback provided, score calculated
-                               ▼
-                    ┌──────────────────────┐
-                    │ MANAGER_EVAL_COMPLETE│
-                    │  (Read-only)         │
-                    └──────────┬───────────┘
-                               │ Manager: "Submit to HR"
-                               │ Action: Calculate final score & rank
-                               ▼
-                    ┌──────────────────────┐
-                    │ SUBMITTED_TO_HR_FINAL│
-                    │  (HR Admin reviews)  │
-                    └──────────┬───────────┘
-                               │ HR Admin: "Mark as HR Complete"
-                               │ Validation: Review verified, no data issues
-                               ▼
-                    ┌──────────────────────┐
-                    │  HR_REVIEW_COMPLETE  │
-                    │  (Ready for board)   │
-                    └──────────┬───────────┘
-                               │ HR Admin: "Mark as Board Approved"
-                               │ (After board meeting)
-                               ▼
-                    ┌──────────────────────┐
-                    │   BOARD_APPROVED     │
-                    │  (Ready to deliver)  │
-                    └──────────┬───────────┘
-                               │ Manager: "Deliver Feedback"
-                               │ Action: Feedback session with employee
-                               ▼
-                    ┌──────────────────────┐
-                    │  FEEDBACK_DELIVERED  │
-                    │  (Review complete)   │
-                    └──────────┬───────────┘
-                               │ HR Admin: "Archive Review"
-                               │ Action: Close fiscal year, mark read-only
-                               ▼
-                    ┌──────────────────────┐
-                    │      ARCHIVED        │ ◄─── Final State
-                    │  (Read-only forever) │      (NFR007 Compliance)
-                    └──────────────────────┘
+```mermaid
+stateDiagram-v2
+    [*] --> SELF_EVAL_DRAFT: Initial State
+    
+    SELF_EVAL_DRAFT: SELF_EVAL_DRAFT
+    SELF_EVAL_DRAFT: (Employee edits)
+    
+    SELF_EVAL_SUBMITTED: SELF_EVAL_SUBMITTED
+    SELF_EVAL_SUBMITTED: (Read-only)
+    
+    MANAGER_EVAL_IN_PROGRESS: MANAGER_EVAL_IN_PROGRESS
+    MANAGER_EVAL_IN_PROGRESS: (Manager edits)
+    
+    MANAGER_EVAL_COMPLETE: MANAGER_EVAL_COMPLETE
+    MANAGER_EVAL_COMPLETE: (Read-only)
+    
+    SUBMITTED_TO_HR_FINAL: SUBMITTED_TO_HR_FINAL
+    SUBMITTED_TO_HR_FINAL: (HR Admin reviews)
+    
+    HR_REVIEW_COMPLETE: HR_REVIEW_COMPLETE
+    HR_REVIEW_COMPLETE: (Ready for board)
+    
+    BOARD_APPROVED: BOARD_APPROVED
+    BOARD_APPROVED: (Ready to deliver)
+    
+    FEEDBACK_DELIVERED: FEEDBACK_DELIVERED
+    FEEDBACK_DELIVERED: (Review complete)
+    
+    ARCHIVED: ARCHIVED
+    ARCHIVED: (Read-only forever)
+    ARCHIVED: NFR007 Compliance
+    
+    SELF_EVAL_DRAFT --> SELF_EVAL_SUBMITTED: Employee: Submit Self-Evaluation\nValidation: All targets rated,\nresult explanations provided
+    
+    SELF_EVAL_SUBMITTED --> MANAGER_EVAL_IN_PROGRESS: System: Auto-transition\nAction: Notify manager
+    
+    MANAGER_EVAL_IN_PROGRESS --> MANAGER_EVAL_COMPLETE: Manager: Submit Manager Evaluation\nValidation: All targets rated,\nfeedback provided, score calculated
+    
+    MANAGER_EVAL_COMPLETE --> SUBMITTED_TO_HR_FINAL: Manager: Submit to HR\nAction: Calculate final score & rank
+    
+    SUBMITTED_TO_HR_FINAL --> HR_REVIEW_COMPLETE: HR Admin: Mark as HR Complete\nValidation: Review verified,\nno data issues
+    
+    HR_REVIEW_COMPLETE --> BOARD_APPROVED: HR Admin: Mark as Board Approved\n(After board meeting)
+    
+    BOARD_APPROVED --> FEEDBACK_DELIVERED: Manager: Deliver Feedback\nAction: Feedback session with employee
+    
+    FEEDBACK_DELIVERED --> ARCHIVED: HR Admin: Archive Review\nAction: Close fiscal year,\nmark read-only
+    
+    ARCHIVED --> [*]: Final State
 ```
 
 **State Transition Rules:**
@@ -1151,113 +1046,57 @@ User (reviewer) ──< RoleAssignment >── User (reviewee)
 
 ### Data Flow: Review Lifecycle
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    REVIEW LIFECYCLE DATA FLOW                           │
-└─────────────────────────────────────────────────────────────────────────┘
+```mermaid
+sequenceDiagram
+    participant Employee
+    participant Manager
+    participant System
+    participant HRAdmin as HR Admin
+    participant TargetDB as TargetSetting DB
+    participant ReviewDB as Review DB
+    participant AuditDB as AuditEntry DB
 
-STEP 1: TARGET SETTING (Prior Year End)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-┌──────────┐      CREATE      ┌─────────────────┐
-│ Employee │ ─────────────────>│ TargetSetting   │
-└──────────┘                   │ status: draft   │
-                               │ targets: [3-5]  │
-                               └────────┬────────┘
-                                        │ SUBMIT
-                                        ▼
-┌──────────┐    REVIEW/APPROVE  ┌─────────────────┐
-│ Manager  │ <─────────────────│ TargetSetting   │
-└──────────┘                   │ status: approved│
-     │                         └─────────────────┘
-     │ APPROVE
-     ▼
-┌─────────────────┐
-│ TargetSetting   │
-│ status: complete│ ──┐
-└─────────────────┘   │
-                      │
-STEP 2: REVIEW CYCLE (Year End)      │
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━       │
-                      │               │
-                      │  COPY TARGETS │
-                      ▼               │
-┌──────────┐    CREATE/COPY    ┌──────────────────┐
-│  System  │ ─────────────────>│ Review           │
-└──────────┘                   │ status: draft    │
-                               │ employeeTargets: │
-                               │  (from approved  │◄┘
-                               │   TargetSetting) │
-                               └────────┬─────────┘
-                                        │
-┌──────────┐    SELF-EVALUATE  ┌───────▼──────────┐
-│ Employee │ ─────────────────>│ Review           │
-└──────────┘                   │ • Rate targets   │
-                               │ • Write result   │
-                               │   explanations   │
-                               │ • Update job desc│
-                               │ • Career path    │
-                               └────────┬─────────┘
-                                        │ SUBMIT
-                                        ▼
-┌──────────┐  MANAGER EVALUATE ┌─────────────────┐
-│ Manager  │ <────────────────│ Review          │
-└────┬─────┘                  │ status:         │
-     │                        │ manager_eval_   │
-     │                        │ in_progress     │
-     │                        └────────┬────────┘
-     │ EVALUATE                        │
-     ├────────────────────────────────►│
-     │ • Re-rate targets               │
-     │ • Write feedback per target     │
-     │ • Overall summary               │
-     │ • Final score calculated        │
-     │                        ┌────────▼────────┐
-     │                        │ Review          │
-     │                        │ status:         │
-     │                        │ manager_eval_   │
-     │ SUBMIT TO HR           │ complete        │
-     └───────────────────────>│ finalScore: 245 │
-                              │ finalRank: "A"  │
-                              └────────┬────────┘
-                                       │
-STEP 3: HR REVIEW & BOARD APPROVAL    │
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━    │
-                              ┌────────▼────────┐
-┌──────────┐   REVIEW DATA   │ Review          │
-│ HR Admin │ <───────────────│ status:         │
-└────┬─────┘                 │ submitted_to_   │
-     │                       │ hr_final        │
-     │ MARK HR COMPLETE      └────────┬────────┘
-     └──────────────────────>         │
-                              ┌────────▼────────┐
-┌──────────┐   BOARD MEETING │ Review          │
-│ HR Admin │ ───────────────>│ status:         │
-└──────────┘   MARK APPROVED │ board_approved  │
-                              └────────┬────────┘
-                                       │
-STEP 4: FEEDBACK DELIVERY              │
-━━━━━━━━━━━━━━━━━━━━━━━━━━            │
-                              ┌────────▼────────┐
-┌──────────┐   FEEDBACK      │ Review          │
-│ Manager  │ ───────────────>│ status:         │
-└──────────┘   SESSION       │ feedback_       │
-                              │ delivered       │
-                              └────────┬────────┘
-                                       │
-STEP 5: ARCHIVAL (FY CLOSE)            │
-━━━━━━━━━━━━━━━━━━━━━━━━━━            │
-                              ┌────────▼────────┐
-┌──────────┐   CLOSE FY      │ Review          │
-│ HR Admin │ ───────────────>│ status: archived│
-└──────────┘                 │ archived: true  │
-                              │ archivedAt: ... │
-                              │ archivedBy: ... │
-                              └─────────────────┘
-                                       │
-                              READ-ONLY FOREVER
-                              (NFR007 Compliance)
-
-AUDIT LOG: Every state transition logged to AuditEntry
+    Note over Employee,TargetDB: STEP 1: TARGET SETTING (Prior Year End)
+    
+    Employee->>TargetDB: CREATE Target Setting<br/>(status: draft, targets: 3-5)
+    Employee->>Manager: SUBMIT for approval
+    Manager->>TargetDB: REVIEW/APPROVE
+    TargetDB->>TargetDB: status: approved → complete
+    
+    Note over System,ReviewDB: STEP 2: REVIEW CYCLE (Year End)
+    
+    System->>TargetDB: COPY approved targets
+    System->>ReviewDB: CREATE Review<br/>(status: draft, employeeTargets copied)
+    
+    Employee->>ReviewDB: SELF-EVALUATE<br/>• Rate targets (1-5)<br/>• Write result explanations<br/>• Update job desc<br/>• Career path
+    Employee->>ReviewDB: SUBMIT self-evaluation
+    ReviewDB->>AuditDB: Log: self_eval_submitted
+    
+    ReviewDB->>Manager: Notify: Review ready<br/>(status: manager_eval_in_progress)
+    Manager->>ReviewDB: MANAGER EVALUATE<br/>• Re-rate targets<br/>• Write feedback per target<br/>• Overall summary<br/>• Final score calculated
+    Manager->>ReviewDB: SUBMIT TO HR<br/>(finalScore: 245, finalRank: "A")
+    ReviewDB->>AuditDB: Log: submitted_to_hr_final
+    
+    Note over HRAdmin,ReviewDB: STEP 3: HR REVIEW & BOARD APPROVAL
+    
+    ReviewDB->>HRAdmin: Review data<br/>(status: submitted_to_hr_final)
+    HRAdmin->>ReviewDB: MARK HR COMPLETE<br/>(status: hr_review_complete)
+    ReviewDB->>AuditDB: Log: hr_review_complete
+    
+    HRAdmin->>ReviewDB: BOARD MEETING<br/>MARK APPROVED<br/>(status: board_approved)
+    ReviewDB->>AuditDB: Log: board_approved
+    
+    Note over Manager,ReviewDB: STEP 4: FEEDBACK DELIVERY
+    
+    ReviewDB->>Manager: Notify: Ready for feedback session
+    Manager->>ReviewDB: DELIVER FEEDBACK<br/>(status: feedback_delivered)
+    ReviewDB->>AuditDB: Log: feedback_delivered
+    
+    Note over HRAdmin,ReviewDB: STEP 5: ARCHIVAL (FY CLOSE)
+    
+    HRAdmin->>ReviewDB: CLOSE FISCAL YEAR<br/>(status: archived, archived: true)
+    ReviewDB->>AuditDB: Log: archived
+    ReviewDB->>ReviewDB: READ-ONLY FOREVER<br/>(NFR007 Compliance)
 ```
 
 ### Data Relationships & Constraints
