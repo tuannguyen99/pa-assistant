@@ -3200,63 +3200,36 @@ This section documents the key business workflows that drive the performance rev
 **Trigger:** Start of fiscal year or new employee onboarding  
 **Outcome:** Approved target set ready for performance evaluation
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    TARGET SETTING WORKFLOW                                  │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌──────────┐                                                     ┌──────────┐
-│ Employee │                                                     │ Manager  │
-└────┬─────┘                                                     └────┬─────┘
-     │                                                                │
-     │ 1. Navigate to "Set Targets"                                  │
-     ├────────────────────────────────────────────►                  │
-     │                                             │                  │
-     │                                    [Create Draft]              │
-     │                                             │                  │
-     │ 2. Add 3-5 targets                         │                  │
-     │    - Task description                      │                  │
-     │    - KPI (measurable)                      │                  │
-     │    - Weight (total = 100%)                 │                  │
-     │    - Difficulty (L1/L2/L3)                 │                  │
-     ├─────────────────────────────────────────►  │                  │
-     │                                             │                  │
-     │ 3. Validation:                              │                  │
-     │    ✓ Min 3 targets, Max 5 targets         │                  │
-     │    ✓ Total weight = 100%                   │                  │
-     │    ✓ All fields filled                     │                  │
-     ├─────────────────────────────────────────►  │                  │
-     │                                             │                  │
-     │ 4. Click "Submit to Manager"               │                  │
-     ├─────────────────────────────────────────►  │                  │
-     │                                             │                  │
-     │                                    [Status: submitted]         │
-     │                                             │                  │
-     │                                        Notification ─────────► │
-     │                                             │                  │
-     │                                             │  5. Review targets
-     │                                             │     (Dashboard shows pending)
-     │                                             │  ◄─────────────────
-     │                                             │                  │
-     │                                             │  6. Manager options:
-     │                                             │     A) Approve
-     │                                             │     B) Request changes
-     │                                             │     C) Modify & approve
-     │                                             │                  │
-     │                                             │  [OPTION A: Approve]
-     │                                             │  ────────────────►
-     │                                             │                  │
-     │                                    [Status: approved]          │
-     │ ◄───────────── Notification ───────────────┼──────────────────┘
-     │                                             │
-     │ 7. Targets locked for review cycle         │
-     │                                             │
-     │                                    [Status: complete]
-     │                                             │
-     │                                        [Copy to Review.employeeTargets
-     │                                         when review cycle starts]
-     │                                             │
-     ▼                                             ▼
+```mermaid
+sequenceDiagram
+    participant Employee
+    participant System
+    participant Manager
+    
+    Note over Employee,Manager: TARGET SETTING WORKFLOW
+    
+    Employee->>System: 1. Navigate to "Set Targets"
+    System->>System: Create Draft
+    
+    Employee->>System: 2. Add 3-5 targets<br/>- Task description<br/>- KPI (measurable)<br/>- Weight (total = 100%)<br/>- Difficulty (L1/L2/L3)
+    
+    System->>System: 3. Validation:<br/>✓ Min 3 targets, Max 5 targets<br/>✓ Total weight = 100%<br/>✓ All fields filled
+    
+    Employee->>System: 4. Click "Submit to Manager"
+    System->>System: Status: submitted
+    System->>Manager: Notification: Targets pending approval
+    
+    Manager->>Manager: 5. Review targets<br/>(Dashboard shows pending)
+    
+    Note over Manager: 6. Manager options:<br/>A) Approve<br/>B) Request changes<br/>C) Modify & approve
+    
+    Manager->>System: [OPTION A: Approve]
+    System->>System: Status: approved
+    System->>Employee: Notification: Targets approved
+    
+    Note over System: 7. Targets locked for review cycle<br/>Status: complete
+    
+    Note over System: Copy to Review.employeeTargets<br/>when review cycle starts
 ```
 
 **Implementation:**
@@ -3455,70 +3428,49 @@ export async function PATCH(request: NextRequest) {
 **Trigger:** Review cycle opens (typically end of fiscal year)  
 **Outcome:** Self-evaluation submitted to manager for review
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    SELF-EVALUATION WORKFLOW                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌──────────┐                                     ┌──────────┐
-│ Employee │                                     │  System  │
-└────┬─────┘                                     └────┬─────┘
-     │                                                │
-     │ 1. System creates review                       │
-     │    (copies approved targets)                   │
-     │ ◄──────────────────────────────────────────────┤
-     │                                                │
-     │ 2. Navigate to "My Review"                     │
-     │    Status: self_eval_draft                     │
-     ├────────────────────────────────────────────►   │
-     │                                                │
-     │ 3. For each target:                            │
-     │    A. Rate performance (1-5 stars)             │
-     │       - 1: Did not achieve                     │
-     │       - 2: Partially achieved                  │
-     │       - 3: Achieved                            │
-     │       - 4: Exceeded                            │
-     │       - 5: Far exceeded                        │
-     │                                                │
-     │    B. Write result explanation                 │
-     │       [Optional: Click "AI Help"]              │
-     │       ├──────────────────────────────────────► │
-     │       │                               [AIService]
-     │       │                               Generate suggestion
-     │       │ ◄──────────────────────────────────────┤
-     │       │                                         │
-     │       │ Edit/Accept AI suggestion              │
-     │       │ (marked as ai_assisted=true)           │
-     │                                                │
-     │ 4. Update current job description              │
-     │    (free text, 500 chars max)                  │
-     │                                                │
-     │ 5. Update career path                          │
-     │    (aspirations, 500 chars max)                │
-     │                                                │
-     │ 6. Save as draft (auto-save every 30s)         │
-     ├────────────────────────────────────────────►   │
-     │                                        [Store in DB]
-     │                                                │
-     │ 7. Click "Submit Self-Evaluation"              │
-     ├────────────────────────────────────────────►   │
-     │                                                │
-     │                                        [Validation]
-     │                                        ✓ All targets rated
-     │                                        ✓ All explanations provided
-     │                                                │
-     │                                   [State transition]
-     │                                   self_eval_draft → 
-     │                                   self_eval_submitted
-     │                                                │
-     │                                      [Notify manager]
-     │                                                │
-     │ ◄──────────── Confirmation ────────────────────┤
-     │ "Self-evaluation submitted successfully"       │
-     │                                                │
-     │ 8. Review becomes read-only for employee       │
-     │                                                │
-     ▼                                                ▼
+```mermaid
+sequenceDiagram
+    participant Employee
+    participant System
+    participant AIService
+    participant Manager
+    
+    Note over Employee,Manager: SELF-EVALUATION WORKFLOW
+    
+    System->>Employee: 1. System creates review<br/>(copies approved targets)
+    
+    Employee->>System: 2. Navigate to "My Review"<br/>Status: self_eval_draft
+    
+    Note over Employee: 3. For each target:
+    Employee->>System: A. Rate performance (1-5 stars)<br/>1: Did not achieve<br/>2: Partially achieved<br/>3: Achieved<br/>4: Exceeded<br/>5: Far exceeded
+    
+    Employee->>System: B. Write result explanation
+    
+    opt Optional: AI Help
+        Employee->>AIService: Click "AI Help"
+        AIService->>AIService: Generate suggestion
+        AIService-->>Employee: Return AI suggestion
+        Employee->>Employee: Edit/Accept AI suggestion<br/>(marked as ai_assisted=true)
+    end
+    
+    Employee->>System: 4. Update current job description<br/>(free text, 500 chars max)
+    
+    Employee->>System: 5. Update career path<br/>(aspirations, 500 chars max)
+    
+    Employee->>System: 6. Save as draft (auto-save every 30s)
+    System->>System: Store in DB
+    
+    Employee->>System: 7. Click "Submit Self-Evaluation"
+    
+    System->>System: Validation:<br/>✓ All targets rated<br/>✓ All explanations provided
+    
+    System->>System: State transition:<br/>self_eval_draft → self_eval_submitted
+    
+    System->>Manager: Notify manager
+    
+    System-->>Employee: Confirmation:<br/>"Self-evaluation submitted successfully"
+    
+    Note over System: 8. Review becomes read-only for employee
 ```
 
 **Implementation:**
@@ -3629,92 +3581,63 @@ export async function POST(
 **Trigger:** Employee submits self-evaluation  
 **Outcome:** Complete review with final score and rank
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    MANAGER EVALUATION WORKFLOW                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌──────────┐                                              ┌──────────┐
-│ Manager  │                                              │  System  │
-└────┬─────┘                                              └────┬─────┘
-     │                                                         │
-     │ 1. Notification: "Employee submitted self-eval"        │
-     │ ◄──────────────────────────────────────────────────────┤
-     │                                                         │
-     │ 2. Navigate to Team Reviews Dashboard                  │
-     │    See: Pending reviews list                           │
-     ├─────────────────────────────────────────────────────►  │
-     │                                                         │
-     │ 3. Click on employee's review                          │
-     │    Status: manager_eval_in_progress                    │
-     │                                                         │
-     │ 4. View employee's self-ratings                        │
-     │    (Read-only, side-by-side comparison)                │
-     │                                                         │
-     │ 5. For each target:                                    │
-     │    A. Provide manager rating (1-5)                     │
-     │       - Can agree with employee                        │
-     │       - Can disagree (must explain)                    │
-     │                                                         │
-     │    B. Write feedback                                   │
-     │       [Optional: Click "AI Help"]                      │
-     │       ├────────────────────────────────────────────►   │
-     │       │                                      [AIService]
-     │       │                                      Generate   │
-     │       │ ◄──────────────────────────────────────────────┤
-     │       │                                                 │
-     │       │ Edit/Accept AI suggestion                      │
-     │                                                         │
-     │ 6. Write overall summary                               │
-     │    (Required: 100+ chars)                              │
-     │                                                         │
-     │ 7. Save as draft (auto-save)                           │
-     │                                                         │
-     │ 8. Click "Complete Evaluation"                         │
-     ├─────────────────────────────────────────────────────►  │
-     │                                                         │
-     │                                                [Validation]
-     │                                                ✓ All rated
-     │                                                ✓ All feedback
-     │                                                ✓ Summary provided
-     │                                                         │
-     │                                         [Calculate Score]
-     │                                         For each target:
-     │                                         baseScore = 
-     │                                           rating × weight × 
-     │                                           difficultyMultiplier
-     │                                                         │
-     │                                         finalScore = 
-     │                                           Σ baseScores
-     │                                                         │
-     │                                         [Map to Rank]
-     │                                         lookup(employeeType,
-     │                                                grade,
-     │                                                finalScore)
-     │                                                         │
-     │                                         [State transition]
-     │                                         manager_eval_in_progress →
-     │                                         manager_eval_complete
-     │                                                         │
-     │ ◄──────── Score & Rank Displayed ──────────────────────┤
-     │ finalScore: 245                                         │
-     │ finalRank: "A"                                          │
-     │                                                         │
-     │ 9. Review scorecard                                    │
-     │    [Can go back and adjust if needed]                  │
-     │                                                         │
-     │ 10. Click "Submit to HR"                               │
-     ├─────────────────────────────────────────────────────►  │
-     │                                                         │
-     │                                         [State transition]
-     │                                         manager_eval_complete →
-     │                                         submitted_to_hr_final
-     │                                                         │
-     │                                              [Notify HR]
-     │                                                         │
-     │ ◄──────── Confirmation ────────────────────────────────┤
-     │                                                         │
-     ▼                                                         ▼
+```mermaid
+sequenceDiagram
+    participant Manager
+    participant System
+    participant AIService
+    participant ScoreCalculator
+    participant HRAdmin as HR Admin
+    
+    Note over Manager,HRAdmin: MANAGER EVALUATION WORKFLOW
+    
+    System->>Manager: 1. Notification: "Employee submitted self-eval"
+    
+    Manager->>System: 2. Navigate to Team Reviews Dashboard<br/>See: Pending reviews list
+    
+    Manager->>System: 3. Click on employee's review<br/>Status: manager_eval_in_progress
+    
+    System-->>Manager: 4. View employee's self-ratings<br/>(Read-only, side-by-side comparison)
+    
+    Note over Manager: 5. For each target:
+    Manager->>System: A. Provide manager rating (1-5)<br/>- Can agree with employee<br/>- Can disagree (must explain)
+    
+    opt Optional: AI Help
+        Manager->>AIService: B. Click "AI Help" for feedback
+        AIService->>AIService: Generate suggestion
+        AIService-->>Manager: Return AI suggestion
+        Manager->>Manager: Edit/Accept AI suggestion
+    end
+    
+    Manager->>System: 6. Write overall summary<br/>(Required: 100+ chars)
+    
+    Manager->>System: 7. Save as draft (auto-save)
+    
+    Manager->>System: 8. Click "Complete Evaluation"
+    
+    System->>System: Validation:<br/>✓ All rated<br/>✓ All feedback<br/>✓ Summary provided
+    
+    System->>ScoreCalculator: Calculate Score
+    
+    Note over ScoreCalculator: For each target:<br/>baseScore = rating × weight ×<br/>difficultyMultiplier<br/><br/>finalScore = Σ baseScores
+    
+    ScoreCalculator->>System: Return calculated score
+    
+    System->>System: Map to Rank:<br/>lookup(employeeType, grade, finalScore)
+    
+    System->>System: State transition:<br/>manager_eval_in_progress →<br/>manager_eval_complete
+    
+    System-->>Manager: Score & Rank Displayed<br/>finalScore: 245<br/>finalRank: "A"
+    
+    Manager->>Manager: 9. Review scorecard<br/>[Can go back and adjust if needed]
+    
+    Manager->>System: 10. Click "Submit to HR"
+    
+    System->>System: State transition:<br/>manager_eval_complete →<br/>submitted_to_hr_final
+    
+    System->>HRAdmin: Notify HR
+    
+    System-->>Manager: Confirmation
 ```
 
 **Implementation:**
@@ -3896,68 +3819,50 @@ export async function POST(
 **Trigger:** User clicks role selector in header  
 **Outcome:** User's view and permissions change based on selected role
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    ROLE SWITCHING WORKFLOW                                  │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌──────────┐                                              ┌──────────┐
-│   User   │                                              │  System  │
-└────┬─────┘                                              └────┬─────┘
-     │                                                         │
-     │ 1. Login as alice@company.com                          │
-     │    roles: ["employee", "manager", "hr_admin"]          │
-     │ ◄──────────────────────────────────────────────────────┤
-     │                                                         │
-     │ 2. Default role: employee                              │
-     │    Dashboard shows: My reviews, My targets             │
-     │                                                         │
-     │ 3. Click role selector in header                       │
-     │    Dropdown shows: Employee, Manager, HR Admin         │
-     ├─────────────────────────────────────────────────────►  │
-     │                                                         │
-     │ 4. Select "Manager"                                    │
-     ├─────────────────────────────────────────────────────►  │
-     │                                                         │
-     │                                            [Update Zustand]
-     │                                            currentRole = "manager"
-     │                                                         │
-     │                                            [Check delegation]
-     │                                            Query RoleAssignment
-     │                                            for active delegations
-     │                                                         │
-     │                                            [Audit log]
-     │                                            Log role switch
-     │                                                         │
-     │ ◄──────────────────────────────────────────────────────┤
-     │ Dashboard updates immediately:                          │
-     │ - Shows team reviews                                   │
-     │ - Shows pending approvals                              │
-     │ - Sidebar menu changes                                 │
-     │                                                         │
-     │ 5. Make API calls with manager role                    │
-     ├──────────────────────────────────────────────────────► │
-     │ GET /api/reviews?role=manager                           │
-     │                                                         │
-     │                                            [Middleware checks]
-     │                                            - JWT valid
-     │                                            - User has "manager" role
-     │                                            - Check delegations
-     │                                                         │
-     │ ◄──────────────────────────────────────────────────────┤
-     │ Returns: Team reviews (direct reports + delegated)     │
-     │                                                         │
-     │ 6. Switch to "HR Admin"                                │
-     ├─────────────────────────────────────────────────────►  │
-     │                                                         │
-     │                                            [Update role]
-     │                                            currentRole = "hr_admin"
-     │                                            [Audit log]
-     │                                                         │
-     │ ◄──────────────────────────────────────────────────────┤
-     │ Dashboard shows: All reviews, System config            │
-     │                                                         │
-     ▼                                                         ▼
+```mermaid
+sequenceDiagram
+    participant User
+    participant System
+    participant Zustand as Zustand Store
+    participant API
+    participant Middleware
+    participant AuditLog as Audit Logger
+    
+    Note over User,AuditLog: ROLE SWITCHING WORKFLOW
+    
+    User->>System: 1. Login as alice@company.com<br/>roles: ["employee", "manager", "hr_admin"]
+    
+    System-->>User: 2. Default role: employee<br/>Dashboard shows: My reviews, My targets
+    
+    User->>System: 3. Click role selector in header<br/>Dropdown shows: Employee, Manager, HR Admin
+    
+    User->>Zustand: 4. Select "Manager"
+    
+    Zustand->>Zustand: Update currentRole = "manager"
+    
+    Zustand->>System: Check delegation:<br/>Query RoleAssignment for active delegations
+    
+    Zustand->>AuditLog: Log role switch
+    
+    Zustand-->>User: Dashboard updates immediately:<br/>- Shows team reviews<br/>- Shows pending approvals<br/>- Sidebar menu changes
+    
+    User->>API: 5. Make API calls with manager role<br/>GET /api/reviews?role=manager
+    
+    API->>Middleware: Check permissions
+    
+    Note over Middleware: - JWT valid<br/>- User has "manager" role<br/>- Check delegations
+    
+    Middleware-->>API: Authorized
+    
+    API-->>User: Returns: Team reviews<br/>(direct reports + delegated)
+    
+    User->>Zustand: 6. Switch to "HR Admin"
+    
+    Zustand->>Zustand: Update currentRole = "hr_admin"
+    
+    Zustand->>AuditLog: Log role switch
+    
+    Zustand-->>User: Dashboard shows:<br/>All reviews, System config
 ```
 
 **Implementation:**
@@ -4090,88 +3995,57 @@ export async function middleware(request: NextRequest) {
 **Trigger:** Fiscal year close  
 **Outcome:** All reviews archived and made read-only
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    REVIEW ARCHIVAL WORKFLOW                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌──────────┐                                              ┌──────────┐
-│ HR Admin │                                              │  System  │
-└────┬─────┘                                              └────┬─────┘
-     │                                                         │
-     │ 1. Navigate to Fiscal Year Management                  │
-     ├─────────────────────────────────────────────────────►  │
-     │                                                         │
-     │ 2. Select fiscal year (e.g., 2024)                     │
-     │    Status: Open                                        │
-     │    Reviews: 45 completed, 3 in progress                │
-     │                                                         │
-     │ 3. Click "Close Fiscal Year"                           │
-     ├─────────────────────────────────────────────────────►  │
-     │                                                         │
-     │                                            [Pre-check]
-     │                                            - All reviews completed?
-     │                                            - Board approval done?
-     │                                            - All feedback delivered?
-     │                                                         │
-     │ ◄──────────────────────────────────────────────────────┤
-     │ Warning: "3 reviews not yet delivered feedback"        │
-     │                                                         │
-     │ 4. Confirm closure                                     │
-     │    [Override incomplete reviews]                       │
-     ├─────────────────────────────────────────────────────►  │
-     │                                                         │
-     │                                            [Batch update]
-     │                                            UPDATE Review
-     │                                            SET archived = true,
-     │                                                archivedAt = NOW(),
-     │                                                archivedBy = admin_id
-     │                                            WHERE cycleYear = 2024
-     │                                                         │
-     │                                            UPDATE FiscalYear
-     │                                            SET isClosed = true,
-     │                                                closedAt = NOW()
-     │                                            WHERE year = 2024
-     │                                                         │
-     │                                            [Audit log]
-     │                                            Log bulk archival
-     │                                                         │
-     │ ◄──────────────────────────────────────────────────────┤
-     │ Success: "45 reviews archived"                         │
-     │                                                         │
-     │ 5. User tries to edit archived review                  │
-     │    (As employee or manager)                            │
-     ├──────────────────────────────────────────────────────► │
-     │ PATCH /api/reviews/archived-review-id                   │
-     │                                                         │
-     │                                            [Check archived]
-     │                                            IF review.archived = true
-     │                                              THEN reject
-     │                                                         │
-     │ ◄──────────────────────────────────────────────────────┤
-     │ Error: "Cannot modify archived review (NFR007)"        │
-     │                                                         │
-     │ 6. HR Admin can still view and flag issues             │
-     │    GET /api/reviews/archived-review-id?role=hr_admin   │
-     ├──────────────────────────────────────────────────────► │
-     │                                                         │
-     │ ◄──────────────────────────────────────────────────────┤
-     │ Returns: Full review data (read-only)                  │
-     │                                                         │
-     │ 7. Generate historical reports                         │
-     │    POST /api/reports/multi-year                        │
-     │    { years: [2022, 2023, 2024] }                       │
-     ├──────────────────────────────────────────────────────► │
-     │                                                         │
-     │                                            [Query archived]
-     │                                            SELECT * FROM Review
-     │                                            WHERE cycleYear IN (...)
-     │                                            AND archived = true
-     │                                                         │
-     │ ◄──────────────────────────────────────────────────────┤
-     │ Returns: Aggregated performance data                   │
-     │                                                         │
-     ▼                                                         ▼
+```mermaid
+sequenceDiagram
+    participant HRAdmin as HR Admin
+    participant System
+    participant Database
+    participant User
+    participant AuditLog as Audit Logger
+    
+    Note over HRAdmin,AuditLog: REVIEW ARCHIVAL WORKFLOW
+    
+    HRAdmin->>System: 1. Navigate to Fiscal Year Management
+    
+    HRAdmin->>System: 2. Select fiscal year (e.g., 2024)<br/>Status: Open<br/>Reviews: 45 completed, 3 in progress
+    
+    HRAdmin->>System: 3. Click "Close Fiscal Year"
+    
+    System->>System: Pre-check:<br/>- All reviews completed?<br/>- Board approval done?<br/>- All feedback delivered?
+    
+    System-->>HRAdmin: Warning: "3 reviews not yet delivered feedback"
+    
+    HRAdmin->>System: 4. Confirm closure<br/>[Override incomplete reviews]
+    
+    System->>Database: Batch update:<br/>UPDATE Review<br/>SET archived = true,<br/>archivedAt = NOW(),<br/>archivedBy = admin_id<br/>WHERE cycleYear = 2024
+    
+    System->>Database: UPDATE FiscalYear<br/>SET isClosed = true,<br/>closedAt = NOW()<br/>WHERE year = 2024
+    
+    System->>AuditLog: Log bulk archival
+    
+    System-->>HRAdmin: Success: "45 reviews archived"
+    
+    Note over User,Database: User attempts to edit archived review
+    
+    User->>System: 5. Edit archived review<br/>(As employee or manager)<br/>PATCH /api/reviews/archived-review-id
+    
+    System->>System: Check archived:<br/>IF review.archived = true<br/>THEN reject
+    
+    System-->>User: Error: "Cannot modify archived review (NFR007)"
+    
+    Note over HRAdmin,Database: HR Admin still has read access
+    
+    HRAdmin->>System: 6. View archived review<br/>GET /api/reviews/archived-review-id?role=hr_admin
+    
+    System-->>HRAdmin: Returns: Full review data (read-only)
+    
+    HRAdmin->>System: 7. Generate historical reports<br/>POST /api/reports/multi-year<br/>{ years: [2022, 2023, 2024] }
+    
+    System->>Database: Query archived:<br/>SELECT * FROM Review<br/>WHERE cycleYear IN (...)<br/>AND archived = true
+    
+    Database-->>System: Review data
+    
+    System-->>HRAdmin: Returns: Aggregated performance data
 ```
 
 **Implementation:**
