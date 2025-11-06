@@ -527,55 +527,71 @@ graph TD
 
 The review process follows a strict state machine with role-based transitions:
 
-```mermaid
-stateDiagram-v2
-    [*] --> SELF_EVAL_DRAFT: Initial State
-    
-    SELF_EVAL_DRAFT: SELF_EVAL_DRAFT
-    SELF_EVAL_DRAFT: (Employee edits)
-    
-    SELF_EVAL_SUBMITTED: SELF_EVAL_SUBMITTED
-    SELF_EVAL_SUBMITTED: (Read-only)
-    
-    MANAGER_EVAL_IN_PROGRESS: MANAGER_EVAL_IN_PROGRESS
-    MANAGER_EVAL_IN_PROGRESS: (Manager edits)
-    
-    MANAGER_EVAL_COMPLETE: MANAGER_EVAL_COMPLETE
-    MANAGER_EVAL_COMPLETE: (Read-only)
-    
-    SUBMITTED_TO_HR_FINAL: SUBMITTED_TO_HR_FINAL
-    SUBMITTED_TO_HR_FINAL: (HR Admin reviews)
-    
-    HR_REVIEW_COMPLETE: HR_REVIEW_COMPLETE
-    HR_REVIEW_COMPLETE: (Ready for board)
-    
-    BOARD_APPROVED: BOARD_APPROVED
-    BOARD_APPROVED: (Ready to deliver)
-    
-    FEEDBACK_DELIVERED: FEEDBACK_DELIVERED
-    FEEDBACK_DELIVERED: (Review complete)
-    
-    ARCHIVED: ARCHIVED
-    ARCHIVED: (Read-only forever)
-    ARCHIVED: NFR007 Compliance
-    
-    SELF_EVAL_DRAFT --> SELF_EVAL_SUBMITTED: Employee: Submit Self-Evaluation\nValidation: All targets rated,\nresult explanations provided
-    
-    SELF_EVAL_SUBMITTED --> MANAGER_EVAL_IN_PROGRESS: System: Auto-transition\nAction: Notify manager
-    
-    MANAGER_EVAL_IN_PROGRESS --> MANAGER_EVAL_COMPLETE: Manager: Submit Manager Evaluation\nValidation: All targets rated,\nfeedback provided, score calculated
-    
-    MANAGER_EVAL_COMPLETE --> SUBMITTED_TO_HR_FINAL: Manager: Submit to HR\nAction: Calculate final score & rank
-    
-    SUBMITTED_TO_HR_FINAL --> HR_REVIEW_COMPLETE: HR Admin: Mark as HR Complete\nValidation: Review verified,\nno data issues
-    
-    HR_REVIEW_COMPLETE --> BOARD_APPROVED: HR Admin: Mark as Board Approved\n(After board meeting)
-    
-    BOARD_APPROVED --> FEEDBACK_DELIVERED: Manager: Deliver Feedback\nAction: Feedback session with employee
-    
-    FEEDBACK_DELIVERED --> ARCHIVED: HR Admin: Archive Review\nAction: Close fiscal year,\nmark read-only
-    
-    ARCHIVED --> [*]: Final State
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         REVIEW WORKFLOW STATE MACHINE                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                    ┌──────────────────────┐
+                    │  SELF_EVAL_DRAFT     │ ◄─── Initial State
+                    │  (Employee edits)    │
+                    └──────────┬───────────┘
+                               │ Employee: "Submit Self-Evaluation"
+                               │ Validation: All targets rated, result explanations provided
+                               ▼
+                    ┌──────────────────────┐
+                    │ SELF_EVAL_SUBMITTED  │
+                    │  (Read-only)         │
+                    └──────────┬───────────┘
+                               │ System: Auto-transition
+                               │ Action: Notify manager
+                               ▼
+                    ┌──────────────────────────┐
+                    │ MANAGER_EVAL_IN_PROGRESS │
+                    │  (Manager edits)         │
+                    └──────────┬───────────────┘
+                               │ Manager: "Submit Manager Evaluation"
+                               │ Validation: All targets rated, feedback provided, score calculated
+                               ▼
+                    ┌──────────────────────┐
+                    │ MANAGER_EVAL_COMPLETE│
+                    │  (Read-only)         │
+                    └──────────┬───────────┘
+                               │ Manager: "Submit to HR"
+                               │ Action: Calculate final score & rank
+                               ▼
+                    ┌──────────────────────┐
+                    │ SUBMITTED_TO_HR_FINAL│
+                    │  (HR Admin reviews)  │
+                    └──────────┬───────────┘
+                               │ HR Admin: "Mark as HR Complete"
+                               │ Validation: Review verified, no data issues
+                               ▼
+                    ┌──────────────────────┐
+                    │  HR_REVIEW_COMPLETE  │
+                    │  (Ready for board)   │
+                    └──────────┬───────────┘
+                               │ HR Admin: "Mark as Board Approved"
+                               │ (After board meeting)
+                               ▼
+                    ┌──────────────────────┐
+                    │   BOARD_APPROVED     │
+                    │  (Ready to deliver)  │
+                    └──────────┬───────────┘
+                               │ Manager: "Deliver Feedback"
+                               │ Action: Feedback session with employee
+                               ▼
+                    ┌──────────────────────┐
+                    │  FEEDBACK_DELIVERED  │
+                    │  (Review complete)   │
+                    └──────────┬───────────┘
+                               │ HR Admin: "Archive Review"
+                               │ Action: Close fiscal year, mark read-only
+                               ▼
+                    ┌──────────────────────┐
+                    │      ARCHIVED        │ ◄─── Final State
+                    │  (Read-only forever) │      (NFR007 Compliance)
+                    └──────────────────────┘
 ```
 
 **State Transition Rules:**
