@@ -394,6 +394,8 @@ So that I can prepare board presentations and manage the review cycle lifecycle.
 
 **Value Proposition:** Users gain deep visibility into performance trends, career progression patterns, and organizational performance, enabling proactive talent management and strategic workforce planning.
 
+**Test Data Prerequisites:** Development environment should seed 2-3 years of test data (multiple fiscal years, 20-50 users, varied review data, score distributions matching production patterns) for analytics validation and performance testing.
+
 **Story Breakdown:**
 
 **Story 3.1: Employee Performance Dashboard - Multi-Year Trends**
@@ -412,6 +414,7 @@ So that I can understand my career progression and identify areas for developmen
 7. Career development insights section with recommended focus areas
 8. Export functionality for performance summary (PDF/CSV)
 9. Responsive visualization adapting to data availability (handles first-year users gracefully)
+10. Multi-year trend queries complete in <3s with pagination enabled (performance testing required)
 
 **Prerequisites:** Epic 1 complete, Epic 2 complete (minimum 1 fiscal year of historical data)
 
@@ -431,6 +434,7 @@ So that I can identify meaningful performance patterns and changes over time.
 7. Data export for all visualizations (CSV, JSON)
 8. Visualization accessibility compliance (WCAG 2.1 AA for charts)
 9. Performance optimization for large historical datasets (lazy loading, pagination)
+10. Historical trend charts load in <2s with caching enabled (performance testing required)
 
 **Prerequisites:** Story 3.1
 
@@ -451,6 +455,7 @@ So that I can make informed talent management decisions and identify development
 8. Export team summary report for leadership meetings
 9. Real-time updates as team members complete reviews
 10. Multi-year team comparison (e.g., current team vs. same team 1 year ago)
+11. Team analytics aggregations complete in <3s for standard queries (performance testing required)
 
 **Prerequisites:** Story 3.2, Story 2.1 (Manager Dashboard foundation)
 
@@ -473,6 +478,8 @@ So that I can provide executive leadership with data-driven insights for strateg
 10. Audit log integration showing all administrative actions in context
 11. Export formats: Excel, PDF, CSV, JSON for further analysis
 12. Visualization dashboard with interactive charts (drill-down, filters, time-range selectors)
+13. Company-wide reports generate in <10s for complex multi-year aggregations (performance testing required)
+14. Dashboard initial load completes in <2s with progressive enhancement for detailed analytics
 
 **Prerequisites:** Story 3.3, Story 2.6 (HR Consolidation Dashboard foundation)
 
@@ -495,6 +502,7 @@ So that performance data remains accurate and continuous despite organizational 
 10. Bulk transfer support for organizational restructuring
 11. Transfer notification to old and new managers
 12. Review continuity: targets set with old manager remain visible and editable by new manager
+13. Transfer history queries complete in <3s including multi-year review data (performance testing required)
 
 **Prerequisites:** Story 1.3 (Employee Data Management foundation), Story 3.1 (historical data infrastructure)
 
