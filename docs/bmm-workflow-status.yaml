@@ -43,7 +43,8 @@ workflow_status:
   # Phase 3: Solutioning
   create-architecture: docs/architecture.md
   validate-architecture: optional
-  solutioning-gate-check: required
+  solutioning-gate-check: docs/bmm-readiness-assessment-2025-11-08_00-15-28.md
 
-  # Phase 4: Implementation
+  # Phase 4: Implementation (Ready to Start)
+  # Conditions: Verify GD/BOM approval UI in Story 2.6 before Epic 2
   sprint-planning: required
