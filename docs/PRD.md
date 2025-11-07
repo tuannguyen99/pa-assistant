@@ -81,7 +81,13 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 
 **Performance Evaluation Workflow**
 - **FR007**: System shall automatically calculate target scores using formula: Total Points = Weight × Difficulty × Rating
-- **FR008**: System shall automatically convert final scores to performance ranks based on configurable grade-tier mappings (e.g., APE2/D1 vs APE1/C4)
+- **FR008**: System shall automatically convert final scores to performance ranks based on configurable grade-tier mappings (e.g., APE2/D1 vs APE1/C4). Rank intervals must use validated non-overlapping numeric ranges with half-open form `[min, max)` except the top band which is fully inclusive `[min, max]` to avoid precision gaps. Example Engineer tier mapping (illustrative only):
+    - A+: [3.75, 4.50]
+    - A:  [3.25, 3.75)
+    - B+: [2.75, 3.25)
+    - B:  [2.25, 2.75)
+    - C:  [0.00, 2.25)
+    Configuration validation shall reject overlapping or gapped intervals and enforce ascending min values. Rank resolution occurs after manager evaluation completion (FR010) and again after HR consolidation (FR010b) if recalculation rules apply.
 - **FR009**: Employees shall complete self-evaluations with AI-assisted writing for result explanations, clearly marked as "AI-assisted" with full edit capability; employees may modify original targets with visible flagging and manager notification
 - **FR010**: Managers shall complete evaluations viewing employee self-review side-by-side, with AI synthesis of multiple inputs (employee review + manager comments) clearly marked as "AI-assisted"; optional 1-on-1 review meeting
 - **FR010a**: Managers shall submit completed department evaluations to HR with scores and ranks for company-wide consolidation
@@ -117,7 +123,7 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 ### Non-Functional Requirements
 
 - **NFR001**: System shall support 200 concurrent users with page load times < 2 seconds and AI response times < 10 seconds
-- **NFR002**: System shall implement role-based access control, data encryption at rest and in transit, and audit logging for all sensitive operations
+- **NFR002**: System shall implement role-based access control, data encryption at rest and in transit, and audit logging for all sensitive operations. Technical standards: TLS 1.3 for all HTTP/WebSocket traffic; AES-256-GCM (or encrypted volume equivalent) for at-rest storage; bcrypt password hashing with cost factor ≥12; JWT access tokens signed using HS256/RS256 with 256-bit keys (rotation annually or upon compromise); audit log integrity assured by append-only store or hash-chain sequencing; secrets managed via environment variables with least-privilege access.
 - **NFR003**: System shall provide Excel-familiar UI with table-based data entry, keyboard navigation, and glassmorphism design aesthetics
 - **NFR004**: System shall meet **WCAG 2.1 AA accessibility standards** with full keyboard navigation, screen reader support, and high contrast compliance
 - **NFR005**: System shall implement **desktop-first responsive design** optimized for modern browsers with horizontal scrolling for wide tables
@@ -133,6 +139,7 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 - **Recovery Testing**: Monthly automated restore tests to verify backup integrity
 - **Retention Policy**: Daily backups retained for 30 days, weekly backups for 90 days, annual snapshots retained for 7 years (compliance requirement)
 - **Backup Technologies**: SQLite file-based backups for MVP (simple file copy + verification), with migration path to pg_dump (PostgreSQL) or mysqldump (MySQL) for production scale
+   - *Incremental Definition (SQLite)*: Page-level differential copy capturing only changed pages since last full backup; weekly full backup establishes new baseline; integrity validated with SHA-256 checksums pre- and post-transfer.
 
 **Historical Data Management:**
 - **Fiscal Year Closure**: When HR Admin closes a fiscal year (FR022), all review records for that year are marked as `archived: true` and become read-only
@@ -143,37 +150,99 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
   - HR statistical analysis and reporting
   - Compliance audits and legal discovery
 - **Data Retention**: Review data retained indefinitely for HR analytics; audit logs retained for 7 years minimum (compliance requirement)
-- **Archive Indicators**: UI displays clear "Archived - FY 2024" badges on historical reviews to prevent confusion with active cycle
+ - **Archive Indicators**: UI displays clear "Archived - FY 2024" badges on historical reviews to prevent confusion with active cycle
+
+**Retention Policy Table:**
+| Data Type | Retention | Rationale | Notes |
+|-----------|-----------|-----------|-------|
+| Active Reviews (current FY) | FY duration | Operational workflow | Editable until closure |
+| Archived Reviews | Indefinite | Long-term performance analysis | Read-only (FR010e) |
+| Audit Logs | ≥ 7 years | Compliance & traceability | Exportable, append-only integrity |
+| Daily Incremental Backups | 30 days | Point-in-time recovery | Auto-pruned; relies on weekly baseline |
+| Weekly Full Backups | 90 days | Disaster recovery baseline | Monthly restore test performed |
+| Annual Snapshot | 7 years | Regulatory, historical analytics | Off-site encrypted storage |
+| Configuration Change Audit | ≥ 7 years | Governance of HR admin actions | Includes reason field (FR026) |
 
 ---
 
 ## User Journeys
 
-### User Journey: Employee Self-Review Completion
+### User Journey: Employee Self-Review Completion *(FR004, FR006, FR007, FR008, FR009, FR021)*
 
 **Actor:** Software Engineer (Employee)
 
 **Scenario:** March review period - employee completes self-evaluation for 3-5 annual targets set in April
 
 **Steps:**
-1. Employee logs into pa-assistant and sees dashboard with "Self-Review Due" notification
-2. Employee clicks on current review period and sees their 3-5 approved targets from April
-3. For each target, employee:
-   - Views target description, KPI, weight (%), and difficulty level (pre-filled from April)
-   - **Option to modify target fields** (task, KPI, weight, difficulty) if circumstances changed during the year - system flags modifications and notifies manager for review
-   - Ensures total weight still equals 100% (system validates)
-   - Enters self-assessment rating (1-5 scale)
-   - System auto-calculates Total Points = Weight × Difficulty × Rating
-   - Employee enters factual bullet points for "Result Explanation" (e.g., "Completed Project X, reduced bug count by 30%")
-   - Employee clicks "Get AI Help" - AI transforms bullets into professional narrative
-   - AI output clearly marked "AI-assisted" with side-by-side comparison
-   - Employee reviews, edits if needed, and accepts
-4. System displays overall calculated score and rank based on employee's grade tier
-5. Employee reviews company/department goals displayed in sidebar for context alignment
-6. Employee submits completed self-review (manager receives notification including any target modifications for review)
-7. Manager receives notification that review is ready for their evaluation
+1. Employee logs in and sees dashboard with "Self-Review Due" notification *(dashboard visibility – FR011 indirect; journey focus)*
+2. Employee opens current review period and sees approved targets from April *(target storage – FR006)*
+3. For each target, employee performs a structured evaluation:
+  - Views target description, KPI, weight (%), difficulty *(target definition – FR004)*
+  - **Optional modification of target fields** (task, KPI, weight, difficulty) if changed priorities *(mid-year / evaluation modification flow – FR004, FR005b); system flags & notifies manager (FR009)*
+  - Validates total weight still equals 100% *(weight validation – FR004)*
+  - Enters self-assessment rating (1–5) *(rating capture – FR009)*
+  - System auto-calculates Total Points = Weight × Difficulty × Rating *(score formula – FR007)*
+  - Enters factual bullet points for Result Explanation *(raw input capture – FR009)*
+  - Clicks "Get AI Help" → AI transforms bullets into professional narrative *(AI assistance – FR009)*
+  - Output marked "AI-assisted" side-by-side with original bullets *(transparency – FR009)*
+  - Reviews/edits and accepts narrative *(full edit capability – FR009)*
+4. System displays overall calculated score (sum of points – FR007) and rank based on grade-tier mapping *(rank conversion – FR008)*
+5. Employee reviews company/department goals in sidebar for alignment *(context goals display – FR021)*
+6. Employee submits self-review; system persists evaluation and flags any modified targets for manager review *(submission + modification flagging – FR009)*
+7. Manager receives notification for evaluation *(workflow progression enabling manager evaluation – FR010)*
 
-**Success Outcome:** Self-review completed in 2-4 hours (vs. 1-2 days previously), employee feels confident their work is professionally articulated, with flexibility to adjust targets if priorities shifted during the year
+**Success Outcome:** Self-review completed in 2–4 hours (vs. 1–2 days previously), employee articulates achievements professionally with transparent AI assistance and legitimately flagged target changes for reviewer visibility.
+
+### User Journey: Manager Evaluation Completion *(FR010, FR007, FR008, FR011, FR021, FR010a)*
+
+**Actor:** Manager (Reviewer)
+
+**Scenario:** After employee self-review submission, manager evaluates results, synthesizes feedback, and finalizes department submission.
+
+**Steps:**
+1. Manager logs in and sees dashboard with pending reviews count *(status indicators – FR011)*
+2. Opens an employee’s evaluation: side-by-side view of employee targets & self-review *(comparison layout – FR010)*
+3. For each target:
+  - Reviews employee rating & narrative *(input consumption – FR010)*
+  - Enters manager rating (1–5) *(manager assessment capture – FR010)*
+  - Auto-calculated Total Points updates (Weight × Difficulty × Rating) *(formula reuse – FR007)*
+  - Enters per-target manager comment *(feedback input – FR010)*
+  - (Optional) Invokes AI Synthesis to combine employee narrative + manager comments *(AI synthesis – FR010)*
+  - Accepts/edits AI-assisted output; system logs AI-assisted acceptance *(audit transparency – FR010 + FR019)*
+4. Reviews cumulative score and provisional rank mapping *(score sum – FR007, rank conversion – FR008)*
+5. Adds overall performance summary (optional AI synthesis combining target-level context) *(FR010)*
+6. Marks review as complete; status transitions to `manager_eval_complete` *(state progression – workflow states)*
+7. Upon all team reviews completion, manager uses Department Submission dashboard to submit consolidated data to HR *(bulk submission – FR010a with dashboard context – FR011)*
+
+**Success Outcome:** Manager completes evaluations with reduced synthesis time, consistent scoring, and transparent AI-assisted commentary; department-level submission ready for HR consolidation.
+
+### Edge Case Mini-Journeys *(Risk & Validation Enhancements)*
+
+1. **Invalid Weight Total (FR004 Validation Failure):** Employee modifies a target, resulting total weight = 105%. System blocks save, highlights offending rows, shows corrective tooltip, and prevents submission until total = 100%.
+2. **AI Backend Timeout (FR009 Resilience):** Employee requests AI help; local Ollama times out after configured threshold (e.g., 8s). UI displays fallback prompt: option to retry or open web-based AI provider with auto-generated prompt; action logged.
+3. **Reviewer Reassignment (FR001a / FR019):** HR Admin delegates a review mid-cycle (manager on leave). RoleAssignment created; manager dashboard updates; audit entry records delegation reason and effective dates; employee sees updated reviewer label.
+4. **Archived Review Edit Attempt (FR010e / NFR007):** User attempts to edit a prior fiscal year review. API returns 403 with "Archived – FY YYYY" message; UI displays read-only badge; if HR Admin override required, special modal capturing reason triggers audit log.
+5. **Mid-Year Target Modification (FR005b):** Employee adjusts KPI mid-year; system flags target with "Modified" badge; sends manager notification; audit entry created with before/after diff; rank recalculation deferred until evaluation phase.
+
+---
+## Glossary
+
+| Term | Definition |
+|------|------------|
+| **RBAC** | Role-Based Access Control governing permissions by assigned roles and reviewer relationships. |
+| **Reviewer Scoping** | Limiting a manager’s edit/view rights strictly to assigned reviewees (direct reports or delegated). |
+| **AI-Assisted** | Content generated or synthesized with AI; always marked and auditable with original inputs retained. |
+| **Target** | A performance commitment defined by task, KPI, weight, and difficulty for the fiscal cycle. |
+| **Difficulty (L1–L3)** | Relative challenge level (L1 highest / most complex, L3 lowest) influencing score weighting fairness. |
+| **Total Points** | Computed per target: Weight × Difficulty × Rating (FR007). |
+| **Rank Conversion** | Mapping from final numeric score to rank label based on grade-tier configured ranges (FR008, FR025). |
+| **Archived** | Read-only state for reviews after fiscal year closure; modifications disallowed except audited HR overrides (FR010e, NFR007). |
+| **Fiscal Year (FY)** | Review cycle period (e.g., Apr–Mar) determining target setting and evaluation windows (FR022). |
+| **Role Switch** | User changing active role context (e.g., employee → manager) for task execution; always logged (FR001a). |
+| **AuditEntry** | Immutable record capturing actor, role, action, target, metadata, timestamp for sensitive operations (FR019, FR026). |
+| **Incremental Backup** | A backup capturing only changed database pages since last full backup (SQLite page-level strategy). |
+
+---
 
 ---
 
@@ -212,9 +281,9 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 
 ---
 
-## Epic List
+## Epic List (Updated Actual Counts)
 
-**Epic 1: Foundation & Core Workflows (Est. 9-13 stories)**
+**Epic 1: Foundation & Core Workflows (Actual: 14 stories)**
 - Establish project infrastructure (repo, database, authentication)
 - Implement user management and employee data import
 - Build target setting workflow with validation
@@ -224,13 +293,13 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 - Create HR admin configuration panel (AI backend, rank mappings)
 - Deploy basic help system
 
-**Epic 2: Dashboards & Production Readiness (Est. 4-6 stories)**
+**Epic 2: Dashboards & Production Readiness (Actual: 6 stories)**
 - Build manager dashboard with completion tracking
 - Add company/department goals management
 - Implement security, audit logging, and data encryption
 - Production deployment preparation and testing
 
-**Total Estimated Stories: 13-19 stories**
+**Total Stories: 20 stories (Finalized)**
 
 > **Note:** Detailed epic breakdown with full story specifications is available in [epics.md](./epics.md)
 
