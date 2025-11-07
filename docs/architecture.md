@@ -84,6 +84,7 @@ npx prisma generate
 | **State Management** | Zustand | 4.0+ | Lightweight (<1KB), simple API, perfect for role switching and modal state |
 | **Data Fetching** | TanStack Query | 5.0+ | Caching, optimistic updates, automatic refetching, excellent DX |
 | **Form Handling** | React Hook Form + Zod | Latest | Performant (minimal re-renders), type-safe validation, integrates with shadcn/ui |
+| **Charts & Visualization** | Recharts | 2.0+ | React-native charting library, responsive, composable, good for analytics dashboards (Epic 3) |
 | **Testing (Unit)** | Vitest | Latest | Fast, Vite-powered, Jest-compatible API |
 | **Testing (E2E)** | Playwright | Latest | Cross-browser testing, reliable, powerful selectors |
 | **Date/Time** | date-fns | 3.0+ | Lightweight (vs moment.js), tree-shakeable, functional API |
@@ -109,6 +110,8 @@ npx prisma generate
 | **Date Handling** | date-fns with UTC storage | All | Store UTC in DB, display in user's local timezone, consistent date operations |
 | **Testing Approach** | Vitest (unit) + Playwright (E2E) | All | Fast unit tests, reliable E2E tests, modern testing tools |
 | **Historical Data** | Archived reviews with read-only enforcement | Epic 2, Story 2.3a | NFR007 compliance, multi-year analytics, prevents accidental modification |
+| **Analytics & Visualization** | Recharts + TanStack Query | Epic 3 | Lightweight charts library, responsive, integrates with React Server Components for data fetching |
+| **Data Aggregation** | Prisma aggregation + custom SQL for complex queries | Epic 3 | Leverage Prisma for simple aggregations, raw SQL for multi-year trend analysis performance |
 
 ---
 
@@ -131,7 +134,17 @@ pa-assistant/
              hr-consolidation/
                 page.tsx      # HR consolidation (Story 2.6)
              employee/
-                 page.tsx      # Employee dashboard (future)
+                 page.tsx      # Employee dashboard (Story 3.1)
+         
+          analytics/            # Analytics & Insights (Epic 3)
+             employee/
+                page.tsx      # Personal performance trends (Story 3.1)
+             manager/
+                page.tsx      # Team analytics (Story 3.3)
+             hr/
+                page.tsx      # Company-wide analytics (Story 3.4)
+             historical/
+                 page.tsx      # Historical data visualization (Story 3.2)
          
           reviews/              # Review workflows
              [id]/
@@ -205,9 +218,23 @@ pa-assistant/
              employee-types/
                 route.ts      # Grade systems
              score-mappings/
-                route.ts      # Scorerank
+                route.ts      # Score→rank
              goals/
                  route.ts      # Goals (Story 2.2)
+         
+          analytics/            # Analytics endpoints (Epic 3)
+             employee/
+                [id]/
+                   route.ts   # Personal trends (Story 3.1)
+             manager/
+                [id]/
+                   route.ts   # Team analytics (Story 3.3)
+             hr/
+                route.ts      # Company-wide (Story 3.4)
+             historical/
+                route.ts      # Y-o-Y comparisons (Story 3.2)
+             transfers/
+                 route.ts      # Transfer history (Story 3.5)
          
           audit/
               route.ts
@@ -243,6 +270,21 @@ pa-assistant/
           manager-dashboard.tsx  # Story 2.1
           department-submission.tsx  # Story 2.5
           hr-consolidation.tsx   # Story 2.6
+          employee-dashboard.tsx # Story 3.1
+      
+       analytics/               # Analytics components (Epic 3)
+          performance-trend-chart.tsx    # Story 3.1, 3.2
+          year-over-year-comparison.tsx  # Story 3.2
+          team-analytics-dashboard.tsx   # Story 3.3
+          rank-distribution-chart.tsx    # Story 3.4
+          department-comparison-table.tsx # Story 3.4
+          transfer-history-timeline.tsx  # Story 3.5
+      
+       charts/                  # Reusable chart components
+          line-chart.tsx        # Multi-year trends
+          bar-chart.tsx         # Rank distribution
+          pie-chart.tsx         # Performance breakdown
+          area-chart.tsx        # Historical comparisons
       
        admin/
           user-import.tsx
@@ -278,6 +320,12 @@ pa-assistant/
       
        backup/
           backup-service.ts     # Story 2.3a
+      
+       analytics/               # Analytics services (Epic 3)
+          trend-calculator.ts   # Multi-year trend analysis
+          aggregation-service.ts # Team/company aggregations
+          comparison-service.ts # Y-o-Y comparisons
+          transfer-service.ts   # Transfer tracking (Story 3.5)
       
        utils/
           date.ts
@@ -342,6 +390,7 @@ pa-assistant/
 |------|---------|---------|-----------|
 | **Epic 1: Foundation & Core** | 1.1-1.14 | Auth, Users, Targets, Reviews, AI, RBAC, Config | \src/app/(auth)/*\, \src/app/api/auth/*\, \src/app/(dashboard)/targets/*\, \src/app/(dashboard)/reviews/*\, \src/lib/auth/*\, \src/lib/ai/*\, \src/components/auth/role-header.tsx\ |
 | **Epic 2: Dashboards & Production** | 2.1-2.6 | Dashboards, Security, Audit, Backup | \src/app/(dashboard)/dashboard/manager/*\, \src/app/(dashboard)/dashboard/hr-consolidation/*\, \src/lib/backup/*\, \src/lib/audit/*\ |
+| **Epic 3: Analytics & Insights** | 3.1-3.5 | Analytics, Historical Data, Visualizations, Transfer Management | \src/app/(dashboard)/dashboard/employee/*\, \src/app/(dashboard)/analytics/*\, \src/lib/analytics/*\, \src/components/charts/*\, \src/app/api/analytics/*\ |
 
 ---
 

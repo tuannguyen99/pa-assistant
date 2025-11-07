@@ -421,6 +421,12 @@ All three user segments share a common need: **connecting individual work to bro
    - Avoid need for external HR software (save $50-100K+ annually)
    - Reduce manager overtime during review season
 
+6. **Analytics & Insights:**
+   - Achieve 70%+ employee engagement with personal performance dashboards
+   - Achieve 80%+ manager adoption of team analytics for talent decisions
+   - Enable HR to generate board-ready reports in < 15 minutes (vs. days of manual work)
+   - Support data-driven talent decisions with historical trends and patterns
+
 ### User Success Metrics
 
 **For Managers:**
@@ -439,6 +445,8 @@ All three user segments share a common need: **connecting individual work to bro
 - **Content Update Frequency**: Guidelines updated at least quarterly
 - **Monitoring Efficiency**: Can generate completion report in < 5 minutes
 - **System Configuration**: AI backend can be switched without developer support
+- **Analytics Usage**: Board reports generated in < 15 minutes (target)
+- **Data Quality**: Company-wide analytics accuracy > 99%
 
 ### Key Performance Indicators (KPIs)
 
@@ -449,6 +457,12 @@ All three user segments share a common need: **connecting individual work to bro
 3. **User Satisfaction Score**: Average rating across all user types (target: 4.2/5.0)
 4. **AI Adoption Rate**: % of users actively using AI features (target: 75%)
 5. **Review Quality Score**: % of reviews meeting quality criteria - specific feedback, connected to goals (target: 85%)
+
+**Additional KPIs for Analytics Features:**
+
+6. **Dashboard Engagement Rate**: % of users actively using performance/analytics dashboards (target: 70%+)
+7. **Data-Driven Decision Rate**: % of managers using analytics for talent decisions (target: 80%+)
+8. **Historical Data Accuracy**: % accuracy of multi-year performance trends (target: 99%+)
 
 ---
 

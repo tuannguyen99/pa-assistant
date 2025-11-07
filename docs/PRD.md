@@ -99,6 +99,11 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 **Dashboard & Monitoring**
 - **FR011**: Managers shall access dashboard showing all direct reports with completion status indicators (Not Started, In Progress, Pending Review, Completed)
 - **FR012**: HR Admin shall create and edit company/department goals visible to all users during target setting and evaluation phases
+- **FR027**: Employees shall access personal performance dashboard displaying multi-year performance trends, goal achievement tracking over time, and career development insights
+- **FR028**: Managers shall access analytics dashboard showing team performance aggregates, individual contributor trends, performance distribution analysis, and historical comparisons even as team composition changes
+- **FR029**: System shall provide historical data visualization with year-over-year comparison charts, trend analysis with statistical significance, and custom date range reporting
+- **FR030**: HR Admin shall access advanced company-wide analytics including department performance comparisons, rank distribution analysis, average scores by department, and aggregate metrics for board presentations
+- **FR031**: System shall track and display employee departmental transfers, role changes history, and organizational restructuring with historical data preservation and audit trails
 
 **AI Integration & Help System**
 - **FR013**: HR Admin shall configure AI backend (Ollama local, Cloud API, or web-based tool with auto-open/prompt generation) without code deployment
@@ -129,6 +134,9 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 - **NFR005**: System shall implement **desktop-first responsive design** optimized for modern browsers with horizontal scrolling for wide tables
 - **NFR006**: System shall implement automated database backup with daily incremental backups and weekly full backups, stored in secure off-site location with 30-day retention minimum
 - **NFR007**: System shall preserve historical review data as read-only after fiscal year completion, enabling multi-year trend analysis and statistical reporting while preventing accidental modification of closed review cycles
+- **NFR008**: System shall optimize analytics queries and visualizations to handle 5+ years of historical data with response times < 3 seconds for standard reports and < 10 seconds for complex aggregations
+- **NFR009**: System shall implement lazy loading and pagination for large datasets in analytics dashboards to maintain performance with 200+ employees and multi-year history
+- **NFR010**: Chart visualizations shall comply with WCAG 2.1 AA standards including keyboard navigation, screen reader support, and high contrast mode for accessibility
 
 ### Database Management & Historical Data
 
@@ -216,6 +224,121 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 
 **Success Outcome:** Manager completes evaluations with reduced synthesis time, consistent scoring, and transparent AI-assisted commentary; department-level submission ready for HR consolidation.
 
+### User Journey: Employee Performance Trend Analysis *(FR027, FR029)*
+
+**Actor:** Software Engineer (Employee)
+
+**Scenario:** Employee reviews career progression using multi-year performance dashboard
+
+**Steps:**
+1. Employee logs in and navigates to "My Performance Dashboard"
+2. Dashboard displays performance overview:
+   - Multi-year performance trend chart showing scores from past review cycles
+   - Goal achievement rate over time (percentage of targets achieved at each difficulty level)
+   - Rank history visualization (A+, A, B+ progression)
+3. Employee selects custom date range to compare year-over-year performance *(historical visualization – FR029)*
+4. System displays year-over-year comparison:
+   - Side-by-side score comparison with statistical trend line
+   - Highlights areas of improvement and decline
+   - Shows difficulty level progression (taking on harder targets)
+5. Career development insights section shows:
+   - Recommended focus areas based on performance patterns
+   - Suggested skill development paths
+   - Comparison with role-level expectations
+6. Employee exports performance summary for career planning discussion with manager
+
+**Success Outcome:** Employee gains clear visibility into career progression, understands growth trajectory, and can proactively plan development with data-driven insights.
+
+### User Journey: Manager Team Analytics Review *(FR028, FR029, FR030)*
+
+**Actor:** Manager (Team Lead)
+
+**Scenario:** Manager analyzes team performance trends to inform talent management decisions
+
+**Steps:**
+1. Manager navigates to "Team Analytics Dashboard"
+2. Dashboard displays team overview:
+   - Team performance aggregates (average score, rank distribution)
+   - Individual contributor trends over time *(anonymized comparison – FR028)*
+   - Performance pattern identification (consistent performers, improvers, concerning trends)
+3. Manager selects year-over-year view *(historical visualization – FR029)*:
+   - Compares current team performance vs. previous fiscal year
+   - Identifies improvement trends and areas needing attention
+   - Statistical significance indicators show meaningful changes
+4. Manager filters by grade level to analyze performance by seniority
+5. Historical comparison shows team evolution even with roster changes *(FR028)*:
+   - Tracks team performance consistently despite personnel changes
+   - Identifies impact of new hires and departures
+6. Manager uses insights to:
+   - Plan targeted coaching for struggling team members
+   - Identify high performers for advancement opportunities
+   - Inform hiring and training budget requests
+
+**Success Outcome:** Manager makes data-driven talent decisions, identifies performance trends early, and allocates development resources effectively.
+
+### User Journey: HR Company-Wide Analytics & Board Reporting *(FR030, FR029)*
+
+**Actor:** HR Admin
+
+**Scenario:** HR prepares quarterly board presentation on company-wide performance trends
+
+**Steps:**
+1. HR Admin navigates to "Company Analytics Dashboard"
+2. Dashboard displays company-wide overview:
+   - Total employees reviewed across all departments
+   - Company-wide rank distribution chart (A+, A, B+, B, C percentages)
+   - Average scores by department with comparison
+   - Completion rates and timeline compliance
+3. HR Admin uses drill-down navigation:
+   - Company → Department → Manager → Individual Review
+   - Identifies outlier departments or teams
+4. HR Admin generates historical analysis *(FR029)*:
+   - Year-over-year company performance trends
+   - Department performance evolution over 3+ years
+   - Statistical analysis of rank distribution shifts
+5. HR Admin creates board report with one-click generator:
+   - Automated presentation with key metrics and visualizations
+   - Executive summary with trend insights
+   - Department spotlight: highest/lowest performers
+   - Recommendations for HR policy adjustments
+6. HR Admin validates data quality:
+   - Real-time calculation verification across all reviews
+   - Flags outliers or inconsistencies for investigation
+   - Reviews audit logs for administrative actions
+
+**Success Outcome:** HR delivers comprehensive, data-driven board presentation with minimal manual effort; board makes informed decisions on compensation, promotions, and HR strategy.
+
+### User Journey: Employee Transfer & Role Change Tracking *(FR031)*
+
+**Actor:** HR Admin & Manager
+
+**Scenario:** Employee transfers between departments mid-cycle; system preserves historical data and maintains review continuity
+
+**Steps:**
+1. HR Admin processes employee transfer:
+   - Employee moves from Engineering Dept to Product Dept
+   - Updates employee record with new department and manager
+   - System creates audit trail entry for transfer
+2. System automatically:
+   - Preserves historical performance data from Engineering Dept
+   - Maintains link to previous manager's reviews
+   - Transfers current-cycle review to new manager (Product Dept)
+   - Flags transfer in review with "Transferred mid-cycle" badge
+3. New manager (Product Dept) views transferred employee:
+   - Sees complete historical performance from previous department
+   - Reviews original targets set with previous manager
+   - Adds evaluation notes acknowledging partial-cycle context
+4. Employee views their dashboard:
+   - Historical performance chart shows seamless data across departments
+   - Role change history timeline displays all transitions
+   - Career progression remains intact despite organizational changes
+5. End-of-cycle reporting:
+   - Employee appears in both departments' reports (prorated)
+   - Historical data preserved for both manager and employee access
+   - Audit trail shows full transfer history with timestamps
+
+**Success Outcome:** Employee transfers and role changes are tracked accurately, historical data is preserved, and review continuity is maintained without manual data reconciliation.
+
 ### Edge Case Mini-Journeys *(Risk & Validation Enhancements)*
 
 1. **Invalid Weight Total (FR004 Validation Failure):** Employee modifies a target, resulting total weight = 105%. System blocks save, highlights offending rows, shows corrective tooltip, and prevents submission until total = 100%.
@@ -299,7 +422,14 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 - Implement security, audit logging, and data encryption
 - Production deployment preparation and testing
 
-**Total Stories: 20 stories (Finalized)**
+**Epic 3: Analytics & Insights (Actual: 5 stories)**
+- Implement employee dashboard with multi-year performance trends
+- Build manager analytics dashboard (team trends, aggregates, historical comparisons)
+- Create historical data visualization and year-over-year charts
+- Develop advanced HR reporting and company-wide analytics
+- Implement advanced employee data management (departmental transfers, role changes history)
+
+**Total Stories: 25 stories (Updated)**
 
 > **Note:** Detailed epic breakdown with full story specifications is available in [epics.md](./epics.md)
 
@@ -308,18 +438,13 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 ## Out of Scope
 
 - Automated quarterly reminder emails (manual reminders for MVP)
-- Employee dashboard with multi-year performance trends
-- Manager analytics dashboard (team trends, aggregates, historical comparisons)
-- Historical data visualization and year-over-year charts
 - Peer feedback / 360-degree review integration
 - Export to PDF/Excel functionality (employee data import/add is included in MVP)
-- Advanced HR reporting and company-wide analytics
 - Mobile responsive design (desktop-first for MVP)
 - Multi-language support (English-only for MVP)
 - Dark mode / theme customization (glassmorphism light theme for MVP)
 - Advanced AI features (auto-suggested KPIs, sentiment analysis)
 - Integration with existing HR/payroll systems (direct sync)
-- Advanced employee data management (departmental transfers, role changes history)
 - Advanced notification system
 - Collaborative commenting/feedback threads
 - Custom workflow configuration per department

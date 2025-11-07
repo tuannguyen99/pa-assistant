@@ -74,15 +74,16 @@ This roadmap outlines the strategic evolution of pa-assistant beyond the MVP, pr
 
 ---
 
-## Phase 2: Analytics & Insights (6-12 Months Post-Launch)
+## Phase 2: Advanced Collaboration (12-18 Months Post-Launch)
 
-**Timeline:** Q4 2026 - Q1 2027
-**Business Value:** Transform performance data into actionable insights for management
-**Success Criteria:** Management decision-making supported by data, improved review quality
+**Timeline:** Q2-Q4 2027
+**Business Value:** Enhance review quality through collaborative input
+**Success Criteria:** Improved review quality scores, higher stakeholder engagement
+**Note:** Analytics & Insights features (employee/manager dashboards, historical visualization, HR analytics, employee transfer tracking) have been moved to MVP scope.
 
 ### Key Features
 
-#### 2.1 Employee Performance Dashboard
+#### 3.1 Peer Feedback Integration
 **Business Impact:** Enable employees to track career progression
 **Technical Complexity:** Medium
 **Dependencies:** Historical data accumulation (6+ months)
@@ -94,6 +95,8 @@ This roadmap outlines the strategic evolution of pa-assistant beyond the MVP, pr
 - Goal achievement tracking over time
 - Career development recommendations
 - Personal performance insights
+
+**Note:** This feature has been **moved to MVP scope** (Epic 3: Analytics & Insights).
 
 #### 2.2 Manager Analytics Dashboard
 **Business Impact:** Provide managers with team performance insights
@@ -108,6 +111,8 @@ This roadmap outlines the strategic evolution of pa-assistant beyond the MVP, pr
 - Performance distribution analysis
 - Predictive insights for team planning
 
+**Note:** This feature has been **moved to MVP scope** (Epic 3: Analytics & Insights).
+
 #### 2.3 Historical Data Visualization
 **Business Impact:** Enable year-over-year performance analysis
 **Technical Complexity:** Medium
@@ -121,10 +126,14 @@ This roadmap outlines the strategic evolution of pa-assistant beyond the MVP, pr
 - Performance pattern identification
 - Custom date range reporting
 
+**Note:** This feature has been **moved to MVP scope** (Epic 3: Analytics & Insights).
+
 ### Phase 2 Success Metrics
 - Management usage rate > 70%
 - Data-driven decisions > 60% of management actions
 - Performance improvement insights adoption > 50%
+
+**Note:** These metrics are now part of MVP success criteria.
 
 ---
 
@@ -203,20 +212,7 @@ This roadmap outlines the strategic evolution of pa-assistant beyond the MVP, pr
 - Conflict resolution for data discrepancies
 - Audit trails for all data changes
 
-#### 4.2 Advanced Employee Data Management
-**Business Impact:** Support complex organizational changes
-**Technical Complexity:** Medium-High
-**Dependencies:** HR system integration
-**Implementation:** 6-8 weeks
-**Risk Level:** Medium
-
-**Detailed Requirements:**
-- Department transfer tracking
-- Role change history
-- Organizational restructuring support
-- Historical data preservation
-
-#### 4.3 Multi-Language Support
+#### 4.2 Multi-Language Support
 **Business Impact:** Enable global expansion
 **Technical Complexity:** Medium
 **Dependencies:** Internationalization framework
@@ -228,6 +224,8 @@ This roadmap outlines the strategic evolution of pa-assistant beyond the MVP, pr
 - RTL language support preparation
 - Localized date/number formatting
 - Cultural adaptation of workflows
+
+**Note:** Advanced Employee Data Management (departmental transfers, role changes history) has been **moved to MVP scope** (Epic 3: Analytics & Insights - Story 3.5).
 
 ### Phase 4 Success Metrics
 - Integration completion rate > 80% of target systems

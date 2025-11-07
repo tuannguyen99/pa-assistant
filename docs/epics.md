@@ -386,6 +386,118 @@ So that I can prepare board presentations and manage the review cycle lifecycle.
 
 ---
 
+## Epic 3: Analytics & Insights
+
+**Expanded Goal:** Transform performance data into actionable insights through employee career tracking, manager team analytics, and company-wide reporting capabilities. Enable data-driven talent management decisions at all organizational levels.
+
+**Value Proposition:** Users gain deep visibility into performance trends, career progression patterns, and organizational performance, enabling proactive talent management and strategic workforce planning.
+
+**Story Breakdown:**
+
+**Story 3.1: Employee Performance Dashboard - Multi-Year Trends**
+
+As an employee,
+I want to view my performance history across multiple years with trend visualization,
+So that I can understand my career progression and identify areas for development.
+
+**Acceptance Criteria:**
+1. Dashboard displays multi-year performance trend chart (line/bar chart showing scores from past fiscal years)
+2. Goal achievement rate visualization over time (percentage of targets achieved by difficulty level)
+3. Rank history timeline showing progression (A+, A, B+, etc.) across years
+4. Performance metrics include: average score, rank, difficulty level progression
+5. Custom date range selector for specific period analysis
+6. Side-by-side comparison view for year-over-year analysis
+7. Career development insights section with recommended focus areas
+8. Export functionality for performance summary (PDF/CSV)
+9. Responsive visualization adapting to data availability (handles first-year users gracefully)
+
+**Prerequisites:** Epic 1 complete, Epic 2 complete (minimum 1 fiscal year of historical data)
+
+**Story 3.2: Historical Data Visualization & Year-Over-Year Charts**
+
+As a user (employee, manager, or HR admin),
+I want year-over-year comparison charts with statistical trend analysis,
+So that I can identify meaningful performance patterns and changes over time.
+
+**Acceptance Criteria:**
+1. Year-over-year comparison charts for individual, team, and company-wide data
+2. Statistical significance indicators (trend lines, confidence intervals where applicable)
+3. Custom date range reporting with flexible period selection
+4. Performance pattern identification (consistent performer, improver, concerning trend badges)
+5. Drill-down capability from high-level trends to detailed review data
+6. Comparison views: side-by-side, overlay, stacked visualizations
+7. Data export for all visualizations (CSV, JSON)
+8. Visualization accessibility compliance (WCAG 2.1 AA for charts)
+9. Performance optimization for large historical datasets (lazy loading, pagination)
+
+**Prerequisites:** Story 3.1
+
+**Story 3.3: Manager Analytics Dashboard - Team Trends & Aggregates**
+
+As a manager,
+I want a team analytics dashboard showing aggregated performance trends and individual contributor patterns,
+So that I can make informed talent management decisions and identify development opportunities.
+
+**Acceptance Criteria:**
+1. Team performance aggregates: average score, rank distribution chart, completion rates
+2. Individual contributor trend lines (anonymized comparison view)
+3. Performance distribution analysis (bell curve, outlier identification)
+4. Historical comparison showing team evolution despite roster changes
+5. Filter controls: by grade level, by review cycle, by performance band
+6. Predictive insights: team members at risk, high performers ready for advancement
+7. Drill-down navigation: team view → individual review details
+8. Export team summary report for leadership meetings
+9. Real-time updates as team members complete reviews
+10. Multi-year team comparison (e.g., current team vs. same team 1 year ago)
+
+**Prerequisites:** Story 3.2, Story 2.1 (Manager Dashboard foundation)
+
+**Story 3.4: Advanced HR Reporting & Company-Wide Analytics**
+
+As an HR Admin,
+I want comprehensive company-wide analytics with department comparisons and board-ready reports,
+So that I can provide executive leadership with data-driven insights for strategic HR decisions.
+
+**Acceptance Criteria:**
+1. Company-wide performance overview: total employees reviewed, rank distribution, average scores by department
+2. Department comparison matrix with sortable metrics (average score, completion rate, rank distribution)
+3. One-click board report generator creating presentation materials (PowerPoint/PDF export)
+4. Drill-down navigation: Company → Department → Manager → Individual Review
+5. Outlier detection and data quality flagging (statistical anomalies, incomplete data)
+6. Historical trend analysis across 3+ fiscal years
+7. Rank distribution shift analysis (year-over-year changes in grade distributions)
+8. Custom report builder with metric selection and filtering
+9. Scheduled report generation and email delivery
+10. Audit log integration showing all administrative actions in context
+11. Export formats: Excel, PDF, CSV, JSON for further analysis
+12. Visualization dashboard with interactive charts (drill-down, filters, time-range selectors)
+
+**Prerequisites:** Story 3.3, Story 2.6 (HR Consolidation Dashboard foundation)
+
+**Story 3.5: Advanced Employee Data Management - Transfer & Role History**
+
+As an HR Admin,
+I want to track employee departmental transfers and role changes with complete historical preservation,
+So that performance data remains accurate and continuous despite organizational changes.
+
+**Acceptance Criteria:**
+1. Employee transfer workflow: update department/manager with effective date
+2. Audit trail creation for all transfers (old dept/manager → new dept/manager with timestamp)
+3. Historical data preservation: all previous reviews remain linked to employee profile
+4. Mid-cycle transfer handling: current review transferred to new manager with "Transferred mid-cycle" flag
+5. Role change history timeline displayed on employee profile
+6. Manager access to transferred employee's complete historical reviews
+7. Department reporting accuracy: transferred employees appear in both dept reports (prorated by time)
+8. Employee dashboard shows seamless performance history across departments
+9. Transfer impact analysis: performance before/after transfer visualization
+10. Bulk transfer support for organizational restructuring
+11. Transfer notification to old and new managers
+12. Review continuity: targets set with old manager remain visible and editable by new manager
+
+**Prerequisites:** Story 1.3 (Employee Data Management foundation), Story 3.1 (historical data infrastructure)
+
+---
+
 ## Story Guidelines Reference
 
 **Story Format:**
