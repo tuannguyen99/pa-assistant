@@ -381,6 +381,8 @@ So that I can prepare board presentations and manage the review cycle lifecycle.
 8. Flagging of outliers or data quality issues
 9. Audit log viewing for all administrative actions
 10. Implementation follows UX spec Section 6.1 HR Consolidation Dashboard
+11. "Submit to Board" action available to HR Admin when all departments reach hr_review_complete state, creates board review package and transitions reviews to awaiting board approval status
+12. Board approval action (available only to GD/BOM roles) displays company-wide performance summary and allows authorized approval, transitions all reviews from hr_review_complete to board_approved state, captures board meeting date/notes, logs approval timestamp and approver identity, requires confirmation dialog with "This action is final and cannot be undone" warning
 
 **Prerequisites:** Story 2.1, Story 1.12, Story 2.5
 
