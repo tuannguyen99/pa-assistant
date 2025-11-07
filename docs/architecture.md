@@ -1,9 +1,9 @@
-# pa-assistant Architecture Document
+# pa-system Architecture Document
 
-**Project:** pa-assistant  
+**Project:** pa-system (Performance Assessment System)  
 **Author:** Winston (Architect Agent)  
 **Date:** November 5, 2025  
-**Version:** 1.0  
+**Version:** 1.1  
 **Project Level:** 2 (Greenfield)  
 **Target Scale:** MVP - 200 users (pilot: 10 users)
 
@@ -11,13 +11,18 @@
 
 ## Executive Summary
 
-This document defines the technical architecture for **pa-assistant**, a modern performance review management system that replaces Excel-based workflows with an AI-enhanced web application. The architecture leverages Next.js 14+ App Router for a type-safe, full-stack TypeScript solution with pluggable authentication (username/password now, LDAP future), dual-mode AI integration (web-based and local Ollama), and comprehensive RBAC with multi-role support.
+This document defines the technical architecture for **pa-system**, a comprehensive performance management platform that replaces manual Excel-based workflows with structured, auditable, and data-driven digital processes. The architecture leverages Next.js 14+ App Router for a type-safe, full-stack TypeScript solution with pluggable authentication (username/password now, LDAP future), optional AI integration (web-based and local Ollama), and comprehensive RBAC with multi-role support.
+
+**Core System Purpose:**
+pa-system is primarily a **structured performance management system** that digitizes target-setting, evaluation, analytics, and audit workflows. AI writing assistance is an optional enhancement feature—the system is fully functional without AI enabled.
 
 **Key Architectural Principles:**
+- **Data Integrity First:** Complete audit trails, read-only archives, automated validation
+- **Process Standardization:** Enforce consistent workflows and state machines
 - **Developer Productivity:** Full TypeScript stack with type-safe database access via Prisma
 - **Scalability:** SQLite for MVP, clear migration path to PostgreSQL for production
-- **Security First:** Role-based access control, audit logging, data encryption
-- **AI Transparency:** Clear labeling of AI-assisted content with full user control
+- **Security & Auditability:** Role-based access control, comprehensive logging, data encryption
+- **Optional AI Transparency:** When enabled, clear labeling of AI-assisted content with full user control
 - **Maintainability:** Consistent naming conventions, error handling, and testing patterns
 
 ---
@@ -118,7 +123,7 @@ npx prisma generate
 ## Complete Project Structure
 
 ```
-pa-assistant/
+pa-system/
  src/
     app/                          # Next.js App Router
        (auth)/                   # Auth route group

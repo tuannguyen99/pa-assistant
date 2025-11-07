@@ -1,5 +1,6 @@
-﻿# pa-assistant Product Requirements Document (PRD)
+﻿# pa-system Product Requirements Document (PRD)
 
+**Product Name:** Performance Assessment System (pa-system)
 **Author:** BMad
 **Date:** 2025-11-02
 **Project Level:** 2
@@ -7,19 +8,56 @@
 
 ---
 
+## Product Overview
+
+**pa-system** is a comprehensive performance management system that digitizes and streamlines the entire performance review lifecycle—from goal setting to evaluation and analytics. The system replaces manual Excel-based workflows with a structured, auditable, and data-driven platform that ensures fairness, transparency, and efficiency across the organization.
+
+### Core Value Proposition
+
+**Primary Purpose:** Transform manual, error-prone performance review processes into a modern, structured system that provides:
+1. **Process Standardization** - Enforce consistent workflows and data structures across all departments
+2. **Data Integrity & Auditability** - Maintain complete history with tamper-proof audit trails
+3. **Analytics & Insights** - Enable data-driven talent decisions through multi-year trend analysis
+4. **Role-Based Collaboration** - Support complex organizational hierarchies with clear permission boundaries
+5. **Optional AI Writing Assistance** - Provide AI-powered writing support as an optional enhancement (not required for core functionality)
+
+**What Sets pa-system Apart:**
+- **Excel-to-Digital Migration** - Preserves familiar workflows while adding structure and intelligence
+- **Historical Data Preservation** - Multi-year performance analytics with read-only archived data
+- **Enterprise-Ready RBAC** - Supports complex multi-role scenarios and delegation
+- **On-Premise Deployment** - Complete data sovereignty and security control
+- **Configurable AI Backend** - AI assistance is optional; system fully functional without it
+
 ## Goals and Background Context
 
 ### Goals
 
-- **Reduce review cycle time by 75%** - Cut manager review time from 20-40 hours to 5-10 hours and employee self-review time from 1-2 days to 2-4 hours
-- **Achieve 95% on-time completion rate** - Enable timely completion of all performance reviews within designated review periods
-- **Maintain review authenticity with 70%+ AI feature adoption** - Position AI as a transparent writing assistant that preserves authenticity while improving efficiency
+1. **Digitize and Standardize Performance Management** - Replace Excel-based chaos with structured, auditable digital workflows
+2. **Reduce review cycle time by 75%** - Cut manager review time from 20-40 hours to 5-10 hours and employee self-review time from 1-2 days to 2-4 hours through automation and structured data entry
+3. **Achieve 95% on-time completion rate** - Enable timely completion through clear workflows, automated notifications, and progress tracking
+4. **Enable data-driven talent decisions** - Provide multi-year analytics and historical comparisons for strategic HR planning
+5. **Maintain review authenticity and transparency** - Ensure all evaluations are traceable with complete audit trails; AI assistance is clearly marked and optional
 
 ### Background Context
 
-The company's annual performance review process has reached a critical breaking point. With 200 employees following the Japanese fiscal year calendar (April-May for target setting, March-April for evaluation), the current Excel-based system creates unsustainable burdens: managers spend 20-40 hours per cycle evaluating 30-40 direct reports, while employees struggle for 1-2 days to articulate their achievements professionally.
+The company's annual performance review process has reached a critical breaking point. With 200 employees following the Japanese fiscal year calendar (April-May for target setting, March-April for evaluation), the current **manual Excel-based system** creates unsustainable operational and strategic problems:
 
-The core problem is lack of structured support. Excel provides no guidance for writing professional assessments, no synthesis of multiple feedback sources, and no connection to company goals. This leads to rushed, generic reviews that directly impact salary and bonuses—creating fairness concerns and retention risks. As the company scales, this manual process becomes exponentially more burdensome, threatening to collapse under its own weight while competitors gain advantages through modern HR technology.
+**Operational Challenges:**
+- Managers spend 20-40 hours per cycle manually evaluating 30-40 direct reports
+- Employees struggle for 1-2 days writing self-reviews without guidance or structure
+- No standardized process or data validation leads to inconsistent review quality
+- Excel files scattered across departments with no version control or audit trail
+- Manual score calculations prone to human error
+- No historical data tracking for career progression analysis
+
+**Strategic Risks:**
+- **Lack of structured support:** Excel provides no guidance for writing professional assessments, no validation of scoring formulas, and no connection to company goals
+- **Data integrity issues:** No audit trail of changes, manual data entry errors, lost files
+- **Scalability crisis:** As the company grows, the manual process becomes exponentially more burdensome and error-prone
+- **Fairness concerns:** Inconsistent review quality and rushed evaluations directly impact salary and bonuses, creating retention risks
+- **No analytics capability:** Cannot identify performance trends, high performers, or areas needing development investment
+
+**The Core Problem:** The company needs a **structured, digital performance management system** that enforces data integrity, provides audit trails, enables analytics, and scales with organizational growth. AI writing assistance is a valuable add-on feature, but the primary need is replacing manual Excel workflows with enterprise-grade software.
 
 ---
 
@@ -106,7 +144,7 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 - **FR031**: System shall track and display employee departmental transfers, role changes history, and organizational restructuring with historical data preservation and audit trails
 
 **AI Integration & Help System**
-- **FR013**: HR Admin shall configure AI backend (Ollama local, Cloud API, or web-based tool with auto-open/prompt generation) without code deployment
+- **FR013**: HR Admin shall configure AI backend (Ollama local, Cloud API, or web-based tool with auto-open/prompt generation) without code deployment. **AI assistance is optional; system remains fully functional without AI features.**
 - **FR014**: System shall provide accessible help pages with process flows, definitions, examples, and guidance throughout all workflows
 
 **HR Admin Configuration**
