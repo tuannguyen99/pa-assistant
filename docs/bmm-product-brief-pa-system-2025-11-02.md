@@ -491,7 +491,7 @@ All three user segments share a common need: **connecting individual work to bro
 ### Core Features (Must Have)
 
 **1. User Authentication & Role Management**
-- Login for 3 roles: Employee, Manager, HR Admin
+- Login for 5 roles: Employee, Manager, HR Admin, Board of Managers, General Director
 - Basic permissions and data access control
 - Employee grade/level tracking (APE1/C4, APE2/D1, etc.)
 
