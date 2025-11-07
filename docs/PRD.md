@@ -112,6 +112,7 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 
 **Target Setting Workflow**
 - **FR004**: Employees shall create 3-5 performance targets with task description, KPI, weight percentage (auto-validated to total 100%), and difficulty level (L1-L3), with ability to modify targets at mid-year and during self-evaluation (modifications flagged and sent to manager for review)
+  - **Difficulty Levels:** L1 (highest complexity) = 1.25, L2 (moderate) = 1.0, L3 (lowest) = 0.75
 - **FR005**: Managers shall review employee targets with ability to send feedback and request revisions, then submit department targets to HR for alignment verification
 - **FR005a**: HR shall review all department targets to verify quality and alignment with company targets, with ability to send feedback to managers for employee updates
 - **FR005b**: System shall support mid-year target setting period where all employees can update their targets following the same review workflow (employee → manager → HR)
@@ -119,6 +120,7 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 
 **Performance Evaluation Workflow**
 - **FR007**: System shall automatically calculate target scores using formula: Total Points = Weight × Difficulty × Rating
+  - Where Difficulty values are: L1 = 1.25, L2 = 1.0, L3 = 0.75
 - **FR008**: System shall automatically convert final scores to performance ranks based on configurable grade-tier mappings (e.g., APE2/D1 vs APE1/C4). Rank intervals must use validated non-overlapping numeric ranges with half-open form `[min, max)` except the top band which is fully inclusive `[min, max]` to avoid precision gaps. Example Engineer tier mapping (illustrative only):
     - A+: [3.75, 4.50]
     - A:  [3.25, 3.75)
@@ -223,11 +225,11 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 1. Employee logs in and sees dashboard with "Self-Review Due" notification *(dashboard visibility – FR011 indirect; journey focus)*
 2. Employee opens current review period and sees approved targets from April *(target storage – FR006)*
 3. For each target, employee performs a structured evaluation:
-  - Views target description, KPI, weight (%), difficulty *(target definition – FR004)*
+  - Views target description, KPI, weight (%), difficulty (L1/L2/L3) *(target definition – FR004)*
   - **Optional modification of target fields** (task, KPI, weight, difficulty) if changed priorities *(mid-year / evaluation modification flow – FR004, FR005b); system flags & notifies manager (FR009)*
   - Validates total weight still equals 100% *(weight validation – FR004)*
   - Enters self-assessment rating (1–5) *(rating capture – FR009)*
-  - System auto-calculates Total Points = Weight × Difficulty × Rating *(score formula – FR007)*
+  - System auto-calculates Total Points = Weight × Difficulty × Rating, where Difficulty = L1 (1.25), L2 (1.0), or L3 (0.75) *(score formula – FR007)*
   - Enters factual bullet points for Result Explanation *(raw input capture – FR009)*
   - Clicks "Get AI Help" → AI transforms bullets into professional narrative *(AI assistance – FR009)*
   - Output marked "AI-assisted" side-by-side with original bullets *(transparency – FR009)*
@@ -251,7 +253,7 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 3. For each target:
   - Reviews employee rating & narrative *(input consumption – FR010)*
   - Enters manager rating (1–5) *(manager assessment capture – FR010)*
-  - Auto-calculated Total Points updates (Weight × Difficulty × Rating) *(formula reuse – FR007)*
+  - Auto-calculated Total Points updates (Weight × Difficulty × Rating), using Difficulty values L1=1.25, L2=1.0, L3=0.75 *(formula reuse – FR007)*
   - Enters per-target manager comment *(feedback input – FR010)*
   - (Optional) Invokes AI Synthesis to combine employee narrative + manager comments *(AI synthesis – FR010)*
   - Accepts/edits AI-assisted output; system logs AI-assisted acceptance *(audit transparency – FR010 + FR019)*
@@ -391,11 +393,11 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 | Term | Definition |
 |------|------------|
 | **RBAC** | Role-Based Access Control governing permissions by assigned roles and reviewer relationships. |
-| **Reviewer Scoping** | Limiting a manager’s edit/view rights strictly to assigned reviewees (direct reports or delegated). |
+| **Reviewer Scoping** | Limiting a manager's edit/view rights strictly to assigned reviewees (direct reports or delegated). |
 | **AI-Assisted** | Content generated or synthesized with AI; always marked and auditable with original inputs retained. |
 | **Target** | A performance commitment defined by task, KPI, weight, and difficulty for the fiscal cycle. |
-| **Difficulty (L1–L3)** | Relative challenge level (L1 highest / most complex, L3 lowest) influencing score weighting fairness. |
-| **Total Points** | Computed per target: Weight × Difficulty × Rating (FR007). |
+| **Difficulty (L1–L3)** | Relative challenge level with numeric weights: L1 (highest complexity) = 1.25, L2 (moderate) = 1.0, L3 (lowest) = 0.75. |
+| **Total Points** | Computed per target: Weight × Difficulty × Rating, where Difficulty is the numeric value (1.25, 1.0, or 0.75) corresponding to the selected level (FR007). |
 | **Rank Conversion** | Mapping from final numeric score to rank label based on grade-tier configured ranges (FR008, FR025). |
 | **Archived** | Read-only state for reviews after fiscal year closure; modifications disallowed except audited HR overrides (FR010e, NFR007). |
 | **Fiscal Year (FY)** | Review cycle period (e.g., Apr–Mar) determining target setting and evaluation windows (FR022). |
