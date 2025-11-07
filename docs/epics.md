@@ -337,11 +337,18 @@ I want production-ready deployment configuration,
 So that the system can handle 200 concurrent users reliably.
 
 **Acceptance Criteria:**
-1. Docker containerization complete
-2. Performance optimization implemented
-3. Load testing completed
-4. Backup and recovery procedures
-5. Monitoring and logging configured
+1. Docker Compose file configured with all services (Next.js, PostgreSQL, optional Ollama)
+2. Environment variable documentation complete with example .env.production file including all required variables
+3. Load test confirms 200 concurrent users with <2s page load and <3s API response times (NFR001, NFR004)
+4. Performance optimization implemented: database indexes, query optimization, caching strategy, image optimization
+5. Monitoring dashboards operational with health checks, error rates, response times, and database metrics
+6. Backup automation configured with daily incremental backups and weekly full backups (cross-reference Story 2.3a)
+7. Database migration path validated: SQLite→PostgreSQL with Prisma datasource switch tested in staging environment
+8. Production logging configured with log rotation, structured logging (JSON format), and log aggregation
+9. SSL/TLS certificates configured for HTTPS with automatic renewal setup
+10. Rollback procedures documented with database restore testing and application version rollback
+11. Performance benchmarking completed: baseline metrics established for response times, database queries, and memory usage
+12. Security hardening checklist completed: rate limiting, CORS configuration, secure headers, input validation
 
 **Prerequisites:** Story 2.3
 
