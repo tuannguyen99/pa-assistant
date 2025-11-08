@@ -316,6 +316,7 @@ export default function UserManagementPage() {
                   onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
                   required
+                  autoComplete="off"
                 />
               </div>
               <div>
@@ -329,6 +330,7 @@ export default function UserManagementPage() {
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
                   required
+                  autoComplete="off"
                 />
               </div>
               <div>
@@ -343,6 +345,7 @@ export default function UserManagementPage() {
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
                   required
                   minLength={6}
+                  autoComplete="new-password"
                 />
               </div>
               <div>
@@ -374,6 +377,7 @@ export default function UserManagementPage() {
                   value={formData.grade}
                   onChange={(e) => setFormData(prev => ({ ...prev, grade: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
+                  autoComplete="off"
                 />
               </div>
               <div>
@@ -386,6 +390,7 @@ export default function UserManagementPage() {
                   value={formData.department}
                   onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
+                  autoComplete="off"
                 />
               </div>
               <div className="flex space-x-4 mt-6">
@@ -459,6 +464,7 @@ export default function UserManagementPage() {
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
                   minLength={6}
+                  autoComplete="new-password"
                 />
               </div>
               <div>
