@@ -1,16 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getUser, authOptions } from '../../src/auth.config'
 
-// Mock prisma
-const mockPrisma = {
-  user: {
-    findUnique: vi.fn()
-  }
-}
-
+// Mock prisma BEFORE importing auth.config
 vi.mock('../../src/lib/prisma', () => ({
-  prisma: mockPrisma
+  prisma: {
+    user: {
+      findUnique: vi.fn()
+    }
+  }
 }))
+
+import { getUser, authOptions } from '../../src/auth.config'
+import { prisma } from '../../src/lib/prisma'
+
+const mockPrisma = prisma as any
 
 describe('Authentication', () => {
   beforeEach(() => {
