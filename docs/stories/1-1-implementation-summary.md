@@ -168,5 +168,5 @@ npm run dev
 \\\
 
 Test credentials:
-- Email: admin@example.com
-- Password: password123
+- Email: admin@prdcv.com
+- Password: Pr&dcv@2025
