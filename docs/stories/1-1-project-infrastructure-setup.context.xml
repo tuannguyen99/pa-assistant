@@ -1,0 +1,116 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1</storyId>
+    <title>Project Infrastructure Setup</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-08</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-1-project-infrastructure-setup.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>As a developer</asA>
+    <iWant>I want project infrastructure established</iWant>
+    <soThat>So that development can begin with proper tooling and deployment setup.</soThat>
+    <tasks>- [ ] Task 1: Initialize Next.js project with TypeScript and Tailwind (AC: 1,4)
+  - [ ] Run npx create-next-app command with specified options
+  - [ ] Install core dependencies (Prisma, NextAuth, etc.)
+  - [ ] Install shadcn/ui
+  - [ ] Install dev dependencies (Vitest, Playwright, etc.)
+- [ ] Task 2: Set up database schema (AC: 2)
+  - [ ] Initialize Prisma with SQLite
+  - [ ] Create schema.prisma with all models from data-architecture.md
+  - [ ] Run prisma generate
+  - [ ] Create initial migration
+- [ ] Task 3: Implement basic authentication (AC: 3)
+  - [ ] Configure NextAuth.js with credentials provider
+  - [ ] Set up JWT configuration
+  - [ ] Create basic login/register pages
+- [ ] Task 4: Configure development environment (AC: 4)
+  - [ ] Set up environment variables (.env.local)
+  - [ ] Configure ESLint and Prettier
+  - [ ] Set up Vitest for unit testing
+  - [ ] Set up Playwright for E2E testing
+- [ ] Task 5: Establish CI/CD pipeline (AC: 5)
+  - [ ] Create GitHub Actions workflow for CI
+  - [ ] Configure automated testing
+  - [ ] Set up deployment scripts</tasks>
+  </story>
+
+  <acceptanceCriteria>1. Git repository initialized with proper structure
+2. Database schema designed and implemented (SQLite for MVP)
+3. Basic authentication system implemented (JWT-based)
+4. Development environment configured and running
+5. Basic CI/CD pipeline established</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>docs/architecture/project-initialization.md</path>
+        <title>Project Initialization</title>
+        <section>Post-Initialization Setup</section>
+        <snippet>Provides exact commands for initializing Next.js project with TypeScript, Tailwind, and installing core dependencies including Prisma, NextAuth, shadcn/ui, and dev tools like Vitest and Playwright.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture/technology-stack.md</path>
+        <title>Technology Stack</title>
+        <section>Frontend Framework, Database, ORM, Authentication</section>
+        <snippet>Specifies Next.js 14.2.8 with App Router, TypeScript 5.3+, Tailwind CSS 3.4.1, shadcn/ui, Prisma 5.7+ with SQLite, NextAuth.js v5.0.0-beta.20+, Vitest 1.0+, Playwright 1.40+.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture/data-architecture.md</path>
+        <title>Data Architecture</title>
+        <section>Complete Prisma Schema</section>
+        <snippet>Defines all database models including User, TargetSetting, Review, RoleAssignment, AuditEntry, FiscalYear, Department, EmployeeType, ScoreMapping, CompanyGoal, AIConfig with relationships and constraints.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/epics.md</path>
+        <title>pa-assistant - Epic Breakdown</title>
+        <section>Story 1.1: Project Infrastructure Setup</section>
+        <snippet>Defines acceptance criteria for project setup including Git repo, database schema, authentication, development environment, and CI/CD pipeline.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/PRD.md</path>
+        <title>pa-system Product Requirements Document</title>
+        <section>Goals and Background Context</section>
+        <snippet>Establishes project goals including digitizing performance management, reducing review cycle time by 75%, achieving 95% on-time completion, and enabling data-driven talent decisions.</snippet>
+      </artifact>
+    </docs>
+    <code></code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next" version="14.2.8" />
+        <package name="react" />
+        <package name="typescript" version="5.3+" />
+        <package name="tailwindcss" version="3.4.1" />
+        <package name="shadcn-ui" version="2.0+" />
+        <package name="prisma" version="5.7+" />
+        <package name="next-auth" version="5.0.0-beta.20+" />
+        <package name="zustand" version="4.4+" />
+        <package name="tanstack/react-query" version="5.12+" />
+        <package name="react-hook-form" />
+        <package name="zod" version="3.22+" />
+        <package name="recharts" version="2.10+" />
+        <package name="vitest" version="1.0+" />
+        <package name="playwright" version="1.40+" />
+        <package name="date-fns" version="3.0+" />
+        <package name="winston" version="3.11+" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>Use Next.js App Router for modern architecture, TypeScript for type safety, Tailwind CSS for styling, shadcn/ui for accessible components, Prisma ORM for database operations, NextAuth.js for authentication, SQLite for MVP database. Follow src/ directory structure with app router, use path aliases @/* for imports, organize components in src/components/ui/ for shadcn/ui.</constraints>
+  <interfaces></interfaces>
+  <tests>
+    <standards>Use Vitest for unit testing with Jest-compatible API, Playwright for E2E testing with cross-browser support. Follow testing-strategy.md for patterns and locations.</standards>
+    <locations>tests/unit/, tests/e2e/, src/**/__tests__/</locations>
+    <ideas>
+      <idea ac="1">Test Git repository structure matches expected layout with proper directories and initial files.</idea>
+      <idea ac="2">Test database schema creation and migration execution, verify all tables and relationships are created correctly.</idea>
+      <idea ac="3">Test authentication flow including login, registration, JWT token generation and validation.</idea>
+      <idea ac="4">Test development environment setup including environment variables loading, linting, and test execution.</idea>
+      <idea ac="5">Test CI/CD pipeline execution including automated testing and deployment script validation.</idea>
+    </ideas>
+  </tests>
+</story-context>
