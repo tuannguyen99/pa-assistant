@@ -59,9 +59,29 @@ export const authOptions: NextAuthOptions = {
           if (!user) return null
           const passwordsMatch = await bcrypt.compare(password, user.passwordHash || '')
 
-          if (passwordsMatch) return {
-            ...user,
-            roles: user.roles as unknown as string[]
+          if (passwordsMatch) {
+            // Parse roles to ensure it's an array
+            let roles: string[] = []
+            if (Array.isArray(user.roles)) {
+              roles = user.roles
+            } else if (typeof user.roles === 'string') {
+              try {
+                roles = JSON.parse(user.roles)
+                if (!Array.isArray(roles)) {
+                  roles = []
+                }
+              } catch (e) {
+                console.error('Failed to parse roles JSON in auth config:', e)
+                roles = []
+              }
+            } else if (user.roles) {
+              roles = [user.roles].filter(Boolean)
+            }
+
+            return {
+              ...user,
+              roles: roles
+            }
           }
         }
 

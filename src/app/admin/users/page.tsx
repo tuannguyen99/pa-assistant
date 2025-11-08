@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import Header from '@/components/Header'
 
 const ROLE_OPTIONS = [
   { value: 'employee', label: 'Employee' },
@@ -41,8 +42,14 @@ export default function UserManagementPage() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login')
+    } else if (status === 'authenticated') {
+      // Check if user has hr_admin role
+      const userRoles = session?.user?.roles || []
+      if (!userRoles.includes('hr_admin')) {
+        router.push('/dashboard')
+      }
     }
-  }, [status, router])
+  }, [status, session, router])
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -55,7 +62,27 @@ export default function UserManagementPage() {
       const response = await fetch('/api/auth/users')
       if (response.ok) {
         const data = await response.json()
-        setUsers(data.users)
+        // Ensure roles are properly parsed for each user
+        const usersWithParsedRoles = data.users.map((user: any) => {
+          let roles: string[] = []
+          if (Array.isArray(user.roles)) {
+            roles = user.roles
+          } else if (typeof user.roles === 'string') {
+            try {
+              roles = JSON.parse(user.roles)
+              if (!Array.isArray(roles)) {
+                roles = []
+              }
+            } catch (e) {
+              console.error('Failed to parse roles JSON for user:', user.email, e)
+              roles = []
+            }
+          } else if (user.roles) {
+            roles = [user.roles].filter(Boolean)
+          }
+          return { ...user, roles }
+        })
+        setUsers(usersWithParsedRoles)
       } else {
         setError('Failed to load users')
       }
@@ -107,13 +134,24 @@ export default function UserManagementPage() {
     }
 
     try {
+      // Build update data, excluding password if empty
+      const updateData: any = {
+        id: editingUser.id,
+        fullName: formData.fullName,
+        roles: formData.roles,
+        grade: formData.grade,
+        department: formData.department
+      }
+      
+      // Only include password if it's not empty
+      if (formData.password && formData.password.trim().length > 0) {
+        updateData.password = formData.password
+      }
+
       const response = await fetch('/api/auth/update-user', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: editingUser.id,
-          ...formData
-        })
+        body: JSON.stringify(updateData)
       })
 
       if (response.ok) {
@@ -138,9 +176,11 @@ export default function UserManagementPage() {
       grade: '',
       department: ''
     })
+    setError('')
   }
 
   const openEditModal = (user: User) => {
+    setError('')
     setEditingUser(user)
     setFormData({
       email: user.email,
@@ -174,6 +214,7 @@ export default function UserManagementPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Header />
       <div className="max-w-6xl mx-auto py-8 px-4">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-6">
@@ -270,6 +311,7 @@ export default function UserManagementPage() {
                 </label>
                 <input
                   type="text"
+                  name="fullName"
                   value={formData.fullName}
                   onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -282,6 +324,7 @@ export default function UserManagementPage() {
                 </label>
                 <input
                   type="email"
+                  name="email"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -294,6 +337,7 @@ export default function UserManagementPage() {
                 </label>
                 <input
                   type="password"
+                  name="password"
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -326,6 +370,7 @@ export default function UserManagementPage() {
                 </label>
                 <input
                   type="text"
+                  name="grade"
                   value={formData.grade}
                   onChange={(e) => setFormData(prev => ({ ...prev, grade: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -337,6 +382,7 @@ export default function UserManagementPage() {
                 </label>
                 <input
                   type="text"
+                  name="department"
                   value={formData.department}
                   onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -370,6 +416,11 @@ export default function UserManagementPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-4">Edit User</h2>
+            {error && (
+              <div className="text-red-600 text-sm mb-4 bg-red-50 p-3 rounded-md">
+                {error}
+              </div>
+            )}
             <form onSubmit={handleUpdateUser} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -377,6 +428,7 @@ export default function UserManagementPage() {
                 </label>
                 <input
                   type="text"
+                  name="fullName"
                   value={formData.fullName}
                   onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -389,6 +441,7 @@ export default function UserManagementPage() {
                 </label>
                 <input
                   type="email"
+                  name="email"
                   value={formData.email}
                   className="w-full rounded-md border border-gray-300 px-3 py-2 bg-gray-100"
                   disabled
@@ -401,6 +454,7 @@ export default function UserManagementPage() {
                 </label>
                 <input
                   type="password"
+                  name="password"
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -432,6 +486,7 @@ export default function UserManagementPage() {
                 </label>
                 <input
                   type="text"
+                  name="grade"
                   value={formData.grade}
                   onChange={(e) => setFormData(prev => ({ ...prev, grade: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -443,6 +498,7 @@ export default function UserManagementPage() {
                 </label>
                 <input
                   type="text"
+                  name="department"
                   value={formData.department}
                   onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
                   className="w-full rounded-md border border-gray-300 px-3 py-2"

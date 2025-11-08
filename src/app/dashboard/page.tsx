@@ -1,17 +1,13 @@
-﻿'use client'
-
-import { useSession } from 'next-auth/react'
+﻿import { getServerSession } from 'next-auth'
+import { redirect } from 'next/navigation'
+import { authOptions } from '@/auth.config'
 import Header from '@/components/Header'
 
-export default function DashboardPage() {
-  const { data: session, status } = useSession()
-
-  if (status === 'loading') {
-    return <div className="min-h-screen p-8">Loading...</div>
-  }
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions)
 
   if (!session) {
-    return <div className="min-h-screen p-8">Access denied. Please log in.</div>
+    redirect('/login')
   }
 
   return (

@@ -30,10 +30,29 @@ export default function ProfilePage() {
         .then(res => res.json())
         .then(data => {
           if (data.user) {
+            // Ensure roles is an array - handle different formats from Prisma
+            let roles: string[] = []
+            if (Array.isArray(data.user.roles)) {
+              roles = data.user.roles
+            } else if (typeof data.user.roles === 'string') {
+              try {
+                roles = JSON.parse(data.user.roles)
+                if (!Array.isArray(roles)) {
+                  roles = []
+                }
+              } catch (e) {
+                console.error('Failed to parse roles JSON:', e)
+                roles = []
+              }
+            } else if (data.user.roles) {
+              // Handle other formats
+              roles = [data.user.roles].filter(Boolean)
+            }
+
             setProfileData({
               fullName: data.user.fullName || '',
               email: data.user.email || '',
-              roles: data.user.roles || [],
+              roles: roles,
               grade: data.user.grade || '',
               department: data.user.department || ''
             })
