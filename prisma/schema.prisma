@@ -1,0 +1,193 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  username     String?  @unique
+  passwordHash String?
+  fullName     String
+  roles        String   // JSON array: ["employee", "manager", "hr_admin"]
+  
+  // LDAP fields (future)
+  ldapDN       String?  @unique
+  ldapSyncedAt DateTime?
+  authProvider String   @default("credentials")
+  
+  managerId    String?
+  manager      User?    @relation("ManagerEmployee", fields: [managerId], references: [id], onDelete: SetNull)
+  directReports User[]  @relation("ManagerEmployee")
+  
+  grade        String
+  department   String
+  employeeId   String?  @unique
+  jobTitle     String?
+  employmentStatus String @default("active")
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  reviewsAsReviewee Review[] @relation("RevieweeReviews")
+  reviewsAsReviewer Review[] @relation("ReviewerReviews")
+  targetSetsAsEmployee TargetSetting[] @relation("EmployeeTargets")
+  targetSetsAsManager TargetSetting[] @relation("ManagerTargets")
+  auditEntries AuditEntry[]
+  roleAssignmentsAsReviewer RoleAssignment[] @relation("ReviewerAssignments")
+  roleAssignmentsAsReviewee RoleAssignment[] @relation("RevieweeAssignments")
+}
+
+model TargetSetting {
+  id          String   @id @default(uuid())
+  employeeId  String
+  employee    User     @relation("EmployeeTargets", fields: [employeeId], references: [id])
+  managerId   String
+  manager     User     @relation("ManagerTargets", fields: [managerId], references: [id])
+  cycleYear   Int
+  status      String   @default("draft")
+  // States: draft | submitted_to_manager | revision_requested | 
+  //         manager_approved | submitted_to_hr | target_setting_complete
+  
+  targets     String   // JSON array of 3-5 targets with task, KPI, weight, difficulty
+  
+  submittedAt DateTime?
+  approvedAt  DateTime?
+  submittedToHRAt DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([employeeId, cycleYear])
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  revieweeId  String
+  reviewee    User     @relation("RevieweeReviews", fields: [revieweeId], references: [id])
+  reviewerId  String
+  reviewer    User     @relation("ReviewerReviews", fields: [reviewerId], references: [id])
+  cycleYear   Int
+  status      String   @default("self_eval_draft")
+  // States: self_eval_draft | self_eval_submitted | manager_eval_in_progress | 
+  //         manager_eval_complete | submitted_to_hr_final | hr_review_complete |
+  //         board_approved | feedback_delivered | archived
+  
+  // Employee fields
+  currentJobDescription String?
+  careerPath            String?
+  employeeTargets       String?    // JSON array with ratings and result explanations
+  employeeSubmittedAt   DateTime?
+  
+  // Manager fields
+  managerTargetRatings  String?    // JSON
+  managerFeedback       String?    // JSON array of feedback per target
+  overallSummary        String?
+  finalScore            Float?
+  finalRank             String?
+  managerSubmittedAt    DateTime?
+  
+  // Historical data (NFR007)
+  archived    Boolean  @default(false)
+  archivedAt  DateTime?
+  archivedBy  String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([revieweeId, cycleYear])
+}
+
+model RoleAssignment {
+  id            String    @id @default(uuid())
+  reviewerId    String
+  reviewer      User      @relation("ReviewerAssignments", fields: [reviewerId], references: [id])
+  revieweeId    String
+  reviewee      User      @relation("RevieweeAssignments", fields: [revieweeId], references: [id])
+  reason        String
+  effectiveFrom DateTime
+  effectiveTo   DateTime?
+  createdAt     DateTime  @default(now())
+  
+  @@index([reviewerId, effectiveFrom, effectiveTo])
+}
+
+model AuditEntry {
+  id         String   @id @default(uuid())
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id])
+  actorRole  String   // Role used when performing action
+  action     String   // e.g., "edit_target", "accept_ai_synthesis", "switch_role"
+  targetType String   // e.g., "review", "target", "user"
+  targetId   String
+  details    String?  // JSON: Optional metadata (diffs, ai_assisted flag, etc.)
+  timestamp  DateTime @default(now())
+  
+  @@index([actorId, timestamp])
+  @@index([targetType, targetId])
+}
+
+model FiscalYear {
+  id        String   @id @default(uuid())
+  year      Int      @unique
+  startDate DateTime
+  endDate   DateTime
+  isClosed  Boolean  @default(false)
+  closedAt  DateTime?
+  closedBy  String?
+  createdAt DateTime @default(now())
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  headId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EmployeeType {
+  id        String   @id @default(uuid())
+  type      String   @unique  // "Engineer", "Back-Office"
+  grades    String   // JSON array of valid grades for this type
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ScoreMapping {
+  id           String   @id @default(uuid())
+  employeeType String
+  grade        String
+  mappings     String   // JSON array of {min, max, rank}
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@unique([employeeType, grade])
+}
+
+model CompanyGoal {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  department  String?  // null = company-wide
+  cycleYear   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AIConfig {
+  id                    String   @id @default(uuid())
+  mode                  String   @default("web")
+  ollamaUrl             String?  @default("http://localhost:11434")
+  ollamaModel           String?  @default("llama2")
+  resultExplanationTmpl String   @default("Please help write a professional self-evaluation...")
+  managerFeedbackTmpl   String   @default("Please help write constructive manager feedback...")
+  updatedAt             DateTime @updatedAt
+}
