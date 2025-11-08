@@ -14,7 +14,7 @@ async function main() {
       email: 'admin@prdcv.com',
       fullName: 'Admin User',
       passwordHash: hashedPassword,
-      roles: JSON.stringify(['hr_admin']),
+      roles: ['hr_admin'],
       grade: 'Senior',
       department: 'HR',
       employmentStatus: 'active',

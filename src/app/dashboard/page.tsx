@@ -1,6 +1,7 @@
 ﻿'use client'
 
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
+import Header from '@/components/Header'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -14,21 +15,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Performance Assessment Dashboard</h1>
-          <button
-            onClick={() => signOut({ callbackUrl: '/login' })}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-          >
-            Sign Out
-          </button>
-        </div>
-
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="max-w-4xl mx-auto py-8 px-4">
         <div className="bg-white p-6 rounded-lg shadow-md">
+          <h1 className="text-3xl font-bold mb-6">Performance Assessment Dashboard</h1>
           <h2 className="text-xl font-semibold mb-4">Welcome, {session.user?.email}</h2>
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 mb-6">
             This is your performance assessment dashboard. The full application features will be implemented in upcoming stories.
           </p>
 

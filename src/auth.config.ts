@@ -4,6 +4,27 @@ import { z } from 'zod'
 import bcrypt from 'bcrypt'
 import { prisma } from './lib/prisma'
 
+declare module 'next-auth' {
+  interface User {
+    roles: string[]
+  }
+  interface Session {
+    user: {
+      id?: string
+      name?: string | null
+      email?: string | null
+      image?: string | null
+      roles?: string[]
+    }
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    roles?: string[]
+  }
+}
+
 export async function getUser(email: string) {
   try {
     const user = await prisma.user.findUnique({
@@ -38,7 +59,10 @@ export const authOptions: NextAuthOptions = {
           if (!user) return null
           const passwordsMatch = await bcrypt.compare(password, user.passwordHash || '')
 
-          if (passwordsMatch) return user
+          if (passwordsMatch) return {
+            ...user,
+            roles: user.roles as unknown as string[]
+          }
         }
 
         return null
@@ -47,5 +71,19 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.roles = user.roles
+      }
+      return token
+    },
+    async session({ session, token }) {
+      if (token.roles) {
+        session.user.roles = token.roles
+      }
+      return session
+    },
   },
 }

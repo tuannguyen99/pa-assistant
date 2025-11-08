@@ -16,7 +16,7 @@ model User {
   username     String?  @unique
   passwordHash String?
   fullName     String
-  roles        String   // JSON array: ["employee", "manager", "hr_admin"]
+  roles        Json     // Array: ["employee", "manager", "hr_admin", "board_of_manager", "general_director"]
   
   // LDAP fields (future)
   ldapDN       String?  @unique
