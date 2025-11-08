@@ -125,10 +125,8 @@ export default function LoginPage() {
           <p className="text-xs text-blue-700">Password: Pr&dcv@2025</p>
         </div>
 
-        <div className="text-center">
-          <Link href="/register" className="text-sm text-indigo-600 hover:text-indigo-500">
-            Don't have an account? Sign up
-          </Link>
+        <div className="text-center text-sm text-gray-600">
+          <p>Need access? Contact your HR Admin to create an account.</p>
         </div>
       </div>
     </div>

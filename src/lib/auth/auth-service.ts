@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/auth.config'
 import { prisma } from '@/lib/prisma'
 import type { User } from '@prisma/client'
+import bcrypt from 'bcrypt'
 
 export class AuthService {
   static async getCurrentUser(): Promise<User | null> {
@@ -27,12 +28,84 @@ export class AuthService {
       })
       if (!user?.roles) return false
 
-      const roles = user.roles as string[]
+      const roles = user.roles as unknown as string[]
       return roles.includes(role)
     } catch (error) {
       console.error('Failed to check role:', error)
       return false
     }
+  }
+
+  static async isHRAdmin(userId: string): Promise<boolean> {
+    return this.hasRole(userId, 'hr_admin')
+  }
+
+  static async getAllUsers(): Promise<User[]> {
+    try {
+      const users = await prisma.user.findMany({
+        orderBy: { fullName: 'asc' }
+      })
+      return users
+    } catch (error) {
+      console.error('Failed to get all users:', error)
+      return []
+    }
+  }
+
+  static async createUser(data: {
+    email: string
+    password: string
+    fullName: string
+    roles: string[]
+    grade?: string
+    department?: string
+  }): Promise<User> {
+    const { email, password, fullName, roles, grade, department } = data
+
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 12)
+
+    // Create user
+    const user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        fullName,
+        roles: roles as any,
+        grade: grade || 'TBD',
+        department: department || 'TBD'
+      }
+    })
+
+    return user
+  }
+
+  static async updateUser(
+    userId: string,
+    data: {
+      fullName?: string
+      roles?: string[]
+      grade?: string
+      department?: string
+      password?: string
+    }
+  ): Promise<User> {
+    const updateData: any = {}
+
+    if (data.fullName) updateData.fullName = data.fullName
+    if (data.roles) updateData.roles = data.roles as any
+    if (data.grade !== undefined) updateData.grade = data.grade
+    if (data.department !== undefined) updateData.department = data.department
+    if (data.password) {
+      updateData.passwordHash = await bcrypt.hash(data.password, 12)
+    }
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: updateData
+    })
+
+    return user
   }
 
   static async canAccessReview(userId: string, reviewId: string): Promise<boolean> {
@@ -73,30 +146,13 @@ export class AuthService {
     }
   }
 
+  // Legacy method for backward compatibility - delegates to createUser
   static async registerUser(data: {
     email: string
     password: string
     fullName: string
     roles: string[]
   }): Promise<User> {
-    const { email, password, fullName, roles } = data
-
-    // Hash password
-    const bcrypt = await import('bcrypt')
-    const passwordHash = await bcrypt.hash(password, 12)
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        fullName,
-        roles: roles as any,
-        grade: 'TBD', // Default
-        department: 'TBD' // Default
-      }
-    })
-
-    return user
+    return this.createUser(data)
   }
 }

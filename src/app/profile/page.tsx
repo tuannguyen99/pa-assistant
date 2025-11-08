@@ -5,17 +5,17 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
 export default function ProfilePage() {
-  const { data: session, status, update } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
-  const [formData, setFormData] = useState({
+  const [profileData, setProfileData] = useState({
     fullName: '',
     email: '',
+    roles: [] as string[],
     grade: '',
     department: ''
   })
   const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -30,19 +30,24 @@ export default function ProfilePage() {
         .then(res => res.json())
         .then(data => {
           if (data.user) {
-            setFormData({
+            setProfileData({
               fullName: data.user.fullName || '',
               email: data.user.email || '',
+              roles: data.user.roles || [],
               grade: data.user.grade || '',
               department: data.user.department || ''
             })
           }
         })
-        .catch(err => console.error('Failed to fetch profile:', err))
+        .catch(err => {
+          console.error('Failed to fetch profile:', err)
+          setError('Failed to load profile')
+        })
+        .finally(() => setIsLoading(false))
     }
   }, [session])
 
-  if (status === 'loading') {
+  if (status === 'loading' || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -57,48 +62,18 @@ export default function ProfilePage() {
     return null
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
-
-    try {
-      const response = await fetch('/api/auth/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        // Update session if needed
-        await update()
-        setIsEditing(false)
-      } else {
-        const data = await response.json()
-        setError(data.error || 'Update failed')
-      }
-    } catch (error) {
-      setError('An error occurred. Please try again.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-md mx-auto py-8 px-4">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-            {!isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="text-indigo-600 hover:text-indigo-500"
-              >
-                Edit
-              </button>
-            )}
+            <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+            <p className="text-sm text-blue-800">
+              <strong>Note:</strong> Your profile is read-only. Contact your HR Admin to update your information.
+            </p>
           </div>
 
           {error && (
@@ -107,83 +82,66 @@ export default function ProfilePage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name
               </label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
-                  required
-                />
-              ) : (
-                <p className="text-gray-900">{formData.fullName || 'Not set'}</p>
-              )}
+              <p className="text-gray-900 p-2 bg-gray-50 rounded-md">{profileData.fullName || 'Not set'}</p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email
               </label>
-              <p className="text-gray-900">{formData.email}</p>
-              <p className="text-xs text-gray-500">Email cannot be changed</p>
+              <p className="text-gray-900 p-2 bg-gray-50 rounded-md">{profileData.email}</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Roles
+              </label>
+              <div className="p-2 bg-gray-50 rounded-md">
+                {profileData.roles.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {profileData.roles.map((role: string) => (
+                      <span 
+                        key={role}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                      >
+                        {role}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500">No roles assigned</p>
+                )}
+              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Grade
               </label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={formData.grade}
-                  onChange={(e) => setFormData(prev => ({ ...prev, grade: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
-                />
-              ) : (
-                <p className="text-gray-900">{formData.grade || 'Not set'}</p>
-              )}
+              <p className="text-gray-900 p-2 bg-gray-50 rounded-md">{profileData.grade || 'Not set'}</p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Department
               </label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={formData.department}
-                  onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
-                />
-              ) : (
-                <p className="text-gray-900">{formData.department || 'Not set'}</p>
-              )}
+              <p className="text-gray-900 p-2 bg-gray-50 rounded-md">{profileData.department || 'Not set'}</p>
             </div>
+          </div>
 
-            {isEditing && (
-              <div className="flex space-x-4">
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-500 disabled:opacity-50"
-                >
-                  {isLoading ? 'Saving...' : 'Save'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-          </form>
+          <div className="mt-6">
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-500"
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </div>
       </div>
     </div>

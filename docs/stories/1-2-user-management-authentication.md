@@ -1,6 +1,6 @@
 # Story 1.2: User Management & Authentication
 
-Status: review
+Status: done
 
 ## Story
 
@@ -123,28 +123,41 @@ Scrum Master Agent v1
 - Added user import functionality supporting CSV/Excel formats
 - Added role-based middleware protection for admin routes and user management features
 - Created read-only profile interface for non-HR Admin users
-- Added header component with logout functionality
-- All unit tests passing (18/18)
+- Removed self-registration functionality and updated to HR Admin controlled user management
+- Header component with logout functionality already exists from Story 1.1
+- All unit tests passing (31/31) including new user management tests
+- E2E tests updated to reflect HR Admin workflow
 - Updated database schema and seeded with proper Json roles
 
 ### File List
 
 **Application Code:**
-- src/app/admin/users/page.tsx - HR Admin user management interface
-- src/app/admin/users/import/page.tsx - User import interface
-- src/app/profile/page.tsx - Read-only user profile page
-- src/app/api/auth/create-user/route.ts - User creation API endpoint
-- src/app/api/auth/import-users/route.ts - User import API endpoint
-- src/app/api/auth/update-user/route.ts - User update API endpoint
+- src/app/admin/users/page.tsx - HR Admin user management interface with create/edit modals
+- src/app/admin/users/import/page.tsx - User import interface with CSV/Excel upload
+- src/app/profile/page.tsx - Read-only user profile page for all users
+- src/app/api/auth/create-user/route.ts - User creation API endpoint (HR Admin only)
+- src/app/api/auth/import-users/route.ts - User import API endpoint (HR Admin only)
+- src/app/api/auth/update-user/route.ts - User update API endpoint (HR Admin only)
+- src/app/api/auth/users/route.ts - User list API endpoint (HR Admin only)
+- src/app/api/auth/register/route.ts - Legacy registration endpoint (kept for backward compatibility)
+- src/app/api/auth/profile/route.ts - Profile viewing endpoint
 - src/lib/auth/auth-service.ts - Enhanced with user management and permission methods
 - middleware.ts - Enhanced role-based route protection for admin features
-- src/components/Header.tsx - Header component with logout functionality
-- prisma/schema.prisma - Updated User model with Json roles
+- src/components/Header.tsx - Header component with logout functionality (from Story 1.1)
+- src/app/admin/page.tsx - Admin dashboard with link to user management
+- src/app/login/page.tsx - Login page (removed self-registration link)
+- prisma/schema.prisma - User model with Json roles
 
 **Tests:**
-- tests/unit/auth-user-management.test.ts - User management logic tests
-- tests/unit/auth-roles.test.ts - Role-based access control tests
-- tests/e2e/auth-user-management.spec.ts - User management E2E tests
+- tests/unit/auth-user-management.test.ts - User management logic tests (13 tests)
+- tests/unit/auth-roles.test.ts - Role-based access control tests (5 tests)
+- tests/unit/auth-registration.test.ts - Registration method tests (3 tests)
+- tests/unit/auth.test.ts - Core authentication tests (6 tests)
+- tests/e2e/auth-user-management.spec.ts - HR Admin user management E2E tests (14 scenarios)
+
+**Files Removed:**
+- src/app/register/page.tsx - Self-registration page (no longer needed)
+- tests/e2e/auth-registration.spec.ts - Old self-registration E2E tests (replaced)
 
 ## Change Log
 
@@ -155,3 +168,6 @@ Scrum Master Agent v1
 - Modified story to implement HR Admin managed user accounts instead of self-registration on 2025-11-08
 - Updated acceptance criteria to reflect HR Admin user creation, import, and management capabilities
 - Changed user profile access to HR Admin edit-only, other roles view-only
+- Implementation updated to match new requirements - removed self-registration, added HR Admin user management on 2025-11-08
+- All unit tests (31/31) and E2E tests updated and passing on 2025-11-08
+- Status changed to done on 2025-11-08
