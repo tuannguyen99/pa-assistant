@@ -2,10 +2,10 @@
 import Credentials from 'next-auth/providers/credentials'
 import { z } from 'zod'
 import bcrypt from 'bcrypt'
+import { prisma } from './lib/prisma'
 
 export async function getUser(email: string) {
   try {
-    const { prisma } = await import('./lib/prisma')
     const user = await prisma.user.findUnique({
       where: { email }
     })
