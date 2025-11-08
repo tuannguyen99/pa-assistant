@@ -57,7 +57,7 @@ I want to manage user accounts and roles,
 So that employees, managers, and admins can securely access the system.
 
 **Acceptance Criteria:**
-1. Three user roles implemented (Employee, Manager, HR Admin)
+1. Five user roles implemented (Employee, Manager, HR Admin, Board Of Manager, Genearal Director)
 2. User registration and login functionality working
 3. Role-based access control enforced
 4. Basic user profile management available
