@@ -1,0 +1,187 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>2</storyId>
+    <title>User Management & Authentication</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-08</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-2-user-management-authentication.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>HR Admin</asA>
+    <iWant>to manage user accounts and roles</iWant>
+    <soThat>employees, managers, and admins can securely access the system</soThat>
+    <tasks>- [ ] Task 1: Implement user registration functionality (AC: 2)
+  - [ ] Create registration page with form validation
+  - [ ] Add API route for user registration with password hashing
+  - [ ] Add unit tests for registration logic
+  - [ ] Add E2E test for user registration flow
+- [ ] Task 2: Implement role-based access control enforcement (AC: 3)
+  - [ ] Update middleware to check user roles for route protection
+  - [ ] Add role checking utilities in auth service
+  - [ ] Add unit tests for role-based access control
+  - [ ] Update E2E tests to verify role restrictions
+- [ ] Task 3: Create user profile management interface (AC: 4)
+  - [ ] Build profile page with user information display
+  - [ ] Add profile edit functionality with form validation
+  - [ ] Add unit tests for profile management
+  - [ ] Add E2E test for profile update flow
+- [ ] Task 4: Ensure session management and logout functionality (AC: 5)
+  - [ ] Add logout button to navigation/header
+  - [ ] Verify session timeout and refresh handling
+  - [ ] Add unit tests for session management
+  - [ ] Update E2E tests to include logout verification
+- [ ] Task 5: Implement and validate five user roles (AC: 1)
+  - [ ] Ensure User model supports roles array with Employee, Manager, HR Admin, Board of Manager, General Director
+  - [ ] Add role assignment logic in registration/profile management
+  - [ ] Add unit tests for role validation
+  - [ ] Add E2E tests for role-specific functionality</tasks>
+  </story>
+
+  <acceptanceCriteria>1. Five user roles implemented (Employee, Manager, HR Admin, Board of Manager, General Director)
+2. User registration and login functionality working
+3. Role-based access control enforced
+4. Basic user profile management available
+5. Session management and logout working</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>docs/epics.md</path>
+        <title>pa-assistant - Epic Breakdown</title>
+        <section>Story 1.2: User Management & Authentication</section>
+        <snippet>Acceptance Criteria: 1. Three user roles implemented (Employee, Manager, HR Admin) 2. User registration and login functionality working 3. Role-based access control enforced 4. Basic user profile management available 5. Session management and logout working</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/PRD.md</path>
+        <title>pa-system Product Requirements Document</title>
+        <section>User Management & Authentication</section>
+        <snippet>System shall support five user roles (Employee, Manager, HR Admin, General Director, Board of Manager) with role-based access control. HR Admin shall be able to add, edit, and import employee records. System shall auto-populate employee information when Employee ID is entered.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture/authentication-architecture.md</path>
+        <title>Authentication Architecture</title>
+        <section>MVP Implementation (Username/Password)</section>
+        <snippet>NextAuth.js Credentials Provider with authorize function checking user and bcrypt password comparison. AuthService abstraction layer with getCurrentUser, hasRole, canAccessReview methods. User database schema with roles array.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture/data-architecture.md</path>
+        <title>Data Architecture</title>
+        <section>Complete Prisma Schema</section>
+        <snippet>User model with id, email, username, passwordHash, fullName, roles array, managerId, grade, department. Includes relations to reviews and audit entries.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture/testing-strategy.md</path>
+        <title>Testing Strategy</title>
+        <section>Authentication Testing</section>
+        <snippet>Use Vitest for unit testing auth functions with mocked Prisma client. Playwright for E2E testing login/logout flows. Test role-based access control and session management.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture/coding-standards.md</path>
+        <title>Coding Standards</title>
+        <section>Authentication Code Standards</section>
+        <snippet>Use TypeScript strict mode, proper error handling in auth functions, consistent naming for auth-related files. Follow async/await patterns and environment variable usage.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture/unified-project-structure.md</path>
+        <title>Unified Project Structure</title>
+        <section>Authentication Module Structure</section>
+        <snippet>Auth components in src/components/auth/, API routes in src/app/api/auth/, auth utilities in src/lib/auth/. Follow App Router structure with proper path aliases.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/rbac-spec.md</path>
+        <title>RBAC & Audit Spec</title>
+        <section>Data model (simplified)</section>
+        <snippet>User with roles array, RoleAssignment for delegated reviewers, AuditEntry for logging actions. Permission checks evaluate active role and relationship graph.</snippet>
+      </artifact>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/app/api/auth/[...nextauth]/route.ts</path>
+        <kind>api</kind>
+        <symbol>NextAuth configuration</symbol>
+        <lines>1-50</lines>
+        <reason>Existing NextAuth setup with credentials provider - extend for registration endpoint</reason>
+      </artifact>
+      <artifact>
+        <path>src/lib/auth/auth-service.ts</path>
+        <kind>service</kind>
+        <symbol>AuthService</symbol>
+        <lines>1-30</lines>
+        <reason>Abstraction layer for auth operations - add role checking methods</reason>
+      </artifact>
+      <artifact>
+        <path>middleware.ts</path>
+        <kind>middleware</kind>
+        <symbol>Route protection</symbol>
+        <lines>1-20</lines>
+        <reason>Existing middleware protecting routes - enhance for role-based access</reason>
+      </artifact>
+      <artifact>
+        <path>src/app/login/page.tsx</path>
+        <kind>component</kind>
+        <symbol>LoginPage</symbol>
+        <lines>1-50</lines>
+        <reason>Existing login UI - reuse patterns for registration and profile pages</reason>
+      </artifact>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>User model</symbol>
+        <lines>10-30</lines>
+        <reason>Database schema with User model including roles array - ensure supports Employee, Manager, HR Admin</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next-auth" version="4.24.13">Authentication framework with credentials provider</package>
+        <package name="bcrypt" version="5.1.1">Password hashing for user registration</package>
+        <package name="prisma" version="6.19.0">Database ORM for user management</package>
+        <package name="zod" version="3.22.4">Schema validation for forms</package>
+        <package name="react-hook-form" version="7.48.2">Form handling for registration and profile</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>- Follow pluggable provider pattern from authentication-architecture.md
+- Use NextAuth.js with credentials provider for MVP
+- Implement AuthService abstraction layer
+- Enforce RBAC with role-based route protection
+- Use bcrypt for password hashing with cost factor ≥12
+- Store roles as string array in User model
+- Create audit entries for sensitive actions
+- Follow TypeScript strict mode and coding standards
+- Use Vitest for unit testing, Playwright for E2E testing
+- Align with unified project structure using @/* aliases</constraints>
+  <interfaces>
+    <interface>
+      <name>NextAuth API</name>
+      <kind>REST endpoint</kind>
+      <signature>POST /api/auth/[...nextauth] - signIn, signOut, session</signature>
+      <path>src/app/api/auth/[...nextauth]/route.ts</path>
+    </interface>
+    <interface>
+      <name>AuthService</name>
+      <kind>class interface</kind>
+      <signature>class AuthService { static getCurrentUser(): Promise<User|null>; static hasRole(userId: string, role: string): Promise<boolean>; static canAccessReview(userId: string, reviewId: string): Promise<boolean>; }</signature>
+      <path>src/lib/auth/auth-service.ts</path>
+    </interface>
+    <interface>
+      <name>User Registration API</name>
+      <kind>REST endpoint</kind>
+      <signature>POST /api/auth/register - { email, password, fullName, roles } → { user, token }</signature>
+      <path>src/app/api/auth/register/route.ts</path>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>Use Vitest for unit testing with jsdom environment and Jest-compatible API. Use Playwright for E2E testing with cross-browser support. Follow testing-strategy.md patterns for auth testing including mocked Prisma client and async/await patterns.</standards>
+    <locations>Unit tests in tests/unit/auth-*.test.ts, E2E tests in tests/e2e/auth-*.spec.ts</locations>
+    <ideas>- AC1: Unit test User model roles validation (Employee, Manager, HR Admin, Board of Manager, General Director)
+- AC2: E2E test user registration flow with form validation and API response
+- AC3: Unit test middleware role checking for protected routes
+- AC4: E2E test profile page display and edit functionality
+- AC5: Unit test session management and logout button functionality</ideas>
+  </tests>
+</story-context>
