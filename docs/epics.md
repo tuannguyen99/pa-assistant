@@ -57,11 +57,14 @@ I want to manage user accounts and roles,
 So that employees, managers, and admins can securely access the system.
 
 **Acceptance Criteria:**
-1. Five user roles implemented (Employee, Manager, HR Admin, Board Of Manager, Genearal Director)
-2. User registration and login functionality working
-3. Role-based access control enforced
-4. Basic user profile management available
-5. Session management and logout working
+1. Five user roles implemented (Employee, Manager, HR Admin, Board of Manager, General Director)
+2. HR Admin can create new user accounts and assign roles
+3. HR Admin can import users from existing company data sources
+4. HR Admin can edit user profiles and role assignments
+5. Role-based access control enforced with HR Admin having full user management permissions
+6. Other roles have view-only access to their own profiles
+7. Login functionality working for all users
+8. Session management and logout working
 
 **Prerequisites:** Story 1.1
 
