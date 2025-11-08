@@ -74,6 +74,13 @@ test.describe('HR Admin User Management', () => {
     // Update full name
     await page.fill('input[name="fullName"]', 'Updated User Name')
     
+    // Update employee ID if empty or generate unique one
+    const employeeIdInput = page.locator('input[name="employeeId"]')
+    const employeeIdValue = await employeeIdInput.inputValue()
+    if (!employeeIdValue) {
+      await page.fill('input[name="employeeId"]', `EMP${Date.now()}`)
+    }
+    
     // Update grade
     await page.fill('input[name="grade"]', 'Principal')
     
@@ -85,9 +92,9 @@ test.describe('HR Admin User Management', () => {
       await page.waitForSelector('h2:has-text("Edit User")', { state: 'hidden', timeout: 5000 })
     } catch {
       // If modal didn't close, check if there's an error
-      const errorVisible = await page.locator('.text-red-600').isVisible()
+      const errorVisible = await page.locator('.text-red-600').first().isVisible()
       if (errorVisible) {
-        const errorText = await page.locator('.text-red-600').textContent()
+        const errorText = await page.locator('.text-red-600').first().textContent()
         throw new Error(`Update failed with error: ${errorText}`)
       }
       throw new Error('Modal did not close and no error was shown')
@@ -144,6 +151,7 @@ test.describe('HR Admin User Management', () => {
     // Fill required fields but don't select a role
     await page.fill('input[name="fullName"]', 'No Role User')
     await page.fill('input[name="email"]', `norole.${Date.now()}@example.com`)
+    await page.fill('input[name="employeeId"]', `EMP${Date.now()}`)
     await page.fill('input[name="password"]', 'password123')
     
     // Submit the form
@@ -168,9 +176,11 @@ test.describe('HR Admin User Management', () => {
     
     const testEmail = `employee.${Date.now()}@example.com`
     const testPassword = 'password123'
+    const testEmployeeId = `EMP${Date.now()}`
     
     await page.fill('input[name="fullName"]', 'Regular Employee')
     await page.fill('input[name="email"]', testEmail)
+    await page.fill('input[name="employeeId"]', testEmployeeId)
     await page.fill('input[name="password"]', testPassword)
     await page.check('input[value="employee"]')
     await page.click('button[type="submit"]:has-text("Create")')
@@ -246,7 +256,7 @@ test.describe('User Import', () => {
     // Should show format requirements
     await expect(page.locator('text=CSV Format Requirements')).toBeVisible()
     await expect(page.locator('text=Required columns: email, fullName, roles')).toBeVisible()
-    await expect(page.locator('text=Optional columns: password, grade, department')).toBeVisible()
+    await expect(page.locator('text=Optional columns: employeeId, password, grade, department')).toBeVisible()
   })
 
   test('Import page has file upload input', async ({ page }) => {

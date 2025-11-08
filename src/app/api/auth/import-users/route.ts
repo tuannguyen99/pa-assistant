@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
     const passwordIdx = header.indexOf('password')
     const gradeIdx = header.indexOf('grade')
     const departmentIdx = header.indexOf('department')
+    const employeeIdIdx = header.indexOf('employeeId')
 
     if (emailIdx === -1 || fullNameIdx === -1 || rolesIdx === -1) {
       return NextResponse.json(
@@ -71,6 +72,7 @@ export async function POST(request: NextRequest) {
         const password = passwordIdx !== -1 ? row[passwordIdx] : 'defaultPass123'
         const grade = gradeIdx !== -1 ? row[gradeIdx] : 'TBD'
         const department = departmentIdx !== -1 ? row[departmentIdx] : 'TBD'
+        const employeeId = employeeIdIdx !== -1 ? row[employeeIdIdx] : undefined
 
         // Parse roles (comma-separated in the cell)
         const roles = rolesStr.split(/[;|]/).map(r => r.trim()).filter(r => r)
@@ -88,7 +90,8 @@ export async function POST(request: NextRequest) {
           roles,
           password,
           grade,
-          department
+          department,
+          employeeId
         })
 
         results.imported++

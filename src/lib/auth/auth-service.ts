@@ -76,8 +76,9 @@ export class AuthService {
     roles: string[]
     grade?: string
     department?: string
+    employeeId?: string
   }): Promise<User> {
-    const { email, password, fullName, roles, grade, department } = data
+    const { email, password, fullName, roles, grade, department, employeeId } = data
 
     // Hash password
     const passwordHash = await bcrypt.hash(password, 12)
@@ -90,7 +91,8 @@ export class AuthService {
         fullName,
         roles: roles as any,
         grade: grade || 'TBD',
-        department: department || 'TBD'
+        department: department || 'TBD',
+        employeeId: employeeId || undefined
       }
     })
 
@@ -105,6 +107,7 @@ export class AuthService {
       grade?: string
       department?: string
       password?: string
+      employeeId?: string
     }
   ): Promise<User> {
     const updateData: any = {}
@@ -113,6 +116,7 @@ export class AuthService {
     if (data.roles) updateData.roles = data.roles as any
     if (data.grade !== undefined) updateData.grade = data.grade
     if (data.department !== undefined) updateData.department = data.department
+    if (data.employeeId !== undefined) updateData.employeeId = data.employeeId
     if (data.password) {
       updateData.passwordHash = await bcrypt.hash(data.password, 12)
     }

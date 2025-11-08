@@ -8,7 +8,8 @@ const updateUserSchema = z.object({
   roles: z.array(z.string()).min(1).optional(),
   grade: z.string().optional(),
   department: z.string().optional(),
-  password: z.string().min(6).optional()
+  password: z.string().min(6).optional(),
+  employeeId: z.string().min(1).optional()
 })
 
 export async function PUT(request: NextRequest) {
@@ -48,6 +49,15 @@ export async function PUT(request: NextRequest) {
     }
 
     console.error('User update error:', error)
+    
+    // Check for duplicate employee ID error
+    if (error instanceof Error && error.message.includes('Unique constraint')) {
+      return NextResponse.json(
+        { error: 'User with this employee ID already exists' },
+        { status: 400 }
+      )
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

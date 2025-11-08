@@ -20,6 +20,7 @@ interface User {
   roles: string[]
   grade?: string
   department?: string
+  employeeId?: string
 }
 
 export default function UserManagementPage() {
@@ -36,7 +37,8 @@ export default function UserManagementPage() {
     fullName: '',
     roles: [] as string[],
     grade: '',
-    department: ''
+    department: '',
+    employeeId: ''
   })
 
   useEffect(() => {
@@ -140,7 +142,8 @@ export default function UserManagementPage() {
         fullName: formData.fullName,
         roles: formData.roles,
         grade: formData.grade,
-        department: formData.department
+        department: formData.department,
+        employeeId: formData.employeeId
       }
       
       // Only include password if it's not empty
@@ -174,7 +177,8 @@ export default function UserManagementPage() {
       fullName: '',
       roles: [],
       grade: '',
-      department: ''
+      department: '',
+      employeeId: ''
     })
     setError('')
   }
@@ -188,7 +192,8 @@ export default function UserManagementPage() {
       fullName: user.fullName,
       roles: user.roles,
       grade: user.grade || '',
-      department: user.department || ''
+      department: user.department || '',
+      employeeId: user.employeeId || ''
     })
   }
 
@@ -246,6 +251,9 @@ export default function UserManagementPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Employee ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -268,6 +276,9 @@ export default function UserManagementPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.map(user => (
                   <tr key={user.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {user.employeeId || '-'}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {user.fullName}
                     </td>
@@ -332,6 +343,22 @@ export default function UserManagementPage() {
                   required
                   autoComplete="off"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Employee ID *
+                </label>
+                <input
+                  type="text"
+                  name="employeeId"
+                  value={formData.employeeId}
+                  onChange={(e) => setFormData(prev => ({ ...prev, employeeId: e.target.value }))}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2"
+                  required
+                  autoComplete="off"
+                  placeholder="e.g., EMP001"
+                />
+                <p className="text-xs text-gray-500 mt-1">Unique identifier for the employee</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -452,6 +479,22 @@ export default function UserManagementPage() {
                   disabled
                 />
                 <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Employee ID *
+                </label>
+                <input
+                  type="text"
+                  name="employeeId"
+                  value={formData.employeeId}
+                  onChange={(e) => setFormData(prev => ({ ...prev, employeeId: e.target.value }))}
+                  className="w-full rounded-md border border-gray-300 px-3 py-2"
+                  required
+                  autoComplete="off"
+                  placeholder="e.g., EMP001"
+                />
+                <p className="text-xs text-gray-500 mt-1">Unique identifier for the employee</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

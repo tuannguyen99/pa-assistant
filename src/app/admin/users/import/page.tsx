@@ -92,16 +92,17 @@ export default function ImportUsersPage() {
             <h3 className="font-semibold text-blue-900 mb-2">CSV Format Requirements:</h3>
             <ul className="list-disc list-inside text-sm text-blue-800 space-y-1">
               <li>Required columns: email, fullName, roles</li>
-              <li>Optional columns: password, grade, department</li>
+              <li>Optional columns: employeeId, password, grade, department</li>
               <li>Roles should be comma-separated (e.g., "employee,manager")</li>
               <li>Valid roles: employee, manager, hr_admin, board_of_manager, general_director</li>
               <li>If password is not provided, a default password will be generated</li>
+              <li>Employee ID should be unique if provided (e.g., "EMP001")</li>
             </ul>
             <div className="mt-3 p-2 bg-white rounded border border-blue-300">
               <p className="text-xs text-blue-900 font-mono">
                 Example:<br />
-                email,fullName,roles,password,grade,department<br />
-                john@example.com,John Doe,"employee,manager",pass123,Senior,Engineering
+                email,fullName,roles,employeeId,password,grade,department<br />
+                john@example.com,John Doe,"employee,manager",EMP001,pass123,Senior,Engineering
               </p>
             </div>
           </div>

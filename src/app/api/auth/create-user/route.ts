@@ -8,7 +8,8 @@ const createUserSchema = z.object({
   fullName: z.string().min(1),
   roles: z.array(z.string()).min(1),
   grade: z.string().optional(),
-  department: z.string().optional()
+  department: z.string().optional(),
+  employeeId: z.string().min(1)
 })
 
 export async function POST(request: NextRequest) {
@@ -49,10 +50,22 @@ export async function POST(request: NextRequest) {
 
     console.error('User creation error:', error)
     
-    // Check for duplicate email error
+    // Check for duplicate email or employee ID error
     if (error instanceof Error && error.message.includes('Unique constraint')) {
+      const errorMsg = error.message.toLowerCase()
+      if (errorMsg.includes('email')) {
+        return NextResponse.json(
+          { error: 'User with this email already exists' },
+          { status: 400 }
+        )
+      } else if (errorMsg.includes('employeeid')) {
+        return NextResponse.json(
+          { error: 'User with this employee ID already exists' },
+          { status: 400 }
+        )
+      }
       return NextResponse.json(
-        { error: 'User with this email already exists' },
+        { error: 'User with this email or employee ID already exists' },
         { status: 400 }
       )
     }
