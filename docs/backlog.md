@@ -15,3 +15,7 @@ Routing guidance:
 | 2025-11-08 | 1-1 | 1 | Enhancement | Medium | TBD | Open | Add unit tests for authentication flow [file: pa-app/tests/unit/auth.test.ts] |
 | 2025-11-08 | 1-1 | 1 | Enhancement | Medium | TBD | Open | Add E2E tests for login/logout functionality [file: pa-app/tests/e2e/auth.spec.ts] |
 | 2025-11-08 | 1-1 | 1 | Enhancement | Low | TBD | Open | Standardize NextAuth version usage (recommend v5 throughout) |
+| 2025-11-09 | 1-2 | 1 | Enhancement | Low | TBD | Open | Enhance CSV import with proper parsing library (papaparse) to handle quoted commas [file: src/app/api/auth/import-users/route.ts] |
+| 2025-11-09 | 1-2 | 1 | Enhancement | Low | TBD | Open | Add more specific error codes and detailed error messages for better debugging [file: src/app/api/auth/create-user/route.ts, src/app/api/auth/update-user/route.ts] |
+| 2025-11-09 | 1-2 | 1 | Enhancement | Medium | TBD | Open | Remove unused PUT endpoint in profile route or document its purpose [file: src/app/api/auth/profile/route.ts:31-56] |
+| 2025-11-09 | 1-2 | 1 | Enhancement | Low | TBD | Open | Create shared constants file for role definitions to reduce duplication [file: src/lib/constants/roles.ts] |
