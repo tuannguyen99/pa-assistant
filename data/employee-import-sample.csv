@@ -1,6 +1,6 @@
-employeeId,fullName,email,grade,department,jobTitle,employmentStatus,managerId,roles
+﻿employeeId,fullName,email,grade,department,jobTitle,employmentStatus,managerId,roles
 EMP101,Alice Johnson,alice.johnson@company.com,Senior,Engineering,Senior Software Engineer,active,,employee
-EMP102,Bob Smith,bob.smith@company.com,Principal,Engineering,Principal Engineer,active,,employee,manager
+EMP102,Bob Smith,bob.smith@company.com,Principal,Engineering,Principal Engineer,active,,employee;manager
 EMP103,Carol White,carol.white@company.com,Junior,Marketing,Marketing Specialist,active,,employee
 EMP104,David Brown,david.brown@company.com,Senior,Finance,Senior Accountant,active,,employee
 EMP105,Eve Davis,eve.davis@company.com,Mid,HR,HR Coordinator,active,,employee

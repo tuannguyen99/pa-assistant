@@ -31,7 +31,7 @@ export class AuthService {
       // Parse roles to ensure it's an array
       let roles: string[] = []
       if (Array.isArray(user.roles)) {
-        roles = user.roles
+        roles = user.roles as string[]
       } else if (typeof user.roles === 'string') {
         try {
           roles = JSON.parse(user.roles)
@@ -42,8 +42,9 @@ export class AuthService {
           console.error('Failed to parse roles JSON in hasRole:', e)
           roles = []
         }
-      } else if (user.roles) {
-        roles = [user.roles].filter(Boolean)
+      } else if (user.roles && typeof user.roles === 'object') {
+        // Handle other JSON cases
+        roles = []
       }
 
       return roles.includes(role)
@@ -89,7 +90,7 @@ export class AuthService {
         email,
         passwordHash,
         fullName,
-        roles: roles as any,
+        roles: JSON.parse(JSON.stringify(roles)),
         grade: grade || 'TBD',
         department: department || 'TBD',
         employeeId: employeeId || undefined
@@ -110,10 +111,10 @@ export class AuthService {
       employeeId?: string
     }
   ): Promise<User> {
-    const updateData: any = {}
+    const updateData: Record<string, unknown> = {}
 
     if (data.fullName) updateData.fullName = data.fullName
-    if (data.roles) updateData.roles = data.roles as any
+    if (data.roles) updateData.roles = JSON.parse(JSON.stringify(data.roles))
     if (data.grade !== undefined) updateData.grade = data.grade
     if (data.department !== undefined) updateData.department = data.department
     if (data.employeeId !== undefined) updateData.employeeId = data.employeeId

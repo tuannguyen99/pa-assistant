@@ -63,7 +63,7 @@ export const authOptions: NextAuthOptions = {
             // Parse roles to ensure it's an array
             let roles: string[] = []
             if (Array.isArray(user.roles)) {
-              roles = user.roles
+              roles = user.roles as string[]
             } else if (typeof user.roles === 'string') {
               try {
                 roles = JSON.parse(user.roles)
@@ -74,8 +74,9 @@ export const authOptions: NextAuthOptions = {
                 console.error('Failed to parse roles JSON in auth config:', e)
                 roles = []
               }
-            } else if (user.roles) {
-              roles = [user.roles].filter(Boolean)
+            } else if (user.roles && typeof user.roles === 'object') {
+              // Handle other JSON cases
+              roles = []
             }
 
             return {

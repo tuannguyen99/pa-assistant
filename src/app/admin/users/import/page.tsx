@@ -26,7 +26,7 @@ interface EmployeeRow {
 }
 
 export default function EmployeeImportPage() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   
@@ -55,6 +55,7 @@ export default function EmployeeImportPage() {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
+      transformHeader: (header: string) => header.trim(), // Trim headers
       complete: (results) => {
         if (results.errors.length > 0) {
           setError('Error parsing CSV: ' + results.errors[0].message)
@@ -70,6 +71,7 @@ export default function EmployeeImportPage() {
         }
 
         const firstRow = data[0]
+        
         const requiredColumns = ['employeeId', 'fullName', 'email', 'grade', 'department']
         const missingColumns = requiredColumns.filter(col => !(col in firstRow))
         
@@ -97,10 +99,10 @@ export default function EmployeeImportPage() {
     setError('')
 
     try {
-      // Process roles field - convert comma-separated string to array
+      // Process roles field - convert semicolon-separated string to array
       const processedData = previewData.map(row => ({
         ...row,
-        roles: row.roles ? row.roles.split(',').map(r => r.trim()) : undefined,
+        roles: row.roles ? row.roles.split(';').map(r => r.trim()) : ['employee'],
         employmentStatus: row.employmentStatus || 'active'
       }))
 
@@ -136,7 +138,7 @@ export default function EmployeeImportPage() {
     const csvContent = [
       'employeeId,fullName,email,grade,department,jobTitle,employmentStatus,managerId,roles',
       'EMP001,John Doe,john.doe@example.com,Senior,Engineering,Senior Engineer,active,,employee',
-      'EMP002,Jane Smith,jane.smith@example.com,Principal,Engineering,Principal Engineer,active,,employee,manager'
+      'EMP002,Jane Smith,jane.smith@example.com,Principal,Engineering,Principal Engineer,active,,employee;manager'
     ].join('\n')
 
     const blob = new Blob([csvContent], { type: 'text/csv' })
@@ -188,7 +190,7 @@ export default function EmployeeImportPage() {
                 <li>Download the CSV template below to see the required format</li>
                 <li>Required columns: employeeId, fullName, email, grade, department</li>
                 <li>Optional columns: jobTitle, employmentStatus (active/inactive/on_leave), managerId, roles</li>
-                <li>For roles, use comma-separated values (e.g., "employee,manager")</li>
+                <li>For roles with multiple values, use semicolons: employee;manager</li>
                 <li>Default password will be set to the employeeId</li>
               </ul>
               <button

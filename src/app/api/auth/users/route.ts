@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { AuthService } from '@/lib/auth/auth-service'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Check if current user is HR Admin
     const currentUser = await AuthService.getCurrentUser()
@@ -23,8 +23,18 @@ export async function GET(request: NextRequest) {
     // Get all users
     const users = await AuthService.getAllUsers()
 
-    // Remove password hashes from response
-    const usersWithoutPasswords = users.map(({ passwordHash, ...user }) => user)
+    // Remove sensitive fields from response
+    const usersWithoutPasswords = users.map(user => ({
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+      roles: user.roles,
+      grade: user.grade,
+      department: user.department,
+      employeeId: user.employeeId,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    }))
 
     return NextResponse.json({ users: usersWithoutPasswords }, { status: 200 })
   } catch (error) {

@@ -15,7 +15,7 @@ const employeeSchema = z.object({
   employmentStatus: z.enum(['active', 'inactive', 'on_leave']).default('active'),
   managerId: z.string().optional(),
   roles: z.array(z.string()).optional()
-})
+}).passthrough() // Allow extra fields
 
 interface ImportResult {
   success: boolean

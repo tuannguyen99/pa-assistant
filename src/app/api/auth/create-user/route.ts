@@ -37,8 +37,18 @@ export async function POST(request: NextRequest) {
     // Create user via AuthService
     const user = await AuthService.createUser(validatedData)
 
-    // Return user without password
-    const { passwordHash, ...userWithoutPassword } = user
+    // Return user without sensitive fields
+    const userWithoutPassword = {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+      roles: user.roles,
+      grade: user.grade,
+      department: user.department,
+      employeeId: user.employeeId,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    }
     return NextResponse.json({ user: userWithoutPassword }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {

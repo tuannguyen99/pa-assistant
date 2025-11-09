@@ -78,7 +78,7 @@ export async function GET(
     // Parse roles if needed
     let roles: string[] = []
     if (Array.isArray(user.roles)) {
-      roles = user.roles
+      roles = user.roles as string[]
     } else if (typeof user.roles === 'string') {
       try {
         roles = JSON.parse(user.roles)

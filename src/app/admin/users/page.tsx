@@ -23,6 +23,26 @@ interface User {
   employeeId?: string
 }
 
+interface RawUser {
+  id: string
+  email: string
+  fullName: string
+  roles: string | string[] | unknown
+  grade?: string
+  department?: string
+  employeeId?: string
+}
+
+interface UpdateUserData {
+  id: string
+  fullName: string
+  roles: string[]
+  grade: string
+  department: string
+  employeeId: string
+  password?: string
+}
+
 export default function UserManagementPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -91,7 +111,7 @@ export default function UserManagementPage() {
       if (response.ok) {
         const data = await response.json()
         // Ensure roles are properly parsed for each user
-        const usersWithParsedRoles = data.users.map((user: any) => {
+        const usersWithParsedRoles = data.users.map((user: RawUser) => {
           let roles: string[] = []
           if (Array.isArray(user.roles)) {
             roles = user.roles
@@ -105,8 +125,8 @@ export default function UserManagementPage() {
               console.error('Failed to parse roles JSON for user:', user.email, e)
               roles = []
             }
-          } else if (user.roles) {
-            roles = [user.roles].filter(Boolean)
+          } else if (user.roles && typeof user.roles === 'string') {
+            roles = [user.roles]
           }
           return { ...user, roles }
         })
@@ -163,7 +183,7 @@ export default function UserManagementPage() {
 
     try {
       // Build update data, excluding password if empty
-      const updateData: any = {
+      const updateData: UpdateUserData = {
         id: editingUser.id,
         fullName: formData.fullName,
         roles: formData.roles,

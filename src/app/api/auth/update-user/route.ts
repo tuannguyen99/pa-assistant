@@ -37,8 +37,18 @@ export async function PUT(request: NextRequest) {
     // Update user via AuthService
     const user = await AuthService.updateUser(validatedData.id, validatedData)
 
-    // Return user without password
-    const { passwordHash, ...userWithoutPassword } = user
+    // Return user without sensitive fields
+    const userWithoutPassword = {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+      roles: user.roles,
+      grade: user.grade,
+      department: user.department,
+      employeeId: user.employeeId,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    }
     return NextResponse.json({ user: userWithoutPassword }, { status: 200 })
   } catch (error) {
     if (error instanceof z.ZodError) {
