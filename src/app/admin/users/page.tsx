@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, Users, UserCheck, Building } from 'lucide-react'
+import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, Users, UserCheck, Building, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -104,6 +104,8 @@ export default function UserManagementPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [departmentFilter, setDepartmentFilter] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState<number | 'all'>(10) // Users per page
 
   const createForm = useForm<UserFormData>({
     resolver: zodResolver(userFormSchema),
@@ -165,9 +167,26 @@ export default function UserManagementPage() {
     }
 
     setFilteredUsers(filtered)
+    setCurrentPage(1) // Reset to first page when filters change
   }, [users, searchTerm, departmentFilter])
 
+  // Reset to first page when page size changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [pageSize])
+
   const departments = Array.from(new Set(users.map(u => u.department).filter(Boolean)))
+
+  // Pagination logic
+  const actualPageSize = pageSize === 'all' ? filteredUsers.length : pageSize
+  const totalPages = Math.ceil(filteredUsers.length / actualPageSize)
+  const startIndex = (currentPage - 1) * actualPageSize
+  const endIndex = startIndex + actualPageSize
+  const paginatedUsers = filteredUsers.slice(startIndex, endIndex)
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)))
+  }
 
   const fetchUsers = async () => {
     try {
@@ -543,7 +562,7 @@ export default function UserManagementPage() {
                   />
                 </div>
               </div>
-              <div className="sm:w-64">
+              <div className="sm:w-48">
                 <select
                   value={departmentFilter}
                   onChange={(e) => setDepartmentFilter(e.target.value)}
@@ -553,6 +572,17 @@ export default function UserManagementPage() {
                   {departments.map(dept => (
                     <option key={dept} value={dept}>{dept}</option>
                   ))}
+                </select>
+              </div>
+              <div className="sm:w-32">
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value={10}>10 per page</option>
+                  <option value={20}>20 per page</option>
+                  <option value="all">Show all</option>
                 </select>
               </div>
               {(searchTerm || departmentFilter) && (
@@ -569,7 +599,10 @@ export default function UserManagementPage() {
           <CardHeader>
             <CardTitle>Users ({filteredUsers.length})</CardTitle>
             <CardDescription>
-              A list of all users in the system with their roles and information.
+              {pageSize === 'all'
+                ? `Showing all ${filteredUsers.length} users`
+                : `Showing ${paginatedUsers.length} of ${filteredUsers.length} users (Page ${currentPage} of ${totalPages})`
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -587,7 +620,7 @@ export default function UserManagementPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.map((user) => (
+                  {paginatedUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">
                         {user.employeeId || '-'}
@@ -638,6 +671,64 @@ export default function UserManagementPage() {
                 </TableBody>
               </Table>
             </div>
+
+            {/* Pagination Controls */}
+            {pageSize !== 'all' && totalPages > 1 && (
+              <div className="flex items-center justify-between px-2 py-4">
+                <div className="flex-1 text-sm text-muted-foreground">
+                  Showing {startIndex + 1} to {Math.min(endIndex, filteredUsers.length)} of {filteredUsers.length} users
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                  </Button>
+
+                  {/* Page Numbers */}
+                  <div className="flex items-center space-x-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum
+                      if (totalPages <= 5) {
+                        pageNum = i + 1
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i
+                      } else {
+                        pageNum = currentPage - 2 + i
+                      }
+
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => goToPage(pageNum)}
+                          className="w-8 h-8 p-0"
+                        >
+                          {pageNum}
+                        </Button>
+                      )
+                    })}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
