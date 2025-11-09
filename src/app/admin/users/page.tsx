@@ -27,10 +27,13 @@ export default function UserManagementPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [users, setUsers] = useState<User[]>([])
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [departmentFilter, setDepartmentFilter] = useState('')
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -58,6 +61,29 @@ export default function UserManagementPage() {
       fetchUsers()
     }
   }, [status])
+
+  // Filter users when search term, department filter, or users change
+  useEffect(() => {
+    let filtered = users
+
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase()
+      filtered = filtered.filter(user => 
+        user.fullName.toLowerCase().includes(search) ||
+        user.email.toLowerCase().includes(search) ||
+        user.employeeId?.toLowerCase().includes(search)
+      )
+    }
+
+    if (departmentFilter) {
+      filtered = filtered.filter(user => user.department === departmentFilter)
+    }
+
+    setFilteredUsers(filtered)
+  }, [users, searchTerm, departmentFilter])
+
+  // Get unique departments for filter
+  const departments = Array.from(new Set(users.map(u => u.department).filter(Boolean)))
 
   const fetchUsers = async () => {
     try {
@@ -246,6 +272,46 @@ export default function UserManagementPage() {
             </div>
           )}
 
+          {/* Search and Filter Section */}
+          <div className="mb-6 flex gap-4">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Search by name, email, or employee ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div className="w-64">
+              <select
+                value={departmentFilter}
+                onChange={(e) => setDepartmentFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">All Departments</option>
+                {departments.map(dept => (
+                  <option key={dept} value={dept}>{dept}</option>
+                ))}
+              </select>
+            </div>
+            {(searchTerm || departmentFilter) && (
+              <button
+                onClick={() => {
+                  setSearchTerm('')
+                  setDepartmentFilter('')
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+
+          <div className="mb-4 text-sm text-gray-600">
+            Showing {filteredUsers.length} of {users.length} employees
+          </div>
+
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -274,7 +340,7 @@ export default function UserManagementPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.map(user => (
+                {filteredUsers.map(user => (
                   <tr key={user.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {user.employeeId || '-'}

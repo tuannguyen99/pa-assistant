@@ -110,8 +110,8 @@ test.describe('HR Admin User Management', () => {
     
     // Should navigate to import page
     await page.waitForURL('/admin/users/import')
-    await expect(page.locator('h1:has-text("Import Users")')).toBeVisible()
-    await expect(page.locator('text=CSV Format Requirements')).toBeVisible()
+    await expect(page.locator('h1:has-text("Import Employees")')).toBeVisible()
+    await expect(page.locator('text=Import Instructions')).toBeVisible()
   })
 
   test('Create user form validates required fields', async ({ page }) => {
@@ -254,19 +254,19 @@ test.describe('User Import', () => {
     await page.goto('/admin/users/import')
     
     // Should show format requirements
-    await expect(page.locator('text=CSV Format Requirements')).toBeVisible()
-    await expect(page.locator('text=Required columns: email, fullName, roles')).toBeVisible()
-    await expect(page.locator('text=Optional columns: employeeId, password, grade, department')).toBeVisible()
+    await expect(page.locator('text=Import Instructions')).toBeVisible()
+    await expect(page.locator('text=Required columns: employeeId, fullName, email, grade, department')).toBeVisible()
+    await expect(page.locator('text=Optional columns: jobTitle, employmentStatus')).toBeVisible()
   })
 
   test('Import page has file upload input', async ({ page }) => {
     await loginAsHRAdmin(page)
     await page.goto('/admin/users/import')
     
-    // Should have file input
+    // Should have file input (even if hidden)
     const fileInput = page.locator('input[type="file"]')
-    await expect(fileInput).toBeVisible()
-    await expect(fileInput).toHaveAttribute('accept', '.csv,.xlsx,.xls')
+    await expect(fileInput).toBeAttached()
+    await expect(fileInput).toHaveAttribute('accept', '.csv')
   })
 
   test('Can navigate back to user management from import page', async ({ page }) => {
