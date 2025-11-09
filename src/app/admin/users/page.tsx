@@ -3,15 +3,74 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, Users, UserCheck, Building } from 'lucide-react'
+
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
 import Header from '@/components/Header'
 
 const ROLE_OPTIONS = [
-  { value: 'employee', label: 'Employee' },
-  { value: 'manager', label: 'Manager' },
-  { value: 'hr_admin', label: 'HR Admin' },
-  { value: 'board_of_manager', label: 'Board of Manager' },
-  { value: 'general_director', label: 'General Director' }
+  { value: 'employee', label: 'Employee', color: 'bg-blue-100 text-blue-800' },
+  { value: 'manager', label: 'Manager', color: 'bg-green-100 text-green-800' },
+  { value: 'hr_admin', label: 'HR Admin', color: 'bg-purple-100 text-purple-800' },
+  { value: 'board_of_manager', label: 'Board of Manager', color: 'bg-orange-100 text-orange-800' },
+  { value: 'general_director', label: 'General Director', color: 'bg-red-100 text-red-800' }
 ]
+
+const userFormSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  fullName: z.string().min(1, 'Full name is required'),
+  roles: z.array(z.string()).min(1, 'At least one role is required'),
+  grade: z.string().optional(),
+  department: z.string().optional(),
+  employeeId: z.string().min(1, 'Employee ID is required')
+})
+
+const editUserFormSchema = z.object({
+  fullName: z.string().min(1, 'Full name is required'),
+  roles: z.array(z.string()).min(1, 'At least one role is required'),
+  grade: z.string().optional(),
+  department: z.string().optional(),
+  employeeId: z.string().min(1, 'Employee ID is required'),
+  password: z.string().optional()
+})
+
+type UserFormData = z.infer<typeof userFormSchema>
+type EditUserFormData = z.infer<typeof editUserFormSchema>
 
 interface User {
   id: string
@@ -33,16 +92,6 @@ interface RawUser {
   employeeId?: string
 }
 
-interface UpdateUserData {
-  id: string
-  fullName: string
-  roles: string[]
-  grade: string
-  department: string
-  employeeId: string
-  password?: string
-}
-
 export default function UserManagementPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
@@ -50,25 +99,41 @@ export default function UserManagementPage() {
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
-  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [departmentFilter, setDepartmentFilter] = useState('')
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    fullName: '',
-    roles: [] as string[],
-    grade: '',
-    department: '',
-    employeeId: ''
+
+  const createForm = useForm<UserFormData>({
+    resolver: zodResolver(userFormSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      fullName: '',
+      roles: [],
+      grade: '',
+      department: '',
+      employeeId: ''
+    }
+  })
+
+  const editForm = useForm<EditUserFormData>({
+    resolver: zodResolver(editUserFormSchema),
+    defaultValues: {
+      fullName: '',
+      roles: [],
+      grade: '',
+      department: '',
+      employeeId: '',
+      password: ''
+    }
   })
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login')
     } else if (status === 'authenticated') {
-      // Check if user has hr_admin role
       const userRoles = session?.user?.roles || []
       if (!userRoles.includes('hr_admin')) {
         router.push('/dashboard')
@@ -88,7 +153,7 @@ export default function UserManagementPage() {
 
     if (searchTerm) {
       const search = searchTerm.toLowerCase()
-      filtered = filtered.filter(user => 
+      filtered = filtered.filter(user =>
         user.fullName.toLowerCase().includes(search) ||
         user.email.toLowerCase().includes(search) ||
         user.employeeId?.toLowerCase().includes(search)
@@ -102,7 +167,6 @@ export default function UserManagementPage() {
     setFilteredUsers(filtered)
   }, [users, searchTerm, departmentFilter])
 
-  // Get unique departments for filter
   const departments = Array.from(new Set(users.map(u => u.department).filter(Boolean)))
 
   const fetchUsers = async () => {
@@ -110,7 +174,6 @@ export default function UserManagementPage() {
       const response = await fetch('/api/auth/users')
       if (response.ok) {
         const data = await response.json()
-        // Ensure roles are properly parsed for each user
         const usersWithParsedRoles = data.users.map((user: RawUser) => {
           let roles: string[] = []
           if (Array.isArray(user.roles)) {
@@ -141,60 +204,41 @@ export default function UserManagementPage() {
     }
   }
 
-  const handleCreateUser = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onCreateUser = async (data: UserFormData) => {
     setError('')
-
-    if (formData.roles.length === 0) {
-      setError('Please select at least one role')
-      return
-    }
-
     try {
       const response = await fetch('/api/auth/create-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(data)
       })
 
       if (response.ok) {
-        setShowCreateModal(false)
-        resetForm()
+        setShowCreateDialog(false)
+        createForm.reset()
         fetchUsers()
       } else {
-        const data = await response.json()
-        setError(data.error || 'Failed to create user')
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to create user')
       }
     } catch (err) {
       setError('An error occurred')
     }
   }
 
-  const handleUpdateUser = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onEditUser = async (data: EditUserFormData) => {
     setError('')
-
     if (!editingUser) return
 
-    if (formData.roles.length === 0) {
-      setError('Please select at least one role')
-      return
-    }
-
     try {
-      // Build update data, excluding password if empty
-      const updateData: UpdateUserData = {
+      const updateData = {
         id: editingUser.id,
-        fullName: formData.fullName,
-        roles: formData.roles,
-        grade: formData.grade,
-        department: formData.department,
-        employeeId: formData.employeeId
-      }
-      
-      // Only include password if it's not empty
-      if (formData.password && formData.password.trim().length > 0) {
-        updateData.password = formData.password
+        fullName: data.fullName,
+        roles: data.roles,
+        grade: data.grade || '',
+        department: data.department || '',
+        employeeId: data.employeeId,
+        ...(data.password && data.password.trim().length > 0 && { password: data.password })
       }
 
       const response = await fetch('/api/auth/update-user', {
@@ -204,52 +248,40 @@ export default function UserManagementPage() {
       })
 
       if (response.ok) {
+        setShowEditDialog(false)
         setEditingUser(null)
-        resetForm()
+        editForm.reset()
         fetchUsers()
       } else {
-        const data = await response.json()
-        setError(data.error || 'Failed to update user')
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to update user')
       }
     } catch (err) {
       setError('An error occurred')
     }
   }
 
-  const resetForm = () => {
-    setFormData({
-      email: '',
-      password: '',
-      fullName: '',
-      roles: [],
-      grade: '',
-      department: '',
-      employeeId: ''
-    })
-    setError('')
-  }
-
-  const openEditModal = (user: User) => {
-    setError('')
+  const openEditDialog = (user: User) => {
     setEditingUser(user)
-    setFormData({
-      email: user.email,
-      password: '', // Don't populate password
+    editForm.reset({
       fullName: user.fullName,
       roles: user.roles,
       grade: user.grade || '',
       department: user.department || '',
-      employeeId: user.employeeId || ''
+      employeeId: '',
+      password: ''
     })
+    setShowEditDialog(true)
   }
 
-  const handleRoleChange = (role: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      roles: checked
-        ? [...prev.roles, role]
-        : prev.roles.filter(r => r !== role)
-    }))
+  const clearFilters = () => {
+    setSearchTerm('')
+    setDepartmentFilter('')
+  }
+
+  const getRoleBadgeColor = (role: string) => {
+    const roleOption = ROLE_OPTIONS.find(r => r.value === role)
+    return roleOption?.color || 'bg-gray-100 text-gray-800'
   }
 
   if (status === 'loading' || isLoading) {
@@ -264,403 +296,498 @@ export default function UserManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50/50">
       <Header />
-      <div className="max-w-6xl mx-auto py-8 px-4">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-            <div className="space-x-4">
-              <button
-                onClick={() => router.push('/admin/users/import')}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-500"
-              >
-                Import Users
-              </button>
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500"
-              >
-                Create User
-              </button>
-            </div>
+      <div className="container mx-auto py-8 px-4">
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
+              <Users className="h-8 w-8 text-indigo-600" />
+              User Management
+            </h1>
+            <p className="text-gray-600 mt-1">Manage employee accounts and permissions</p>
           </div>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => router.push('/admin/users/import')}
+              className="flex items-center gap-2"
+            >
+              <UserCheck className="h-4 w-4" />
+              Import Users
+            </Button>
+            <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Create User
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Create New User</DialogTitle>
+                  <DialogDescription>
+                    Add a new employee to the system with their basic information and roles.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...createForm}>
+                  <form onSubmit={createForm.handleSubmit(onCreateUser)} className="space-y-4">
+                    {/* Basic Information */}
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-medium text-gray-900">Basic Information</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={createForm.control}
+                          name="employeeId"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Employee ID *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="EMP001" autoComplete="off" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-          {error && (
-            <div className="text-red-600 text-sm mb-4 bg-red-50 p-3 rounded-md">
-              {error}
-            </div>
-          )}
+                        <FormField
+                          control={createForm.control}
+                          name="fullName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Full Name *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="John Doe" autoComplete="off" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
 
-          {/* Search and Filter Section */}
-          <div className="mb-6 flex gap-4">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search by name, email, or employee ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div className="w-64">
-              <select
-                value={departmentFilter}
-                onChange={(e) => setDepartmentFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="">All Departments</option>
-                {departments.map(dept => (
-                  <option key={dept} value={dept}>{dept}</option>
-                ))}
-              </select>
-            </div>
-            {(searchTerm || departmentFilter) && (
-              <button
-                onClick={() => {
-                  setSearchTerm('')
-                  setDepartmentFilter('')
-                }}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
-              >
-                Clear Filters
-              </button>
-            )}
-          </div>
+                    {/* Account Credentials */}
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-medium text-gray-900">Account Credentials</h4>
+                      <div className="grid grid-cols-1 gap-4">
+                        <FormField
+                          control={createForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email *</FormLabel>
+                              <FormControl>
+                                <Input type="email" placeholder="john.doe@company.com" autoComplete="off" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-          <div className="mb-4 text-sm text-gray-600">
-            Showing {filteredUsers.length} of {users.length} employees
-          </div>
+                        <FormField
+                          control={createForm.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Password *</FormLabel>
+                              <FormControl>
+                                <Input type="password" placeholder="Minimum 6 characters" autoComplete="new-password" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Employee ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Roles
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Grade
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Department
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.map(user => (
-                  <tr key={user.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {user.employeeId || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {user.fullName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.roles.join(', ')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.grade || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.department || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button
-                        onClick={() => openEditModal(user)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    {/* Employment Details */}
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-medium text-gray-900">Employment Details</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={createForm.control}
+                          name="grade"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Grade</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Senior" autoComplete="off" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={createForm.control}
+                          name="department"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Department</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Engineering" autoComplete="off" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Roles */}
+                    <div className="space-y-4">
+                      <FormField
+                        control={createForm.control}
+                        name="roles"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium text-gray-900">Roles *</FormLabel>
+                            <FormDescription className="text-xs">
+                              Select one or more roles for this user
+                            </FormDescription>
+                            <div className="grid grid-cols-2 gap-3">
+                              {ROLE_OPTIONS.map((role) => (
+                                <div
+                                  key={role.value}
+                                  className="flex flex-row items-start space-x-3 space-y-0"
+                                >
+                                  <Checkbox
+                                    checked={field.value?.includes(role.value)}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([...field.value, role.value])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== role.value
+                                            )
+                                          )
+                                    }}
+                                  />
+                                  <Label className="font-normal text-sm">
+                                    {role.label}
+                                  </Label>
+                                </div>
+                              ))}
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <DialogFooter>
+                      <Button type="submit" disabled={createForm.formState.isSubmitting}>
+                        {createForm.formState.isSubmitting ? 'Creating...' : 'Create User'}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{users.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Departments</CardTitle>
+              <Building className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{departments.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Filtered Results</CardTitle>
+              <Filter className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{filteredUsers.length}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+            {error}
+          </div>
+        )}
+
+        {/* Search and Filter Section */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg">Search & Filter</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by name, email, or employee ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div className="sm:w-64">
+                <select
+                  value={departmentFilter}
+                  onChange={(e) => setDepartmentFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="">All Departments</option>
+                  {departments.map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+              {(searchTerm || departmentFilter) && (
+                <Button variant="outline" onClick={clearFilters}>
+                  Clear Filters
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Users Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Users ({filteredUsers.length})</CardTitle>
+            <CardDescription>
+              A list of all users in the system with their roles and information.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Roles</TableHead>
+                    <TableHead>Grade</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead className="w-[70px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">
+                        {user.employeeId || '-'}
+                      </TableCell>
+                      <TableCell>{user.fullName}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {user.email}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {user.roles.map((role) => (
+                            <Badge
+                              key={role}
+                              variant="secondary"
+                              className={getRoleBadgeColor(role)}
+                            >
+                              {ROLE_OPTIONS.find(r => r.value === role)?.label || role}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>{user.grade || '-'}</TableCell>
+                      <TableCell>{user.department || '-'}</TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => openEditDialog(user)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit User
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-red-600">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete User
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Edit User Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+              <DialogDescription>
+                Update user information and permissions.
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...editForm}>
+              <form onSubmit={editForm.handleSubmit(onEditUser)} className="space-y-4">
+                {/* Basic Information */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-gray-900">Basic Information</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={editForm.control}
+                      name="employeeId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Employee ID *</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={editForm.control}
+                      name="fullName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name *</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Employment Details */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-gray-900">Employment Details</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={editForm.control}
+                      name="grade"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Grade</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={editForm.control}
+                      name="department"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Department</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-gray-900">Security</h4>
+                  <FormField
+                    control={editForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password (leave blank to keep current)</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="Enter new password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Roles */}
+                <div className="space-y-4">
+                  <FormField
+                    control={editForm.control}
+                    name="roles"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-900">Roles *</FormLabel>
+                        <FormDescription className="text-xs">
+                          Select one or more roles for this user
+                        </FormDescription>
+                        <div className="grid grid-cols-2 gap-3">
+                          {ROLE_OPTIONS.map((role) => (
+                            <div
+                              key={role.value}
+                              className="flex flex-row items-start space-x-3 space-y-0"
+                            >
+                              <Checkbox
+                                checked={field.value?.includes(role.value)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([...field.value, role.value])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== role.value
+                                        )
+                                      )
+                                }}
+                              />
+                              <Label className="font-normal text-sm">
+                                {role.label}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <DialogFooter>
+                  <Button type="submit" disabled={editForm.formState.isSubmitting}>
+                    {editForm.formState.isSubmitting ? 'Updating...' : 'Update User'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* Create User Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">Create User</h2>
-            <form onSubmit={handleCreateUser} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
-                  required
-                  autoComplete="off"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
-                  required
-                  autoComplete="off"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Employee ID *
-                </label>
-                <input
-                  type="text"
-                  name="employeeId"
-                  value={formData.employeeId}
-                  onChange={(e) => setFormData(prev => ({ ...prev, employeeId: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
-                  required
-                  autoComplete="off"
-                  placeholder="e.g., EMP001"
-                />
-                <p className="text-xs text-gray-500 mt-1">Unique identifier for the employee</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password *
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
-                  required
-                  minLength={6}
-                  autoComplete="new-password"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Roles *
-                </label>
-                <div className="space-y-2">
-                  {ROLE_OPTIONS.map(role => (
-                    <label key={role.value} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        value={role.value}
-                        checked={formData.roles.includes(role.value)}
-                        onChange={(e) => handleRoleChange(role.value, e.target.checked)}
-                        className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">{role.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Grade
-                </label>
-                <input
-                  type="text"
-                  name="grade"
-                  value={formData.grade}
-                  onChange={(e) => setFormData(prev => ({ ...prev, grade: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
-                  autoComplete="off"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Department
-                </label>
-                <input
-                  type="text"
-                  name="department"
-                  value={formData.department}
-                  onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
-                  autoComplete="off"
-                />
-              </div>
-              <div className="flex space-x-4 mt-6">
-                <button
-                  type="submit"
-                  className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-500"
-                >
-                  Create
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateModal(false)
-                    resetForm()
-                  }}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Edit User Modal */}
-      {editingUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">Edit User</h2>
-            {error && (
-              <div className="text-red-600 text-sm mb-4 bg-red-50 p-3 rounded-md">
-                {error}
-              </div>
-            )}
-            <form onSubmit={handleUpdateUser} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 bg-gray-100"
-                  disabled
-                />
-                <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Employee ID *
-                </label>
-                <input
-                  type="text"
-                  name="employeeId"
-                  value={formData.employeeId}
-                  onChange={(e) => setFormData(prev => ({ ...prev, employeeId: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
-                  required
-                  autoComplete="off"
-                  placeholder="e.g., EMP001"
-                />
-                <p className="text-xs text-gray-500 mt-1">Unique identifier for the employee</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  New Password (leave blank to keep current)
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
-                  minLength={6}
-                  autoComplete="new-password"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Roles *
-                </label>
-                <div className="space-y-2">
-                  {ROLE_OPTIONS.map(role => (
-                    <label key={role.value} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        value={role.value}
-                        checked={formData.roles.includes(role.value)}
-                        onChange={(e) => handleRoleChange(role.value, e.target.checked)}
-                        className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">{role.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Grade
-                </label>
-                <input
-                  type="text"
-                  name="grade"
-                  value={formData.grade}
-                  onChange={(e) => setFormData(prev => ({ ...prev, grade: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Department
-                </label>
-                <input
-                  type="text"
-                  name="department"
-                  value={formData.department}
-                  onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
-                />
-              </div>
-              <div className="flex space-x-4 mt-6">
-                <button
-                  type="submit"
-                  className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-500"
-                >
-                  Update
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingUser(null)
-                    resetForm()
-                  }}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
