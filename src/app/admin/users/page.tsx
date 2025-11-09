@@ -345,7 +345,7 @@ export default function UserManagementPage() {
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                  <DialogTitle>Create New User</DialogTitle>
+                  <DialogTitle>Create User</DialogTitle>
                   <DialogDescription>
                     Add a new employee to the system with their basic information and roles.
                   </DialogDescription>
