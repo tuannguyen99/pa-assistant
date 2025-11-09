@@ -1,0 +1,21 @@
+Employee ID,Name,Grade,Department,Manager,Email,Job Title,Status
+EMP001,John Smith,E2,Engineering,EMP010,john.smith@company.com,Software Engineer,Active
+EMP002,Sarah Johnson,E1,Engineering,EMP010,sarah.johnson@company.com,Junior Software Engineer,Active
+EMP003,Michael Chen,SE1,Engineering,EMP010,michael.chen@company.com,Senior Software Engineer,Active
+EMP004,Emily Davis,E3,Engineering,EMP010,emily.davis@company.com,Principal Engineer,Active
+EMP005,David Wilson,C2,HR,EMP009,david.wilson@company.com,HR Specialist,Active
+EMP006,Lisa Brown,C1,HR,EMP009,lisa.brown@company.com,HR Coordinator,Active
+EMP007,Robert Lee,APE1,Engineering,EMP010,robert.lee@company.com,Architect,Active
+EMP008,Jennifer Kim,C3,Finance,EMP011,jennifer.kim@company.com,Finance Manager,Active
+EMP009,Maria Garcia,C4,HR,,maria.garcia@company.com,HR Director,Active
+EMP010,James Anderson,APE2,Engineering,,james.anderson@company.com,VP of Engineering,Active
+EMP011,Patricia Martinez,C4,Finance,,patricia.martinez@company.com,CFO,Active
+EMP012,Christopher Taylor,E1,Engineering,EMP003,chris.taylor@company.com,Software Engineer,Active
+EMP013,Jessica Rodriguez,C2,Marketing,EMP013,jessica.rodriguez@company.com,Marketing Specialist,Active
+EMP014,Daniel Martinez,E2,Engineering,EMP007,daniel.martinez@company.com,Software Engineer,Active
+EMP015,Amanda White,C1,Operations,EMP016,amanda.white@company.com,Operations Coordinator,Active
+EMP016,Kevin Johnson,C3,Operations,,kevin.johnson@company.com,Operations Manager,Active
+EMP017,Rachel Green,E1,Engineering,EMP004,rachel.green@company.com,Software Engineer,Active
+EMP018,Steven Hall,C2,Finance,EMP008,steven.hall@company.com,Financial Analyst,Active
+EMP019,Michelle Young,C1,HR,EMP006,michelle.young@company.com,HR Assistant,Active
+EMP020,Thomas Wright,E3,Engineering,EMP007,thomas.wright@company.com,Lead Engineer,Active

@@ -1,0 +1,172 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>3</storyId>
+    <title>Employee Data Management</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-09</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-3-employee-data-management.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>HR Admin</asA>
+    <iWant>import and manage employee records</iWant>
+    <soThat>the system has accurate employee information for auto-population</soThat>
+    <tasks>- [ ] Task 1: Implement CSV/Excel import functionality (AC: 1)
+  - [ ] Create import interface with file upload and validation
+  - [ ] Add API route for bulk employee import with error handling
+  - [ ] Add unit tests for import logic
+  - [ ] Add E2E test for employee import flow
+- [ ] Task 2: Create employee record management interface (AC: 2, 3, 4)
+  - [ ] Build employee management page with add/edit forms
+  - [ ] Implement employee directory view with search/filter
+  - [ ] Add API routes for CRUD operations on employee records
+  - [ ] Add unit tests for employee management
+  - [ ] Add E2E test for employee CRUD operations
+- [ ] Task 3: Implement auto-population feature (AC: 5)
+  - [ ] Add Employee ID lookup functionality to forms
+  - [ ] Create API endpoint for employee data retrieval by ID
+  - [ ] Integrate auto-population into relevant forms (target setting, evaluations)
+  - [ ] Add unit tests for auto-population logic
+  - [ ] Add E2E test for auto-population flow</tasks>
+  </story>
+
+  <acceptanceCriteria>1. CSV/Excel import functionality for employee data
+2. Employee record fields: ID, name, grade, department, manager, email, job title, status
+3. Manual add/edit employee functionality
+4. Employee directory view available
+5. Auto-population working when Employee ID entered</acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <artifact>
+        <path>docs/epics.md</path>
+        <title>pa-assistant - Epic Breakdown</title>
+        <section>Story 1.3: Employee Data Management</section>
+        <snippet>Story 1.3: Employee Data Management As an HR Admin, I want to import and manage employee records, So that the system has accurate employee information for auto-population. Acceptance Criteria: 1. CSV/Excel import functionality for employee data 2. Employee record fields: ID, name, grade, department, manager, email, job title, status 3. Manual add/edit employee functionality 4. Employee directory view available 5. Auto-population working when Employee ID entered</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/PRD.md</path>
+        <title>pa-system Product Requirements Document (PRD)</title>
+        <section>Functional Requirements</section>
+        <snippet>FR002: HR Admin shall be able to add, edit, and import employee records (CSV/Excel bulk import) including Employee ID, name, grade/level, department, manager, email, job title, and employment status FR003: System shall auto-populate employee information (name, grade, department, manager) when Employee ID is entered on forms</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture/data-architecture.md</path>
+        <title>Data Architecture</title>
+        <section>Employee Model</section>
+        <snippet>Employee model should include fields for ID, name, grade, department, manager, email, job title, status. Use Prisma schema with proper relations to User and Department models.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture/testing-strategy.md</path>
+        <title>Testing Strategy</title>
+        <section>Data Import Testing</section>
+        <snippet>Use Vitest for unit testing of import logic, Playwright for E2E testing of file upload flows. Validate CSV parsing, error handling, and data integrity.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture/coding-standards.md</path>
+        <title>Coding Standards</title>
+        <section>Data Model Standards</section>
+        <snippet>Follow TypeScript strict mode, Zod validation for inputs, proper error handling. Use consistent naming conventions for database fields and API endpoints.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/architecture/complete-project-structure.md</path>
+        <title>Complete Project Structure</title>
+        <section>Admin Section</section>
+        <snippet>Admin routes under src/app/admin/ for HR Admin functionality. Use src/app/api/users/ for user/employee management endpoints. Follow established patterns from user management story.</snippet>
+      </artifact>
+      <artifact>
+        <path>docs/rbac-spec.md</path>
+        <title>RBAC Specification</title>
+        <section>HR Admin Configuration</section>
+        <snippet>HR Admin role required for employee management operations. Implement role-based middleware checks for admin routes.</snippet>
+      </artifact>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/lib/auth/auth-service.ts</path>
+        <kind>service</kind>
+        <symbol>AuthService</symbol>
+        <lines>1-50</lines>
+        <reason>Existing authentication service with user management methods to extend for employee operations</reason>
+      </artifact>
+      <artifact>
+        <path>src/app/admin/users/page.tsx</path>
+        <kind>component</kind>
+        <symbol>UserManagementPage</symbol>
+        <lines>1-100</lines>
+        <reason>Existing HR Admin user management interface to extend for employee data management</reason>
+      </artifact>
+      <artifact>
+        <path>src/app/api/auth/users/route.ts</path>
+        <kind>controller</kind>
+        <symbol>GET /api/auth/users</symbol>
+        <lines>1-30</lines>
+        <reason>Existing user list API endpoint for HR Admin, pattern to follow for employee CRUD</reason>
+      </artifact>
+      <artifact>
+        <path>middleware.ts</path>
+        <kind>middleware</kind>
+        <symbol>isHRAdmin</symbol>
+        <lines>10-20</lines>
+        <reason>Existing RBAC middleware for HR Admin role checks, required for employee management routes</reason>
+      </artifact>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>schema</kind>
+        <symbol>User</symbol>
+        <lines>20-40</lines>
+        <reason>Existing User model with roles, to reference or extend for employee data</reason>
+      </artifact>
+      <artifact>
+        <path>tests/unit/auth-user-management.test.ts</path>
+        <kind>test</kind>
+        <symbol>user management tests</symbol>
+        <lines>1-50</lines>
+        <reason>Existing unit test patterns for user management to follow for employee CRUD testing</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <ecosystem name="node">
+        <package name="next">^14.0.0</package>
+        <package name="prisma">@prisma/client</package>
+        <package name="zod">^3.22.0</package>
+        <package name="vitest">^1.0.0</package>
+        <package name="playwright">^1.40.0</package>
+        <package name="papaparse">^5.4.0</package>
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>Follow data architecture for employee model with Prisma relations. Implement RBAC with HR Admin role checks. Use TypeScript strict mode and Zod validation. Follow testing strategy with Vitest unit tests and Playwright E2E tests. Reuse existing AuthService patterns. Ensure CSV import handles quoted fields and validation errors.</constraints>
+  <interfaces>
+    <interface>
+      <name>Employee Import API</name>
+      <kind>REST endpoint</kind>
+      <signature>POST /api/users/import</signature>
+      <path>src/app/api/users/import/route.ts</path>
+    </interface>
+    <interface>
+      <name>Employee CRUD API</name>
+      <kind>REST endpoints</kind>
+      <signature>GET/POST/PUT/DELETE /api/users</signature>
+      <path>src/app/api/users/route.ts</path>
+    </interface>
+    <interface>
+      <name>Employee Lookup API</name>
+      <kind>REST endpoint</kind>
+      <signature>GET /api/users/[id]</signature>
+      <path>src/app/api/users/[id]/route.ts</path>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>Use Vitest for unit testing with jsdom environment, Playwright for E2E testing with HR Admin authentication flows. Follow testing-strategy.md patterns for data import and CRUD testing. Include tests for CSV parsing, validation, error handling, and auto-population logic.</standards>
+    <locations>tests/unit/ for unit tests, tests/e2e/ for E2E tests. Follow naming convention: employee-management.test.ts, employee-import.spec.ts</locations>
+    <ideas>- AC1: Test CSV upload with valid data, verify records created; test invalid CSV with error messages
+- AC2: Test employee record creation with all required fields, verify data stored correctly
+- AC3: Test manual add/edit employee, verify form validation and database updates
+- AC4: Test employee directory view with search/filter functionality
+- AC5: Test auto-population by entering Employee ID, verify fields populate correctly</ideas>
+  </tests>
+</story-context>
