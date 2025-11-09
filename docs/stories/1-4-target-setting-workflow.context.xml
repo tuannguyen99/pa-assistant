@@ -1,0 +1,300 @@
+﻿<?xml version='1.0' encoding='UTF-8'?>
+<story-context id='bmad/story-context/1-4-target-setting-workflow' v='1.0'>
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>4</storyId>
+    <title>Target Setting Workflow</title>
+    <storyKey>1-4-target-setting-workflow</storyKey>
+    <status>drafted</status>
+    <generatedAt>2025-11-09T21:53:15Z</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/1-4-target-setting-workflow.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>an employee</asA>
+    <iWant>to create and submit my performance targets</iWant>
+    <soThat>my annual goals are established for the review cycle</soThat>
+    <tasks>
+      <task status='incomplete'>
+        <id>T1</id>
+        <title>Create target setting data model and API endpoints</title>
+        <acceptanceCriteria>AC: 1, 3, 5</acceptanceCriteria>
+        <subtasks>
+          <subtask>Extend Prisma schema with TargetSetting model (already exists from data-architecture.md)</subtask>
+          <subtask>Create migration for TargetSetting table</subtask>
+          <subtask>Implement POST /api/targets/create endpoint for draft creation</subtask>
+          <subtask>Implement PUT /api/targets/[id] endpoint for updating targets</subtask>
+          <subtask>Implement POST /api/targets/[id]/submit endpoint for manager submission</subtask>
+          <subtask>Implement validation middleware for target data (3-5 targets, fields required)</subtask>
+          <subtask>Add unit tests for target validation logic</subtask>
+          <subtask>Add unit tests for target API endpoints</subtask>
+        </subtasks>
+      </task>
+      <task status='incomplete'>
+        <id>T2</id>
+        <title>Build target creation form UI</title>
+        <acceptanceCriteria>AC: 1, 2, 3</acceptanceCriteria>
+        <subtasks>
+          <subtask>Create src/app/(dashboard)/targets/new/page.tsx with server component shell</subtask>
+          <subtask>Build TargetSettingForm client component with dynamic array fields</subtask>
+          <subtask>Implement task description textarea input</subtask>
+          <subtask>Implement KPI input field</subtask>
+          <subtask>Implement weight percentage slider/input with real-time total display</subtask>
+          <subtask>Implement difficulty selector (L1/L2/L3) with tooltips</subtask>
+          <subtask>Add real-time weight validation showing total = 100%</subtask>
+          <subtask>Add visual feedback for validation errors</subtask>
+          <subtask>Add auto-save draft functionality</subtask>
+          <subtask>Add E2E test for target creation form</subtask>
+        </subtasks>
+      </task>
+      <task status='incomplete'>
+        <id>T3</id>
+        <title>Implement manager review and approval workflow</title>
+        <acceptanceCriteria>AC: 4</acceptanceCriteria>
+        <subtasks>
+          <subtask>Create src/app/(dashboard)/targets/pending/page.tsx for manager dashboard</subtask>
+          <subtask>Build manager review interface showing pending targets</subtask>
+          <subtask>Add manager approval action with POST /api/targets/[id]/approve</subtask>
+          <subtask>Add 'Request Revisions' action with feedback textarea</subtask>
+          <subtask>Implement state transitions (draft  submitted_to_manager  manager_approved)</subtask>
+          <subtask>Add notification system for employee when manager approves/requests changes</subtask>
+          <subtask>Update src/app/(dashboard)/targets/[id]/page.tsx for employee to view status</subtask>
+          <subtask>Add unit tests for approval workflow logic</subtask>
+          <subtask>Add E2E test for complete manager approval workflow</subtask>
+        </subtasks>
+      </task>
+      <task status='incomplete'>
+        <id>T4</id>
+        <title>Implement target storage and retrieval</title>
+        <acceptanceCriteria>AC: 5</acceptanceCriteria>
+        <subtasks>
+          <subtask>Create GET /api/targets?cycleYear=YYYY endpoint for retrieving employee targets</subtask>
+          <subtask>Implement unique constraint enforcement (one target set per employee per year)</subtask>
+          <subtask>Add target modification tracking for mid-year updates (future story preparation)</subtask>
+          <subtask>Add audit logging for target creation, submission, and approval actions</subtask>
+          <subtask>Add unit tests for retrieval logic</subtask>
+          <subtask>Add E2E test for year-long target access verification</subtask>
+        </subtasks>
+      </task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id='AC1'>Target creation form with fields: task, KPI, weight, difficulty</criterion>
+    <criterion id='AC2'>Weight validation (must total 100%)</criterion>
+    <criterion id='AC3'>3-5 targets per employee supported</criterion>
+    <criterion id='AC4'>Manager review and approval workflow</criterion>
+    <criterion id='AC5'>Target storage for year-long access</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/performance-review-workflow.md</path>
+        <title>Performance Review Workflow</title>
+        <section>Phase 1: Target Setting (Beginning of FY - April/May)</section>
+        <snippet>Target Setting occurs at the beginning of fiscal year. Employee creates 3-5 performance targets with task description, KPI, weight percentage (must total 100%), and difficulty level (L1, L2, L3). Manager reviews and can approve or request revisions.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/data-architecture.md</path>
+        <title>Data Architecture - TargetSetting Model</title>
+        <section>TargetSetting Model Schema</section>
+        <snippet>TargetSetting model with status states: draft | submitted_to_manager | revision_requested | manager_approved | submitted_to_hr | target_setting_complete. Targets stored as JSON array of 3-5 objects with task, KPI, weight, difficulty fields. Unique constraint enforces one target set per employee per cycle year.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/core-workflows.md</path>
+        <title>Core Workflows - Target Setting Process</title>
+        <section>Workflow 1: Target Setting Process</section>
+        <snippet>Implementation details including validation rules: minimum 3 targets, maximum 5 targets, total weight must equal 100%, each target must have non-empty task description and KPI, difficulty must be L1/L2/L3, weight between 1-100. State machine pattern with transitions: draft  submitted_to_manager  manager_approved/revision_requested  submitted_to_hr  target_setting_complete.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/frontend-architecture.md</path>
+        <title>Frontend Architecture - Rendering Strategy</title>
+        <section>Rendering Strategy &amp; Component Patterns</section>
+        <snippet>Use Server Components for data loading and page shells, Client Components for interactive forms. App Router file-based routing with (dashboard) route group for protected pages. Middleware enforces authentication and RBAC. Direct Prisma queries in server components for data fetching.</snippet>
+      </doc>
+      <doc>
+        <path>docs/rbac-spec.md</path>
+        <title>RBAC &amp; Audit Spec</title>
+        <section>Data model - TargetSetting</section>
+        <snippet>TargetSetting data model includes employeeId, managerId, cycleYear, status (with all state transitions), targets array, submittedAt, approvedAt, submittedToHRAt. RBAC rules: employees can only edit their own targets, managers can only review direct reports' targets, HR admin can view all and mark complete.</snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>FR004-Target-Setting-Workflow, FR005-Manager-Review-Targets, FR006-Target-Storage</section>
+        <snippet>Business requirements specify target setting as first phase of performance review cycle. Employee-facing requirements: create/edit/submit targets. Manager-facing requirements: view pending targets, approve or request revisions. Storage requirements: persist targets for entire review cycle, support year-long access, maintain audit trail.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture/testing-strategy.md</path>
+        <title>Testing Strategy</title>
+        <section>Unit Tests (Vitest), E2E Tests (Playwright)</section>
+        <snippet>Unit tests with Vitest + jsdom for validation logic and API endpoints. E2E tests with Playwright for complete workflows including authentication. Test patterns established in Story 1.3: validation testing, state transitions, RBAC enforcement, comprehensive coverage expectations.</snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <artifact>
+        <path>prisma/schema.prisma</path>
+        <kind>data-model</kind>
+        <symbol>TargetSetting</symbol>
+        <lines>51-73</lines>
+        <reason>Defines the TargetSetting model with all required fields. Model already exists and includes: id, employeeId, managerId, cycleYear, status, targets (JSON array), submittedAt, approvedAt, submittedToHRAt, timestamps, and unique constraint on (employeeId, cycleYear). No changes needed - ready for migration.</reason>
+      </artifact>
+      <artifact>
+        <path>src/app/api/users/[id]/route.ts</path>
+        <kind>api-controller</kind>
+        <symbol>route handlers (GET, PUT, DELETE)</symbol>
+        <lines>1-50</lines>
+        <reason>Establishes API route pattern and structure from Story 1.3. Follow same GET/PUT/DELETE pattern for target endpoints. Includes validation, error handling, auth checks, and audit logging patterns to replicate for /api/targets/[id]/route.ts</reason>
+      </artifact>
+      <artifact>
+        <path>middleware.ts</path>
+        <kind>middleware</kind>
+        <symbol>route protection and RBAC</symbol>
+        <lines>1-100</lines>
+        <reason>Existing middleware enforces authentication and role-based access for protected routes. Extend this middleware to protect /api/targets/* and /app/(dashboard)/targets/* routes. Pattern established in Story 1.2.</reason>
+      </artifact>
+      <artifact>
+        <path>src/lib/auth/auth-service.ts</path>
+        <kind>service</kind>
+        <symbol>session and authorization utilities</symbol>
+        <lines>1-80</lines>
+        <reason>Service for authentication checks and session retrieval. Use getServerSession() pattern from this service in target endpoints to verify user identity and roles. Needed for employee/manager authorization checks.</reason>
+      </artifact>
+      <artifact>
+        <path>src/components/admin/EmployeeAutoPopulate.tsx</path>
+        <kind>component</kind>
+        <symbol>auto-complete/search for employee lookup</symbol>
+        <lines>1-120</lines>
+        <reason>Reference component from Story 1.3 for search/filter patterns. Can reuse or adapt for manager's pending targets list filtering and employee lookup in forms.</reason>
+      </artifact>
+      <artifact>
+        <path>tests/unit/employee-import.test.ts</path>
+        <kind>test</kind>
+        <symbol>unit test patterns with Vitest</symbol>
+        <lines>1-100</lines>
+        <reason>Established test structure from Story 1.3. Follow same Vitest setup, mock patterns, and assertion styles for target validation tests. Reference for test organization and naming conventions.</reason>
+      </artifact>
+      <artifact>
+        <path>tests/e2e/employee-management.spec.ts</path>
+        <kind>test</kind>
+        <symbol>e2e test patterns with Playwright</symbol>
+        <lines>1-150</lines>
+        <reason>Established e2e test patterns from Story 1.3. Follow Playwright authentication flow setup and interaction patterns for target creation and manager approval workflow tests.</reason>
+      </artifact>
+    </code>
+
+    <dependencies>
+      <framework name='Next.js' version='14.x' reason='App Router, Server Components, API Routes' />
+      <framework name='React' version='18.x' reason='Client components for interactive forms' />
+      <framework name='Prisma' version='5.x' reason='Database ORM, query building, migrations' />
+      <framework name='NextAuth.js' version='5.x' reason='Authentication and session management' />
+      <framework name='TypeScript' version='5.x' reason='Type safety for API and components' />
+      <library name='Zod' reason='Server-side validation schemas for target data' />
+      <library name='React Hook Form' reason='Client-side form state management' />
+      <library name='TanStack Query' reason='Caching and data fetching (query invalidation on target updates)' />
+      <library name='Zustand' reason='Optional: client state for multi-target form' />
+      <library name='Vitest' version='current' reason='Unit testing framework' />
+      <library name='Playwright' version='current' reason='E2E testing framework' />
+      <library name='SQLite' version='current' reason='Database (dev), PostgreSQL for production' />
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint priority='critical'>Follow data-architecture.md TargetSetting model schema exactly. Status states: draft | submitted_to_manager | revision_requested | manager_approved | submitted_to_hr | target_setting_complete</constraint>
+    <constraint priority='critical'>Implement state machine pattern from core-workflows.md for target setting process. Enforce state transitions strictly.</constraint>
+    <constraint priority='critical'>Implement proper RBAC: employees can only edit their own targets (where session.user.id === targetSetting.employeeId), managers can only review direct reports' targets (where session.user.id === targetSetting.managerId AND employee is in manager's directReports)</constraint>
+    <constraint priority='critical'>Weight validation on BOTH client and server side. Total must equal exactly 100%. Validate on form change (client) and on submission (server).</constraint>
+    <constraint priority='high'>Use Prisma for all database operations with proper transaction handling. Unique constraint: one target set per employee per cycleYear</constraint>
+    <constraint priority='high'>Follow frontend-architecture.md: use Server Components for data loading and layout, Client Components for interactive forms</constraint>
+    <constraint priority='high'>Validate API responses with Zod schemas. Return structured error responses with meaningful messages and status codes</constraint>
+    <constraint priority='high'>Implement audit logging for: target creation, draft save, submission to manager, manager approval, manager feedback/revision requests. Use AuditEntry model.</constraint>
+    <constraint priority='medium'>Difficulty levels: L1 (highest complexity) = 1.25, L2 (moderate) = 1.0, L3 (lowest) = 0.75. Store as string in targets array, use for score calculation in future stories.</constraint>
+    <constraint priority='medium'>Support 3-5 targets per employee per cycle year. Validate min/max on both client and server.</constraint>
+    <constraint priority='medium'>Targets stored as JSON in database. Define clear JSON structure: { taskDescription: string, kpi: string, weight: number, difficulty: 'L1'|'L2'|'L3', status?: string }</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Target Object Structure</name>
+      <kind>JSON</kind>
+      <signature>{
+  taskDescription: string, // Non-empty, 10-500 chars
+  kpi: string,             // Non-empty, Key Performance Indicator, measurable
+  weight: number,          // 1-100, must total 100% across all targets
+  difficulty: 'L1' | 'L2' | 'L3'  // L1=highest (1.25), L2=moderate (1.0), L3=lowest (0.75)
+}</signature>
+      <path>docs/performance-review-workflow.md</path>
+    </interface>
+    <interface>
+      <name>POST /api/targets/create</name>
+      <kind>REST endpoint</kind>
+      <signature>Request body: { targets: Target[] }
+Response: { id: string, status: 'draft', targets: Target[], createdAt: ISO8601 }
+Status codes: 201 Created, 400 Validation Error, 401 Unauthorized, 409 Conflict (already submitted)</signature>
+      <path>docs/architecture/core-workflows.md</path>
+    </interface>
+    <interface>
+      <name>PUT /api/targets/[id]</name>
+      <kind>REST endpoint</kind>
+      <signature>Request body: { targets: Target[] }
+Response: { id: string, status: 'draft', targets: Target[], updatedAt: ISO8601 }
+Status codes: 200 OK, 400 Validation Error, 401 Unauthorized, 403 Forbidden (not employee), 404 Not Found</signature>
+      <path>docs/architecture/core-workflows.md</path>
+    </interface>
+    <interface>
+      <name>POST /api/targets/[id]/submit</name>
+      <kind>REST endpoint</kind>
+      <signature>Request body: {} (empty)
+Response: { id: string, status: 'submitted_to_manager', submittedAt: ISO8601 }
+Status codes: 200 OK, 400 Bad Request (validation fails), 401 Unauthorized, 403 Forbidden, 409 Conflict (invalid state)</signature>
+      <path>docs/architecture/core-workflows.md</path>
+    </interface>
+    <interface>
+      <name>POST /api/targets/[id]/approve</name>
+      <kind>REST endpoint</kind>
+      <signature>Request body: { action: 'approve' | 'request_revision', feedback?: string }
+Response: { id: string, status: 'manager_approved' | 'revision_requested', feedback?: string, approvedAt?: ISO8601 }
+Status codes: 200 OK, 401 Unauthorized, 403 Forbidden (not assigned manager), 404 Not Found</signature>
+      <path>docs/architecture/core-workflows.md</path>
+    </interface>
+    <interface>
+      <name>GET /api/targets?cycleYear=YYYY</name>
+      <kind>REST endpoint</kind>
+      <signature>Response: { targets: TargetSetting[] }
+Status codes: 200 OK, 400 Bad Request (invalid cycleYear), 401 Unauthorized
+Query params: cycleYear (required, YYYY format)</signature>
+      <path>docs/stories/1-4-target-setting-workflow.md</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Unit tests use Vitest with jsdom environment. Follow patterns from Story 1.3 (employee-import.test.ts). Test structure: describe blocks by feature, it blocks for individual cases. Mock Prisma client for database operations. Use msw for API mocking if needed. Assert both happy path and error cases. Cover all validation rules and state transitions.
+
+E2E tests use Playwright. Follow authentication setup from Story 1.3 (employee-management.spec.ts). Test complete workflows: employee creates targets  manager reviews  approves/rejects  notifications. Include RBAC enforcement tests (verify employee can't access another's targets). Test weight validation real-time feedback. Use page interactions (fill, click, selectOption). Verify page navigation and URL changes. Check database state after actions.
+
+Validation focus: 3-5 targets constraint, weight=100% exactly, all required fields present, difficulty one of L1/L2/L3, no empty descriptions/KPIs.
+    </standards>
+    <locations>
+      <location>tests/unit/target-validation.test.ts (new) - Zod schema validation, weight calculation, target count constraints</location>
+      <location>tests/unit/target-api.test.ts (new) - API route handlers for create/update/submit/approve</location>
+      <location>tests/e2e/target-setting.spec.ts (new) - Complete target creation and manager approval workflow</location>
+      <location>tests/integration/api/targets.test.ts (optional) - API integration tests with real database</location>
+    </locations>
+    <ideas>
+      <idea acId='AC1'>Test target creation form renders all fields: task textarea, KPI input, weight slider, difficulty selector. Test form submission creates draft.</idea>
+      <idea acId='AC2'>Test weight validation: realtime feedback during input changes, error message when total  100%, success when total = 100%. Test on both form (client) and API (server).</idea>
+      <idea acId='AC3'>Test 3-5 targets constraint: cannot submit with &lt;3 targets, cannot add &gt;5 targets. Test 'Add' button disabled when max reached, 'Remove' button disabled when min reached.</idea>
+      <idea acId='AC4'>Test manager review interface loads pending targets. Test manager can approve (status  manager_approved). Test manager can request revision with feedback (status  revision_requested, employee gets feedback).</idea>
+      <idea acId='AC5'>Test targets persist in database after creation. Test GET /api/targets?cycleYear=YYYY retrieves saved targets. Test unique constraint: only one target set per employee per year. Test targets accessible for entire year.</idea>
+      <idea>Test RBAC: employee cannot view/edit another employee's targets. Manager can only see direct reports' pending targets. HR admin can view all.</idea>
+      <idea>Test state transitions: draft  submitted (validation passes), submitted  revision_requested (manager feedback), revision_requested  submitted (employee resubmits), submitted  manager_approved (manager approval).</idea>
+      <idea>Test notifications: employee notified when manager approves or requests changes. Manager notified when targets submitted for review.</idea>
+      <idea>Test audit logging: every action (create, draft save, submit, approve, feedback) logged with actor, action, timestamp, details.</idea>
+      <idea>Test error cases: submit without all fields, weight total incorrect, invalid difficulty value, non-existent target ID, unauthorized access.</idea>
+    </ideas>
+  </tests>
+</story-context>
