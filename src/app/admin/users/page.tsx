@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Plus, Search, Filter, MoreHorizontal, Edit, Users, UserCheck, Building, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Search, Filter, MoreHorizontal, Edit, Users, UserCheck, Building, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -335,6 +335,29 @@ export default function UserManagementPage() {
       } else {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to reactivate user')
+      }
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
+  const handleDeleteUser = async (userId: string, userEmail: string) => {
+    if (!confirm(`Are you sure you want to permanently delete user "${userEmail}"? This action cannot be undone.`)) {
+      return
+    }
+    setError('')
+    try {
+      const response = await fetch('/api/auth/delete-user', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: userId })
+      })
+
+      if (response.ok) {
+        fetchUsers()
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to delete user')
       }
     } catch (err) {
       setError('An error occurred')
@@ -742,6 +765,14 @@ export default function UserManagementPage() {
                                 Reactivate User
                               </DropdownMenuItem>
                             )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => handleDeleteUser(user.id, user.email)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete User
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

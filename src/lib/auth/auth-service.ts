@@ -11,9 +11,29 @@ export class AuthService {
       if (!session?.user?.email) return null
 
       const user = await prisma.user.findUnique({
-        where: { email: session.user.email }
+        where: { email: session.user.email },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          passwordHash: true,
+          fullName: true,
+          roles: true,
+          ldapDN: true,
+          ldapSyncedAt: true,
+          authProvider: true,
+          managerId: true,
+          grade: true,
+          department: true,
+          employeeId: true,
+          jobTitle: true,
+          employmentStatus: true,
+          createdAt: true,
+          updatedAt: true,
+          isActive: true
+        }
       })
-      if (!user?.isActive) return null
+      if (!user || !user.isActive) return null
       return user
     } catch (error) {
       console.error('Failed to get current user:', error)
@@ -183,6 +203,47 @@ export class AuthService {
       data: { isActive: true }
     })
     return user
+  }
+
+  static async deleteUser(userId: string): Promise<void> {
+    // Check if user has dependent records that prevent deletion
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        directReports: true,
+        reviewsAsReviewee: true,
+        reviewsAsReviewer: true,
+        targetSetsAsEmployee: true,
+        targetSetsAsManager: true,
+        auditEntries: true,
+        roleAssignmentsAsReviewer: true,
+        roleAssignmentsAsReviewee: true
+      }
+    })
+
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    // Check for dependent records
+    const hasDependents =
+      user.directReports.length > 0 ||
+      user.reviewsAsReviewee.length > 0 ||
+      user.reviewsAsReviewer.length > 0 ||
+      user.targetSetsAsEmployee.length > 0 ||
+      user.targetSetsAsManager.length > 0 ||
+      user.auditEntries.length > 0 ||
+      user.roleAssignmentsAsReviewer.length > 0 ||
+      user.roleAssignmentsAsReviewee.length > 0
+
+    if (hasDependents) {
+      throw new Error('Cannot delete user with dependent records. Deactivate the user instead.')
+    }
+
+    // Delete the user
+    await prisma.user.delete({
+      where: { id: userId }
+    })
   }
 
   // Legacy method for backward compatibility - delegates to createUser
