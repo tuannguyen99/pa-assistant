@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, Users, UserCheck, Building, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Search, Filter, MoreHorizontal, Edit, Users, UserCheck, Building, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -80,6 +80,7 @@ interface User {
   grade?: string
   department?: string
   employeeId?: string
+  isActive: boolean
 }
 
 interface RawUser {
@@ -90,6 +91,7 @@ interface RawUser {
   grade?: string
   department?: string
   employeeId?: string
+  isActive: boolean
 }
 
 export default function UserManagementPage() {
@@ -293,6 +295,52 @@ export default function UserManagementPage() {
     setShowEditDialog(true)
   }
 
+  const handleDeactivateUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to deactivate this user? They will not be able to log in.')) {
+      return
+    }
+    setError('')
+    try {
+      const response = await fetch('/api/auth/deactivate-user', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: userId })
+      })
+
+      if (response.ok) {
+        fetchUsers()
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to deactivate user')
+      }
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
+  const handleReactivateUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to reactivate this user? They will be able to log in again.')) {
+      return
+    }
+    setError('')
+    try {
+      const response = await fetch('/api/auth/reactivate-user', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: userId })
+      })
+
+      if (response.ok) {
+        fetchUsers()
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to reactivate user')
+      }
+    } catch (err) {
+      setError('An error occurred')
+    }
+  }
+
   const clearFilters = () => {
     setSearchTerm('')
     setDepartmentFilter('')
@@ -343,7 +391,7 @@ export default function UserManagementPage() {
                   Create User
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
+              <DialogContent className="sm:max-w-[500px]" showCloseButton={false}>
                 <DialogHeader>
                   <DialogTitle>Create User</DialogTitle>
                   <DialogDescription>
@@ -495,6 +543,9 @@ export default function UserManagementPage() {
                     </div>
 
                     <DialogFooter>
+                      <Button type="button" variant="outline" onClick={() => setShowCreateDialog(false)}>
+                        Cancel
+                      </Button>
                       <Button type="submit" disabled={createForm.formState.isSubmitting}>
                         {createForm.formState.isSubmitting ? 'Creating...' : 'Create User'}
                       </Button>
@@ -507,7 +558,7 @@ export default function UserManagementPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -515,6 +566,15 @@ export default function UserManagementPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{users.length}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+              <UserCheck className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{users.filter(u => u.isActive).length}</div>
             </CardContent>
           </Card>
           <Card>
@@ -613,6 +673,7 @@ export default function UserManagementPage() {
                     <TableHead>Employee ID</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Roles</TableHead>
                     <TableHead>Grade</TableHead>
                     <TableHead>Department</TableHead>
@@ -628,6 +689,11 @@ export default function UserManagementPage() {
                       <TableCell>{user.fullName}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {user.email}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={user.isActive ? "default" : "secondary"}>
+                          {user.isActive ? 'Active' : 'Inactive'}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
@@ -659,10 +725,23 @@ export default function UserManagementPage() {
                               Edit User
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete User
-                            </DropdownMenuItem>
+                            {user.isActive ? (
+                              <DropdownMenuItem
+                                className="text-orange-600"
+                                onClick={() => handleDeactivateUser(user.id)}
+                              >
+                                <UserCheck className="mr-2 h-4 w-4" />
+                                Deactivate User
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem
+                                className="text-green-600"
+                                onClick={() => handleReactivateUser(user.id)}
+                              >
+                                <UserCheck className="mr-2 h-4 w-4" />
+                                Reactivate User
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -734,7 +813,7 @@ export default function UserManagementPage() {
 
         {/* Edit User Dialog */}
         <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="sm:max-w-[500px]" showCloseButton={false}>
             <DialogHeader>
               <DialogTitle>Edit User</DialogTitle>
               <DialogDescription>
@@ -870,6 +949,9 @@ export default function UserManagementPage() {
                 </div>
 
                 <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+                    Cancel
+                  </Button>
                   <Button type="submit" disabled={editForm.formState.isSubmitting}>
                     {editForm.formState.isSubmitting ? 'Updating...' : 'Update User'}
                   </Button>

@@ -65,6 +65,8 @@ So that employees, managers, and admins can securely access the system.
 6. Other roles have view-only access to their own profiles
 7. Login functionality working for all users
 8. Session management and logout working
+9. HR Admin can deactivate user accounts (for resignations)
+10. HR Admin can reactivate user accounts (for rejoining)
 
 **Prerequisites:** Story 1.1
 

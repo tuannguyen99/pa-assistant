@@ -1,6 +1,6 @@
 # Story 1.2: User Management & Authentication
 
-Status: done
+Status: review
 
 ## Story
 
@@ -13,6 +13,8 @@ As an HR Admin, I need to:
 - Create new user accounts manually
 - Assign appropriate roles to users
 - Edit user profiles and role assignments
+- Deactivate user accounts (for resignations)
+- Reactivate user accounts (for rejoining)
 - View user information (available to all roles)
 
 As other roles (Employee, Manager, Board of Manager, General Director), I need to:
@@ -29,6 +31,8 @@ As other roles (Employee, Manager, Board of Manager, General Director), I need t
 6. Other roles have view-only access to their own profiles
 7. Login functionality working for all users
 8. Session management and logout working
+9. HR Admin can deactivate user accounts (for resignations)
+10. HR Admin can reactivate user accounts (for rejoining)
 
 ## Tasks / Subtasks
 
@@ -63,6 +67,20 @@ As other roles (Employee, Manager, Board of Manager, General Director), I need t
   - [x] Implement permission checks for HR Admin user management features
   - [x] Add unit tests for role validation and permissions
   - [x] Add E2E tests for role-specific functionality
+- [x] Task 7: Implement user deactivation functionality (AC: 9)
+  - [x] Add isActive field to User model
+  - [x] Update user management interface to show active/inactive status
+  - [x] Add deactivate user functionality with confirmation
+  - [x] Update API route for user deactivation
+  - [x] Prevent login for inactive users
+  - [x] Add unit tests for deactivation logic
+  - [x] Add E2E test for HR Admin user deactivation flow
+- [x] Task 8: Implement user reactivation functionality (AC: 10)
+  - [x] Add reactivate user functionality with confirmation
+  - [x] Update API route for user reactivation
+  - [x] Allow login for reactivated users
+  - [x] Add unit tests for reactivation logic
+  - [x] Add E2E test for HR Admin user reactivation flow
 
 ## Dev Notes
 
@@ -128,6 +146,11 @@ Scrum Master Agent v1
 - All unit tests passing (31/31) including new user management tests
 - E2E tests updated to reflect HR Admin workflow
 - Updated database schema and seeded with proper Json roles
+- Added user deactivation and reactivation functionality
+- Updated UI to show active/inactive status with badges
+- Added confirmation dialogs for deactivate/reactivate actions
+- Prevented login for inactive users
+- Added comprehensive unit and E2E tests for deactivation/reactivation
 
 ### File List
 
@@ -139,6 +162,8 @@ Scrum Master Agent v1
 - src/app/api/auth/import-users/route.ts - User import API endpoint (HR Admin only)
 - src/app/api/auth/update-user/route.ts - User update API endpoint (HR Admin only)
 - src/app/api/auth/users/route.ts - User list API endpoint (HR Admin only)
+- src/app/api/auth/deactivate-user/route.ts - User deactivation API endpoint (HR Admin only)
+- src/app/api/auth/reactivate-user/route.ts - User reactivation API endpoint (HR Admin only)
 - src/app/api/auth/register/route.ts - Legacy registration endpoint (kept for backward compatibility)
 - src/app/api/auth/profile/route.ts - Profile viewing endpoint
 - src/lib/auth/auth-service.ts - Enhanced with user management and permission methods
@@ -146,14 +171,14 @@ Scrum Master Agent v1
 - src/components/Header.tsx - Header component with logout functionality (from Story 1.1)
 - src/app/admin/page.tsx - Admin dashboard with link to user management
 - src/app/login/page.tsx - Login page (removed self-registration link)
-- prisma/schema.prisma - User model with Json roles
+- prisma/schema.prisma - User model with isActive field
 
 **Tests:**
-- tests/unit/auth-user-management.test.ts - User management logic tests (13 tests)
+- tests/unit/auth-user-management.test.ts - User management logic tests (17 tests)
 - tests/unit/auth-roles.test.ts - Role-based access control tests (5 tests)
 - tests/unit/auth-registration.test.ts - Registration method tests (3 tests)
 - tests/unit/auth.test.ts - Core authentication tests (6 tests)
-- tests/e2e/auth-user-management.spec.ts - HR Admin user management E2E tests (14 scenarios)
+- tests/e2e/auth-user-management.spec.ts - HR Admin user management E2E tests (16 scenarios)
 
 **Files Removed:**
 - src/app/register/page.tsx - Self-registration page (no longer needed)
@@ -365,3 +390,10 @@ This is a **high-quality implementation** that fully satisfies all acceptance cr
 - Status changed to done on 2025-11-08
 - Comprehensive senior developer code review completed on 2025-11-09
 - Code review result: APPROVED - Production ready with minor enhancement recommendations
+- Added user deactivation and reactivation functionality on 2025-11-09
+- Updated acceptance criteria to include deactivate/reactivate features
+- Added isActive field to User model and updated schema
+- Enhanced UI with active/inactive status display and action buttons
+- Added API endpoints for deactivate/reactivate operations
+- Updated authentication to prevent login for inactive users
+- Added comprehensive unit and E2E tests for new functionality

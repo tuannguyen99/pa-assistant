@@ -41,12 +41,12 @@ export default function Header() {
             <Link href="/profile" className="text-gray-700 hover:text-gray-900">
               Profile
             </Link>
-            {session?.user?.roles?.includes('hr_admin') && (
+            {Array.isArray(session?.user?.roles) && session.user.roles.includes('hr_admin') && (
               <Link href="/admin" className="text-blue-600 hover:text-blue-800 font-medium">
                 Admin
               </Link>
             )}
-            <span className="text-gray-700">Welcome, {session?.user?.name || session?.user?.email}</span>
+            <span className="text-gray-700">Welcome, {session?.user?.name || session?.user?.email || 'User'}</span>
             <button
               onClick={handleLogout}
               className="bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-700"

@@ -17,6 +17,7 @@ model User {
   passwordHash String?
   fullName     String
   roles        Json     // Array: ["employee", "manager", "hr_admin", "board_of_manager", "general_director"]
+  isActive     Boolean  @default(true)
   
   // LDAP fields (future)
   ldapDN       String?  @unique

@@ -13,6 +13,7 @@ export class AuthService {
       const user = await prisma.user.findUnique({
         where: { email: session.user.email }
       })
+      if (!user?.isActive) return null
       return user
     } catch (error) {
       console.error('Failed to get current user:', error)
@@ -166,6 +167,22 @@ export class AuthService {
       console.error('Failed to check review access:', error)
       return false
     }
+  }
+
+  static async deactivateUser(userId: string): Promise<User> {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: false }
+    })
+    return user
+  }
+
+  static async reactivateUser(userId: string): Promise<User> {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: true }
+    })
+    return user
   }
 
   // Legacy method for backward compatibility - delegates to createUser

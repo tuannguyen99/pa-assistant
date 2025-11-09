@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data
           const user = await getUser(email)
-          if (!user) return null
+          if (!user || !user.isActive) return null
           const passwordsMatch = await bcrypt.compare(password, user.passwordHash || '')
 
           if (passwordsMatch) {

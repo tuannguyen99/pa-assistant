@@ -46,6 +46,7 @@ export async function PUT(request: NextRequest) {
       grade: user.grade,
       department: user.department,
       employeeId: user.employeeId,
+      isActive: user.isActive,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
     }

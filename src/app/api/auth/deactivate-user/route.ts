@@ -1,7 +1,12 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { AuthService } from '@/lib/auth/auth-service'
 
-export async function GET() {
+const deactivateUserSchema = z.object({
+  id: z.string()
+})
+
+export async function PUT(request: NextRequest) {
   try {
     // Check if current user is HR Admin
     const currentUser = await AuthService.getCurrentUser()
@@ -20,11 +25,14 @@ export async function GET() {
       )
     }
 
-    // Get all users
-    const users = await AuthService.getAllUsers()
+    const body = await request.json()
+    const { id } = deactivateUserSchema.parse(body)
 
-    // Remove sensitive fields from response
-    const usersWithoutPasswords = users.map(user => ({
+    // Deactivate user via AuthService
+    const user = await AuthService.deactivateUser(id)
+
+    // Return user without sensitive fields
+    const userWithoutPassword = {
       id: user.id,
       email: user.email,
       fullName: user.fullName,
@@ -35,11 +43,17 @@ export async function GET() {
       isActive: user.isActive,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt
-    }))
-
-    return NextResponse.json({ users: usersWithoutPasswords }, { status: 200 })
+    }
+    return NextResponse.json({ user: userWithoutPassword }, { status: 200 })
   } catch (error) {
-    console.error('Get users error:', error)
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid input data', details: error.issues },
+        { status: 400 }
+      )
+    }
+
+    console.error('User deactivation error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -180,6 +180,144 @@ test.describe('HR Admin User Management', () => {
     await expect(page.locator('text=Import Instructions')).toBeVisible()
   })
 
+  test('HR Admin can deactivate a user', async ({ page }) => {
+    await loginAsHRAdmin(page)
+    await page.goto('/admin/users')
+    
+    // Wait for the page to load completely
+    await page.waitForSelector('h1:has-text("User Management")')
+    
+    // Wait for users to load
+    await page.waitForSelector('table tbody tr')
+    
+    // Find the first active user (not the HR admin)
+    const rows = page.locator('table tbody tr')
+    const rowCount = await rows.count()
+    
+    let targetRow = null
+    for (let i = 0; i < rowCount; i++) {
+      const row = rows.nth(i)
+      const statusBadge = row.locator('span').filter({ hasText: 'Active' })
+      const isActive = await statusBadge.isVisible()
+      const emailCell = row.locator('td').nth(2) // Email column
+      const email = await emailCell.textContent()
+      
+      if (isActive && email !== 'admin@prdcv.com') {
+        targetRow = row
+        break
+      }
+    }
+    
+    if (!targetRow) {
+      throw new Error('No active non-admin user found to deactivate')
+    }
+    
+    // Click the dropdown menu trigger for the target user
+    const dropdownTrigger = targetRow.locator('button.h-8.w-8.p-0')
+    await dropdownTrigger.click()
+    
+    // Wait for the dropdown menu to appear
+    await page.waitForSelector('[role="menu"]')
+    
+    // Click the Deactivate User menu item
+    await page.click('text=Deactivate User')
+    
+    // Handle the confirmation dialog
+    page.on('dialog', async dialog => {
+      expect(dialog.message()).toContain('deactivate this user')
+      await dialog.accept()
+    })
+    
+    // Wait for the action to complete (user list should refresh)
+    await page.waitForTimeout(2000)
+    
+    // Check that the user's status is now Inactive
+    const statusBadge = targetRow.locator('span').filter({ hasText: 'Inactive' })
+    await expect(statusBadge).toBeVisible()
+  })
+
+  test('HR Admin can reactivate a user', async ({ page }) => {
+    await loginAsHRAdmin(page)
+    await page.goto('/admin/users')
+    
+    // Wait for the page to load completely
+    await page.waitForSelector('h1:has-text("User Management")')
+    
+    // Wait for users to load
+    await page.waitForSelector('table tbody tr')
+    
+    // Find the first inactive user
+    const rows = page.locator('table tbody tr')
+    const rowCount = await rows.count()
+    
+    let targetRow = null
+    for (let i = 0; i < rowCount; i++) {
+      const row = rows.nth(i)
+      const statusBadge = row.locator('span').filter({ hasText: 'Inactive' })
+      const isInactive = await statusBadge.isVisible()
+      
+      if (isInactive) {
+        targetRow = row
+        break
+      }
+    }
+    
+    if (!targetRow) {
+      // If no inactive user, deactivate one first
+      const activeRows = page.locator('table tbody tr')
+      const activeRowCount = await activeRows.count()
+      
+      for (let i = 0; i < activeRowCount; i++) {
+        const row = activeRows.nth(i)
+        const statusBadge = row.locator('span').filter({ hasText: 'Active' })
+        const isActive = await statusBadge.isVisible()
+        const emailCell = row.locator('td').nth(2)
+        const email = await emailCell.textContent()
+        
+        if (isActive && email !== 'admin@prdcv.com') {
+          // Deactivate this user first
+          const dropdownTrigger = row.locator('button.h-8.w-8.p-0')
+          await dropdownTrigger.click()
+          await page.waitForSelector('[role="menu"]')
+          await page.click('text=Deactivate User')
+          page.on('dialog', async dialog => {
+            await dialog.accept()
+          })
+          await page.waitForTimeout(2000)
+          targetRow = row
+          break
+        }
+      }
+    }
+    
+    if (!targetRow) {
+      throw new Error('No inactive user found to reactivate')
+    }
+    
+    // Click the dropdown menu trigger for the target user
+    const dropdownTrigger = targetRow.locator('button.h-8.w-8.p-0')
+    await dropdownTrigger.click()
+    
+    // Wait for the dropdown menu to appear
+    await page.waitForSelector('[role="menu"]')
+    
+    // Click the Reactivate User menu item
+    await page.click('text=Reactivate User')
+    
+    // Handle the confirmation dialog
+    page.on('dialog', async dialog => {
+      expect(dialog.message()).toContain('reactivate this user')
+      await dialog.accept()
+    })
+    
+    // Wait for the action to complete (user list should refresh)
+    await page.waitForTimeout(2000)
+    
+    // Check that the user's status is now Active
+    const statusBadge = targetRow.locator('span').filter({ hasText: 'Active' })
+    await expect(statusBadge).toBeVisible()
+  })
+
   test('Create user form validates required fields', async ({ page }) => {
     await loginAsHRAdmin(page)
     await page.goto('/admin/users')

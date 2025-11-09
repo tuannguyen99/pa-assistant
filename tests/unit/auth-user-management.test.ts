@@ -314,4 +314,52 @@ describe('AuthService User Management', () => {
       expect(result).toEqual(mockUser)
     })
   })
+
+  describe('deactivateUser', () => {
+    it('should deactivate a user', async () => {
+      const mockUser = {
+        id: '1',
+        email: 'test@example.com',
+        fullName: 'Test User',
+        roles: ['employee'],
+        isActive: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+
+      ;(prisma.user.update as any).mockResolvedValue(mockUser)
+
+      const result = await AuthService.deactivateUser('1')
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: '1' },
+        data: { isActive: false }
+      })
+      expect(result).toEqual(mockUser)
+    })
+  })
+
+  describe('reactivateUser', () => {
+    it('should reactivate a user', async () => {
+      const mockUser = {
+        id: '1',
+        email: 'test@example.com',
+        fullName: 'Test User',
+        roles: ['employee'],
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }
+
+      ;(prisma.user.update as any).mockResolvedValue(mockUser)
+
+      const result = await AuthService.reactivateUser('1')
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: '1' },
+        data: { isActive: true }
+      })
+      expect(result).toEqual(mockUser)
+    })
+  })
 })
