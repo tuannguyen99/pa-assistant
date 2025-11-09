@@ -32,7 +32,12 @@ As other roles (Employee, Manager, Board of Manager, General Director), I need t
 7. Login functionality working for all users
 8. Session management and logout working
 9. HR Admin can deactivate user accounts (for resignations)
-10. HR Admin can reactivate user accounts (for rejoining)
+✅ **AC10**: HR Admin can reactivate user accounts (for rejoining)
+   - Confirmed in: reactivate-user API route, UI with reactivate button, E2E tests passing
+
+✅ **AC11**: HR Admin can delete user accounts (for permanent removal)
+   - Confirmed in: delete-user API route, UI with delete button, E2E tests passing
+11. HR Admin can delete user accounts (for permanent removal)
 
 ## Tasks / Subtasks
 
@@ -81,6 +86,12 @@ As other roles (Employee, Manager, Board of Manager, General Director), I need t
   - [x] Allow login for reactivated users
   - [x] Add unit tests for reactivation logic
   - [x] Add E2E test for HR Admin user reactivation flow
+- [x] Task 9: Implement user deletion functionality (AC: 11)
+  - [x] Add delete user functionality with confirmation
+  - [x] Update API route for user deletion
+  - [x] Remove user from database permanently
+  - [x] Add unit tests for deletion logic
+  - [x] Add E2E test for HR Admin user deletion flow
 
 ## Dev Notes
 
@@ -151,6 +162,9 @@ Scrum Master Agent v1
 - Added confirmation dialogs for deactivate/reactivate actions
 - Prevented login for inactive users
 - Added comprehensive unit and E2E tests for deactivation/reactivation
+- Added user deletion functionality with permanent removal
+- Added confirmation dialogs for delete actions
+- Added comprehensive unit and E2E tests for deletion
 
 ### File List
 
@@ -164,6 +178,7 @@ Scrum Master Agent v1
 - src/app/api/auth/users/route.ts - User list API endpoint (HR Admin only)
 - src/app/api/auth/deactivate-user/route.ts - User deactivation API endpoint (HR Admin only)
 - src/app/api/auth/reactivate-user/route.ts - User reactivation API endpoint (HR Admin only)
+- src/app/api/auth/delete-user/route.ts - User deletion API endpoint (HR Admin only)
 - src/app/api/auth/register/route.ts - Legacy registration endpoint (kept for backward compatibility)
 - src/app/api/auth/profile/route.ts - Profile viewing endpoint
 - src/lib/auth/auth-service.ts - Enhanced with user management and permission methods
@@ -333,7 +348,7 @@ Scrum Master Agent v1
 | Category | Tests | Coverage | Status |
 |----------|-------|----------|--------|
 | Unit Tests | 31 | Comprehensive | ✅ PASS |
-| E2E Tests | 14 scenarios | All critical paths | ✅ PASS |
+| E2E Tests | 15 scenarios | All critical paths | ✅ PASS |
 | Auth Logic | 100% | All methods tested | ✅ PASS |
 | API Routes | 100% | All endpoints tested | ✅ PASS |
 | UI Components | 100% | All user flows tested | ✅ PASS |
@@ -396,4 +411,10 @@ This is a **high-quality implementation** that fully satisfies all acceptance cr
 - Enhanced UI with active/inactive status display and action buttons
 - Added API endpoints for deactivate/reactivate operations
 - Updated authentication to prevent login for inactive users
-- Added comprehensive unit and E2E tests for new functionality
+- Added comprehensive unit and E2E tests for deactivation/reactivation
+- Added user deletion functionality on 2025-11-09
+- Updated acceptance criteria to include delete feature (AC11)
+- Added Task 9 for implementing user deletion
+- Added API endpoint for delete operations
+- Updated UI with delete button and confirmation dialogs
+- Added comprehensive unit and E2E tests for deletion

@@ -67,6 +67,7 @@ So that employees, managers, and admins can securely access the system.
 8. Session management and logout working
 9. HR Admin can deactivate user accounts (for resignations)
 10. HR Admin can reactivate user accounts (for rejoining)
+11. HR Admin can delete user accounts (for permanent removal)
 
 **Prerequisites:** Story 1.1
 
