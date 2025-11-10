@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { AuthService } from '@/lib/auth/auth-service'
+import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
@@ -20,8 +21,18 @@ export async function GET() {
       )
     }
 
-    // Get all users
-    const users = await AuthService.getAllUsers()
+    // Get all users with manager information
+    const users = await prisma.user.findMany({
+      include: {
+        manager: {
+          select: {
+            id: true,
+            fullName: true
+          }
+        }
+      },
+      orderBy: { fullName: 'asc' }
+    })
 
     // Remove sensitive fields from response
     const usersWithoutPasswords = users.map(user => ({
@@ -32,6 +43,8 @@ export async function GET() {
       grade: user.grade,
       department: user.department,
       employeeId: user.employeeId,
+      managerId: user.managerId,
+      manager: user.manager,
       isActive: user.isActive,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt

@@ -18,6 +18,7 @@ async function main() {
       grade: 'Senior',
       department: 'HR',
       employmentStatus: 'active',
+      isActive: true,
     },
   })
   

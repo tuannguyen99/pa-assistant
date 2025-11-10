@@ -9,7 +9,8 @@ const createUserSchema = z.object({
   roles: z.array(z.string()).min(1),
   grade: z.string().optional(),
   department: z.string().optional(),
-  employeeId: z.string().min(1)
+  employeeId: z.string().min(1),
+  managerId: z.string().optional()
 })
 
 export async function POST(request: NextRequest) {

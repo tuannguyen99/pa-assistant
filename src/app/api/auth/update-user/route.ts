@@ -9,7 +9,8 @@ const updateUserSchema = z.object({
   grade: z.string().optional(),
   department: z.string().optional(),
   password: z.string().min(6).optional(),
-  employeeId: z.string().min(1).optional()
+  employeeId: z.string().min(1).optional(),
+  managerId: z.string().nullable().optional()
 })
 
 export async function PUT(request: NextRequest) {

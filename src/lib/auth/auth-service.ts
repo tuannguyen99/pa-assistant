@@ -99,8 +99,9 @@ export class AuthService {
     grade?: string
     department?: string
     employeeId?: string
+    managerId?: string
   }): Promise<User> {
-    const { email, password, fullName, roles, grade, department, employeeId } = data
+    const { email, password, fullName, roles, grade, department, employeeId, managerId } = data
 
     // Hash password
     const passwordHash = await bcrypt.hash(password, 12)
@@ -114,7 +115,8 @@ export class AuthService {
         roles: JSON.parse(JSON.stringify(roles)),
         grade: grade || 'TBD',
         department: department || 'TBD',
-        employeeId: employeeId || undefined
+        employeeId: employeeId || undefined,
+        managerId: managerId || null
       }
     })
 
@@ -130,6 +132,7 @@ export class AuthService {
       department?: string
       password?: string
       employeeId?: string
+      managerId?: string | null
     }
   ): Promise<User> {
     const updateData: Record<string, unknown> = {}
@@ -139,6 +142,7 @@ export class AuthService {
     if (data.grade !== undefined) updateData.grade = data.grade
     if (data.department !== undefined) updateData.department = data.department
     if (data.employeeId !== undefined) updateData.employeeId = data.employeeId
+    if (data.managerId !== undefined) updateData.managerId = data.managerId
     if (data.password) {
       updateData.passwordHash = await bcrypt.hash(data.password, 12)
     }

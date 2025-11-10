@@ -39,6 +39,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
 import Header from '@/components/Header'
 
@@ -57,7 +64,8 @@ const userFormSchema = z.object({
   roles: z.array(z.string()).min(1, 'At least one role is required'),
   grade: z.string().optional(),
   department: z.string().optional(),
-  employeeId: z.string().min(1, 'Employee ID is required')
+  employeeId: z.string().min(1, 'Employee ID is required'),
+  managerId: z.string().optional()
 })
 
 const editUserFormSchema = z.object({
@@ -66,7 +74,8 @@ const editUserFormSchema = z.object({
   grade: z.string().optional(),
   department: z.string().optional(),
   employeeId: z.string().min(1, 'Employee ID is required'),
-  password: z.string().optional()
+  password: z.string().optional(),
+  managerId: z.string().optional()
 })
 
 type UserFormData = z.infer<typeof userFormSchema>
@@ -81,6 +90,11 @@ interface User {
   department?: string
   employeeId?: string
   isActive: boolean
+  managerId?: string
+  manager?: {
+    id: string
+    fullName: string
+  }
 }
 
 interface RawUser {
@@ -92,6 +106,11 @@ interface RawUser {
   department?: string
   employeeId?: string
   isActive: boolean
+  managerId?: string
+  manager?: {
+    id: string
+    fullName: string
+  }
 }
 
 export default function UserManagementPage() {
@@ -99,6 +118,7 @@ export default function UserManagementPage() {
   const router = useRouter()
   const [users, setUsers] = useState<User[]>([])
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
+  const [managers, setManagers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -118,7 +138,8 @@ export default function UserManagementPage() {
       roles: [],
       grade: '',
       department: '',
-      employeeId: ''
+      employeeId: '',
+      managerId: 'none'
     }
   })
 
@@ -130,7 +151,8 @@ export default function UserManagementPage() {
       grade: '',
       department: '',
       employeeId: '',
-      password: ''
+      password: '',
+      managerId: 'none'
     }
   })
 
@@ -215,6 +237,15 @@ export default function UserManagementPage() {
           return { ...user, roles }
         })
         setUsers(usersWithParsedRoles)
+        
+        // Set managers list (users with manager role or higher)
+        const potentialManagers = usersWithParsedRoles.filter(user => 
+          user.roles.includes('manager') || 
+          user.roles.includes('hr_admin') || 
+          user.roles.includes('general_director') || 
+          user.roles.includes('board_manager')
+        )
+        setManagers(potentialManagers)
       } else {
         setError('Failed to load users')
       }
@@ -231,7 +262,10 @@ export default function UserManagementPage() {
       const response = await fetch('/api/auth/create-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+          ...data,
+          managerId: data.managerId || null
+        })
       })
 
       if (response.ok) {
@@ -259,6 +293,7 @@ export default function UserManagementPage() {
         grade: data.grade || '',
         department: data.department || '',
         employeeId: data.employeeId,
+        managerId: data.managerId || null,
         ...(data.password && data.password.trim().length > 0 && { password: data.password })
       }
 
@@ -289,8 +324,9 @@ export default function UserManagementPage() {
       roles: user.roles,
       grade: user.grade || '',
       department: user.department || '',
-      employeeId: '',
-      password: ''
+      employeeId: user.employeeId || '',
+      password: '',
+      managerId: user.managerId || 'none'
     })
     setShowEditDialog(true)
   }
@@ -522,6 +558,31 @@ export default function UserManagementPage() {
                           )}
                         />
                       </div>
+                      <FormField
+                        control={createForm.control}
+                        name="managerId"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Manager</FormLabel>
+                            <Select onValueChange={(value) => field.onChange(value === "none" ? "" : value)} value={field.value || "none"}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a manager (optional)" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="none">No Manager</SelectItem>
+                                {managers.map((manager) => (
+                                  <SelectItem key={manager.id} value={manager.id}>
+                                    {manager.fullName} ({manager.employeeId})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
 
                     {/* Roles */}
@@ -696,6 +757,7 @@ export default function UserManagementPage() {
                     <TableHead>Employee ID</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Manager</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Roles</TableHead>
                     <TableHead>Grade</TableHead>
@@ -712,6 +774,9 @@ export default function UserManagementPage() {
                       <TableCell>{user.fullName}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {user.email}
+                      </TableCell>
+                      <TableCell>
+                        {user.manager ? user.manager.fullName : '-'}
                       </TableCell>
                       <TableCell>
                         <Badge variant={user.isActive ? "default" : "secondary"}>
@@ -918,6 +983,33 @@ export default function UserManagementPage() {
                       )}
                     />
                   </div>
+                  <FormField
+                    control={editForm.control}
+                    name="managerId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Manager</FormLabel>
+                        <Select onValueChange={(value) => field.onChange(value === "none" ? "" : value)} value={field.value || "none"}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a manager (optional)" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">No Manager</SelectItem>
+                            {managers
+                              .filter(manager => manager.id !== editingUser?.id) // Don't allow self-reference
+                              .map((manager) => (
+                              <SelectItem key={manager.id} value={manager.id}>
+                                {manager.fullName} ({manager.employeeId})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 {/* Password */}
