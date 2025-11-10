@@ -156,6 +156,20 @@ export function TargetSettingForm({
     await onSubmit(data.targets)
   }
 
+  const handleManualSaveDraft = async () => {
+    if (!onSaveDraft) return
+    
+    setAutoSaveStatus('saving')
+    try {
+      await onSaveDraft(watchedTargets as Target[])
+      setAutoSaveStatus('saved')
+      setTimeout(() => setAutoSaveStatus('idle'), 2000)
+    } catch (err) {
+      console.error('Manual save error:', err)
+      setAutoSaveStatus('idle')
+    }
+  }
+
   const canAddTarget = fields.length < 5
   const canRemoveTarget = fields.length > 3
 
@@ -191,7 +205,13 @@ export function TargetSettingForm({
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={handleManualSaveDraft}
+              className="flex items-center gap-2"
+            >
               💾 Save Draft
             </Button>
             <Button
@@ -457,6 +477,7 @@ export function TargetSettingForm({
         <Button
           type="button"
           variant="outline"
+          onClick={handleManualSaveDraft}
           className="px-6"
         >
           💾 Save Draft
