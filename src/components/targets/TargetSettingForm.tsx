@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -80,6 +80,8 @@ export function TargetSettingForm({
 }: TargetSettingFormProps) {
   const [totalWeight, setTotalWeight] = useState(0)
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'idle'>('idle')
+  const isInitialLoad = useRef(true)
+  const autoSaveTimer = useRef<NodeJS.Timeout | null>(null)
 
   const {
     register,
@@ -117,11 +119,23 @@ export function TargetSettingForm({
     setTotalWeight(total)
   }, [watchedTargets])
 
-  // Auto-save draft
+  // Auto-save draft with 5-second debounce interval
   useEffect(() => {
     if (!onSaveDraft) return
 
-    const timer = setTimeout(() => {
+    // Skip auto-save on initial load (when form is first populated with saved data)
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false
+      return
+    }
+
+    // Clear existing timer
+    if (autoSaveTimer.current) {
+      clearTimeout(autoSaveTimer.current)
+    }
+
+    // Set new timer for 5 seconds
+    autoSaveTimer.current = setTimeout(() => {
       // For draft, just save when user has started filling targets with any content
       // Don't require 100% weight or all fields filled
       if (watchedTargets && watchedTargets.length > 0) {
@@ -133,9 +147,13 @@ export function TargetSettingForm({
           })
           .catch(() => setAutoSaveStatus('idle'))
       }
-    }, 3000)
+    }, 5000) // 5-second interval
 
-    return () => clearTimeout(timer)
+    return () => {
+      if (autoSaveTimer.current) {
+        clearTimeout(autoSaveTimer.current)
+      }
+    }
   }, [watchedTargets, onSaveDraft])
 
   const handleFormSubmit = async (data: FormData) => {
