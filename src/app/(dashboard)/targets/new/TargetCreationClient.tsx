@@ -90,11 +90,16 @@ export function TargetCreationClient({ currentUser, initialTargets, targetSettin
         throw new Error(errorData.error || 'Failed to save draft')
       }
 
+      const data = await response.json()
+
       // If this was a new draft creation, update targetSettingId
       if (!targetSettingId && method === 'POST') {
-        const data = await response.json()
-        // The ID is now available in the response but we don't need to store it here
+        // The ID is now available in the response
+        // We would need to update state here, but for now just note it's saved
       }
+
+      // Revalidate the page to reload draft from database
+      router.refresh()
     } catch (err) {
       console.error('Draft save error:', err)
       // Don't throw - silently fail for auto-save to avoid blocking user input

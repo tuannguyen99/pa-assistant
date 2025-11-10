@@ -4,6 +4,9 @@ import { TargetCreationClient } from './TargetCreationClient'
 import Header from '@/components/Header'
 import { prisma } from '@/lib/prisma'
 
+// Disable caching on this page to always fetch fresh draft data
+export const revalidate = 0
+
 export default async function NewTargetPage() {
   const currentUser = await AuthService.getCurrentUser()
 
