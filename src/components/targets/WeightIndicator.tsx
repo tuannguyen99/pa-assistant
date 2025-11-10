@@ -7,7 +7,6 @@ interface WeightIndicatorProps {
 export function WeightIndicator({ totalWeight }: WeightIndicatorProps) {
   const isValid = totalWeight === 100
   const isOverweight = totalWeight > 100
-  const isUnderweight = totalWeight < 100
 
   return (
     <div className="flex items-center gap-3 p-4 rounded-lg border">

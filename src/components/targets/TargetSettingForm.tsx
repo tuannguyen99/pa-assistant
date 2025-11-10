@@ -24,8 +24,10 @@ import { Trash2, Plus } from 'lucide-react'
 
 interface TargetSettingFormProps {
   initialTargets?: Target[]
-  onSubmit: (targets: Target[]) => Promise<void>
-  onSaveDraft?: (targets: Target[]) => Promise<void>
+  initialCurrentRole?: string
+  initialLongTermGoal?: string
+  onSubmit: (data: { targets: Target[], currentRole?: string, longTermGoal?: string }) => Promise<void>
+  onSaveDraft?: (data: { targets: Target[], currentRole?: string, longTermGoal?: string }) => Promise<void>
   isSubmitting?: boolean
   currentUser?: {
     id: string
@@ -67,12 +69,16 @@ const formSchema = z.object({
       difficulty: z.enum(['L1', 'L2', 'L3']),
     })
   ),
+  currentRole: z.string().optional(),
+  longTermGoal: z.string().optional(),
 })
 
 type FormData = z.infer<typeof formSchema>
 
 export function TargetSettingForm({
   initialTargets,
+  initialCurrentRole,
+  initialLongTermGoal,
   onSubmit,
   onSaveDraft,
   isSubmitting = false,
@@ -80,7 +86,9 @@ export function TargetSettingForm({
 }: TargetSettingFormProps) {
   const [totalWeight, setTotalWeight] = useState(0)
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'idle'>('idle')
+  const [hasChanges, setHasChanges] = useState(false)
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null)
+  const isInitialMount = useRef(true)
 
   const {
     register,
@@ -96,6 +104,8 @@ export function TargetSettingForm({
         { taskDescription: '', kpi: '', weight: 0, difficulty: 'L2' },
         { taskDescription: '', kpi: '', weight: 0, difficulty: 'L2' },
       ],
+      currentRole: initialCurrentRole || '',
+      longTermGoal: initialLongTermGoal || '',
     },
   })
 
@@ -107,6 +117,16 @@ export function TargetSettingForm({
   const watchedTargets = useWatch({
     control,
     name: 'targets',
+  })
+
+  const watchedCurrentRole = useWatch({
+    control,
+    name: 'currentRole',
+  })
+
+  const watchedLongTermGoal = useWatch({
+    control,
+    name: 'longTermGoal',
   })
 
   // Calculate total weight
@@ -122,8 +142,20 @@ export function TargetSettingForm({
   useEffect(() => {
     if (!onSaveDraft) return
 
-    // Only auto-save if form is dirty (user has made changes)
-    if (!isDirty) return
+    // Only auto-save if form has changes (from isDirty or local changes)
+    if (!isDirty && !hasChanges) {
+      // Reset isInitialMount once we know form is clean
+      if (isInitialMount.current) {
+        isInitialMount.current = false
+      }
+      return
+    }
+
+    // Skip first trigger (initial mount with loaded data)
+    if (isInitialMount.current) {
+      isInitialMount.current = false
+      return
+    }
 
     // Clear existing timer
     if (autoSaveTimer.current) {
@@ -132,13 +164,23 @@ export function TargetSettingForm({
 
     // Set new timer for 5 seconds
     autoSaveTimer.current = setTimeout(() => {
+      // Get current values from form state
+      const currentTargets = watchedTargets
+      const currentCurrentRole = watchedCurrentRole
+      const currentLongTermGoal = watchedLongTermGoal
+
       // For draft, just save when user has started filling targets with any content
       // Don't require 100% weight or all fields filled
-      if (watchedTargets && watchedTargets.length > 0) {
+      if (currentTargets && currentTargets.length > 0) {
         setAutoSaveStatus('saving')
-        onSaveDraft(watchedTargets as Target[])
+        onSaveDraft({
+          targets: currentTargets as Target[],
+          currentRole: currentCurrentRole,
+          longTermGoal: currentLongTermGoal,
+        })
           .then(() => {
             setAutoSaveStatus('saved')
+            setHasChanges(false)
             setTimeout(() => setAutoSaveStatus('idle'), 2000)
           })
           .catch(() => setAutoSaveStatus('idle'))
@@ -150,10 +192,14 @@ export function TargetSettingForm({
         clearTimeout(autoSaveTimer.current)
       }
     }
-  }, [watchedTargets, isDirty, onSaveDraft])
+  }, [isDirty, hasChanges, onSaveDraft, watchedTargets, watchedCurrentRole, watchedLongTermGoal])
 
   const handleFormSubmit = async (data: FormData) => {
-    await onSubmit(data.targets)
+    await onSubmit({
+      targets: data.targets,
+      currentRole: data.currentRole,
+      longTermGoal: data.longTermGoal,
+    })
   }
 
   const handleManualSaveDraft = async () => {
@@ -161,8 +207,13 @@ export function TargetSettingForm({
     
     setAutoSaveStatus('saving')
     try {
-      await onSaveDraft(watchedTargets as Target[])
+      await onSaveDraft({
+        targets: watchedTargets as Target[],
+        currentRole: watchedCurrentRole,
+        longTermGoal: watchedLongTermGoal,
+      })
       setAutoSaveStatus('saved')
+      setHasChanges(false)
       setTimeout(() => setAutoSaveStatus('idle'), 2000)
     } catch (err) {
       console.error('Manual save error:', err)
@@ -210,6 +261,7 @@ export function TargetSettingForm({
               variant="outline" 
               size="sm" 
               onClick={handleManualSaveDraft}
+              disabled={!isDirty && !hasChanges}
               className="flex items-center gap-2"
             >
               💾 Save Draft
@@ -268,6 +320,7 @@ export function TargetSettingForm({
         </CardHeader>
         <CardContent>
           <Textarea
+            {...register('currentRole')}
             placeholder="Describe your current role and key responsibilities..."
             className="min-h-[120px] resize-none border-gray-300 focus:ring-blue-500 focus:border-blue-500"
           />
@@ -282,6 +335,7 @@ export function TargetSettingForm({
         </CardHeader>
         <CardContent>
           <Textarea
+            {...register('longTermGoal')}
             placeholder="Describe your long-term career goals and development aspirations..."
             className="min-h-[120px] resize-none border-gray-300 focus:ring-blue-500 focus:border-blue-500"
           />
@@ -321,7 +375,7 @@ export function TargetSettingForm({
               {fields.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                    No targets added yet. Click "Add Target" below to start.
+                    No targets added yet. Click &quot;Add Target&quot; below to start.
                   </td>
                 </tr>
               ) : (
@@ -378,9 +432,10 @@ export function TargetSettingForm({
                     <td className="px-4 py-3 align-top">
                       <Select
                         value={watchedTargets?.[index]?.difficulty || 'L2'}
-                        onValueChange={(value) =>
+                        onValueChange={(value) => {
                           setValue(`targets.${index}.difficulty`, value as 'L1' | 'L2' | 'L3')
-                        }
+                          setHasChanges(true)
+                        }}
                       >
                         <SelectTrigger className="text-xs border-gray-300 focus:ring-blue-500 focus:border-blue-500 w-full">
                           <SelectValue placeholder="Select" />
@@ -478,6 +533,7 @@ export function TargetSettingForm({
           type="button"
           variant="outline"
           onClick={handleManualSaveDraft}
+          disabled={!isDirty && !hasChanges}
           className="px-6"
         >
           💾 Save Draft

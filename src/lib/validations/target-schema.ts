@@ -56,6 +56,8 @@ export type TargetsArray = z.infer<typeof TargetsArraySchema>
 // Create target setting request schema
 export const CreateTargetSettingSchema = z.object({
   targets: TargetsArraySchema,
+  currentRole: z.string().optional(),
+  longTermGoal: z.string().optional(),
   cycleYear: z.number().int().min(2020).max(2100).optional(),
 })
 
@@ -64,6 +66,8 @@ export type CreateTargetSettingRequest = z.infer<typeof CreateTargetSettingSchem
 // Update target setting request schema
 export const UpdateTargetSettingSchema = z.object({
   targets: TargetsArraySchema,
+  currentRole: z.string().optional(),
+  longTermGoal: z.string().optional(),
 })
 
 export type UpdateTargetSettingRequest = z.infer<typeof UpdateTargetSettingSchema>

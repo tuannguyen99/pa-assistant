@@ -132,7 +132,7 @@ export async function PUT(
 
     // Parse and validate request body
     const body = await request.json()
-    const { targets, isDraft } = body
+    const { targets, currentRole, longTermGoal, isDraft } = body
 
     // For draft saves, use relaxed validation
     if (isDraft) {
@@ -145,7 +145,7 @@ export async function PUT(
       }
     } else {
       // For final submission, use strict validation
-      const validation = UpdateTargetSettingSchema.safeParse({ targets })
+      const validation = UpdateTargetSettingSchema.safeParse({ targets, currentRole, longTermGoal })
       if (!validation.success) {
         return NextResponse.json(
           {
@@ -162,6 +162,8 @@ export async function PUT(
       where: { id },
       data: {
         targets: JSON.stringify(targets),
+        currentRole: currentRole || null,
+        longTermGoal: longTermGoal || null,
         status: 'draft', // Reset to draft when updating
       },
       include: {

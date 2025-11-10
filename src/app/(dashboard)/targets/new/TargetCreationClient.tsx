@@ -20,15 +20,23 @@ interface TargetCreationClientProps {
     } | null
   }
   initialTargets?: any[]
+  initialCurrentRole?: string
+  initialLongTermGoal?: string
   targetSettingId?: string
 }
 
-export function TargetCreationClient({ currentUser, initialTargets, targetSettingId }: TargetCreationClientProps) {
+export function TargetCreationClient({ 
+  currentUser, 
+  initialTargets, 
+  initialCurrentRole,
+  initialLongTermGoal,
+  targetSettingId 
+}: TargetCreationClientProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = async (targets: Target[]) => {
+  const handleSubmit = async (data: { targets: Target[], currentRole?: string, longTermGoal?: string }) => {
     setIsSubmitting(true)
     setError(null)
 
@@ -37,7 +45,7 @@ export function TargetCreationClient({ currentUser, initialTargets, targetSettin
       const createResponse = await fetch('/api/targets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ targets }),
+        body: JSON.stringify(data),
       })
 
       if (!createResponse.ok) {
@@ -67,7 +75,7 @@ export function TargetCreationClient({ currentUser, initialTargets, targetSettin
     }
   }
 
-  const handleSaveDraft = async (targets: Target[]) => {
+  const handleSaveDraft = async (data: { targets: Target[], currentRole?: string, longTermGoal?: string }) => {
     try {
       // Use PUT if we have an existing draft, POST for new drafts
       const method = targetSettingId ? 'PUT' : 'POST'
@@ -79,7 +87,7 @@ export function TargetCreationClient({ currentUser, initialTargets, targetSettin
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          targets,
+          ...data,
           isDraft: true,
         }),
       })
@@ -88,14 +96,6 @@ export function TargetCreationClient({ currentUser, initialTargets, targetSettin
         const errorData = await response.json()
         console.error('Draft save error:', errorData)
         throw new Error(errorData.error || 'Failed to save draft')
-      }
-
-      const data = await response.json()
-
-      // If this was a new draft creation, update targetSettingId
-      if (!targetSettingId && method === 'POST') {
-        // The ID is now available in the response
-        // We would need to update state here, but for now just note it's saved
       }
 
       // Revalidate the page to reload draft from database
@@ -119,6 +119,8 @@ export function TargetCreationClient({ currentUser, initialTargets, targetSettin
       {/* Form */}
       <TargetSettingForm
         initialTargets={initialTargets}
+        initialCurrentRole={initialCurrentRole}
+        initialLongTermGoal={initialLongTermGoal}
         currentUser={currentUser}
         onSubmit={handleSubmit}
         onSaveDraft={handleSaveDraft}

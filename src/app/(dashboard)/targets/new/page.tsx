@@ -57,6 +57,8 @@ export default async function NewTargetPage() {
     select: {
       id: true,
       targets: true,
+      currentRole: true,
+      longTermGoal: true,
       status: true,
     }
   })
@@ -79,6 +81,9 @@ export default async function NewTargetPage() {
     ? JSON.parse(existingDraft.targets)
     : undefined
 
+  const initialCurrentRole = existingDraft?.currentRole || undefined
+  const initialLongTermGoal = existingDraft?.longTermGoal || undefined
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
@@ -87,6 +92,8 @@ export default async function NewTargetPage() {
           <TargetCreationClient 
             currentUser={currentUserWithManager}
             initialTargets={initialTargets}
+            initialCurrentRole={initialCurrentRole}
+            initialLongTermGoal={initialLongTermGoal}
             targetSettingId={existingDraft?.id}
           />
         </div>

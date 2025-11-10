@@ -58,6 +58,8 @@ model TargetSetting {
   //         manager_approved | submitted_to_hr | target_setting_complete
   
   targets     String   // JSON array of 3-5 targets with task, KPI, weight, difficulty
+  currentRole String?  // Current role and responsibilities description
+  longTermGoal String? // Long-term career goals and development aspirations
   
   submittedAt DateTime?
   approvedAt  DateTime?

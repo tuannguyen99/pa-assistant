@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { AuthService } from '@/lib/auth/auth-service'
 import { prisma } from '@/lib/prisma'
 import { CreateTargetSettingSchema } from '@/lib/validations/target-schema'
-import { z } from 'zod'
 
 // GET /api/targets - List target settings for current user or filtered by cycleYear
 export async function GET(request: NextRequest) {
@@ -32,7 +31,10 @@ export async function GET(request: NextRequest) {
     const isHRAdmin = await AuthService.hasRole(currentUser.id, 'hr_admin')
     const isManager = await AuthService.hasRole(currentUser.id, 'manager')
 
-    let whereClause: any = {}
+    let whereClause: {
+      employeeId?: string | { in: string[] }
+      cycleYear?: number
+    } = {}
 
     if (isHRAdmin) {
       // HR Admin can see all targets
@@ -133,7 +135,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json()
-    const { targets, cycleYear, isDraft } = body
+    const { targets, currentRole, longTermGoal, cycleYear, isDraft } = body
 
     // For draft saves, use relaxed validation
     if (isDraft) {
@@ -191,6 +193,8 @@ export async function POST(request: NextRequest) {
         cycleYear: targetCycleYear,
         status: 'draft',
         targets: JSON.stringify(targets),
+        currentRole: currentRole || null,
+        longTermGoal: longTermGoal || null,
       },
       include: {
         employee: {
