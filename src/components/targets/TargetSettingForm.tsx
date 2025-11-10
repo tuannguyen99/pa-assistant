@@ -80,7 +80,6 @@ export function TargetSettingForm({
 }: TargetSettingFormProps) {
   const [totalWeight, setTotalWeight] = useState(0)
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'idle'>('idle')
-  const isInitialLoad = useRef(true)
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null)
 
   const {
@@ -88,7 +87,7 @@ export function TargetSettingForm({
     control,
     handleSubmit,
     setValue,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -123,11 +122,8 @@ export function TargetSettingForm({
   useEffect(() => {
     if (!onSaveDraft) return
 
-    // Skip auto-save on initial load (when form is first populated with saved data)
-    if (isInitialLoad.current) {
-      isInitialLoad.current = false
-      return
-    }
+    // Only auto-save if form is dirty (user has made changes)
+    if (!isDirty) return
 
     // Clear existing timer
     if (autoSaveTimer.current) {
@@ -154,7 +150,7 @@ export function TargetSettingForm({
         clearTimeout(autoSaveTimer.current)
       }
     }
-  }, [watchedTargets, onSaveDraft])
+  }, [watchedTargets, isDirty, onSaveDraft])
 
   const handleFormSubmit = async (data: FormData) => {
     await onSubmit(data.targets)
