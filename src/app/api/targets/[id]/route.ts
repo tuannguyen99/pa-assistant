@@ -132,19 +132,30 @@ export async function PUT(
 
     // Parse and validate request body
     const body = await request.json()
-    const validation = UpdateTargetSettingSchema.safeParse(body)
+    const { targets, isDraft } = body
 
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: 'Validation failed',
-          details: validation.error.format(),
-        },
-        { status: 400 }
-      )
+    // For draft saves, use relaxed validation
+    if (isDraft) {
+      // Basic validation - just ensure targets is an array
+      if (!Array.isArray(targets)) {
+        return NextResponse.json(
+          { error: 'Targets must be an array' },
+          { status: 400 }
+        )
+      }
+    } else {
+      // For final submission, use strict validation
+      const validation = UpdateTargetSettingSchema.safeParse({ targets })
+      if (!validation.success) {
+        return NextResponse.json(
+          {
+            error: 'Validation failed',
+            details: validation.error.format(),
+          },
+          { status: 400 }
+        )
+      }
     }
-
-    const { targets } = validation.data
 
     // Update target setting
     const updatedTargetSetting = await prisma.targetSetting.update({

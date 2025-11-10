@@ -42,6 +42,22 @@ export default async function NewTargetPage() {
     }
   })
 
+  // Fetch existing draft for current year
+  const currentYear = new Date().getFullYear()
+  const existingDraft = await prisma.targetSetting.findUnique({
+    where: {
+      employeeId_cycleYear: {
+        employeeId: currentUser.id,
+        cycleYear: currentYear,
+      },
+    },
+    select: {
+      id: true,
+      targets: true,
+      status: true,
+    }
+  })
+
   const currentUserWithManager = {
     id: currentUser.id,
     email: currentUser.email,
@@ -56,12 +72,20 @@ export default async function NewTargetPage() {
     } : null,
   }
 
+  const initialTargets = existingDraft && existingDraft.status === 'draft'
+    ? JSON.parse(existingDraft.targets)
+    : undefined
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
       <div className="flex-1 w-full px-8 py-8">
         <div className="mx-auto">
-          <TargetCreationClient currentUser={currentUserWithManager} />
+          <TargetCreationClient 
+            currentUser={currentUserWithManager}
+            initialTargets={initialTargets}
+            targetSettingId={existingDraft?.id}
+          />
         </div>
       </div>
     </div>

@@ -19,9 +19,11 @@ interface TargetCreationClientProps {
       employeeId: string
     } | null
   }
+  initialTargets?: any[]
+  targetSettingId?: string
 }
 
-export function TargetCreationClient({ currentUser }: TargetCreationClientProps) {
+export function TargetCreationClient({ currentUser, initialTargets, targetSettingId }: TargetCreationClientProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -67,13 +69,18 @@ export function TargetCreationClient({ currentUser }: TargetCreationClientProps)
 
   const handleSaveDraft = async (targets: Target[]) => {
     try {
-      // Don't require full validation for draft save - user may be still filling form
-      const response = await fetch('/api/targets', {
-        method: 'POST',
+      // Use PUT if we have an existing draft, POST for new drafts
+      const method = targetSettingId ? 'PUT' : 'POST'
+      const url = targetSettingId 
+        ? `/api/targets/${targetSettingId}`
+        : '/api/targets'
+
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           targets,
-          isDraft: true, // Flag to indicate this is a draft save, not full submission
+          isDraft: true,
         }),
       })
 
@@ -81,6 +88,12 @@ export function TargetCreationClient({ currentUser }: TargetCreationClientProps)
         const errorData = await response.json()
         console.error('Draft save error:', errorData)
         throw new Error(errorData.error || 'Failed to save draft')
+      }
+
+      // If this was a new draft creation, update targetSettingId
+      if (!targetSettingId && method === 'POST') {
+        const data = await response.json()
+        // The ID is now available in the response but we don't need to store it here
       }
     } catch (err) {
       console.error('Draft save error:', err)
@@ -100,6 +113,7 @@ export function TargetCreationClient({ currentUser }: TargetCreationClientProps)
 
       {/* Form */}
       <TargetSettingForm
+        initialTargets={initialTargets}
         currentUser={currentUser}
         onSubmit={handleSubmit}
         onSaveDraft={handleSaveDraft}
