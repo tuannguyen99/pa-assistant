@@ -67,17 +67,24 @@ export function TargetCreationClient({ currentUser }: TargetCreationClientProps)
 
   const handleSaveDraft = async (targets: Target[]) => {
     try {
+      // Don't require full validation for draft save - user may be still filling form
       const response = await fetch('/api/targets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ targets }),
+        body: JSON.stringify({ 
+          targets,
+          isDraft: true, // Flag to indicate this is a draft save, not full submission
+        }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save draft')
+        const errorData = await response.json()
+        console.error('Draft save error:', errorData)
+        throw new Error(errorData.error || 'Failed to save draft')
       }
     } catch (err) {
       console.error('Draft save error:', err)
+      // Don't throw - silently fail for auto-save to avoid blocking user input
     }
   }
 

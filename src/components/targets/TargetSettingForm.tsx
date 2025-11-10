@@ -122,10 +122,9 @@ export function TargetSettingForm({
     if (!onSaveDraft) return
 
     const timer = setTimeout(() => {
-      const targetsValid = watchedTargets.every(
-        (t) => t?.taskDescription && t?.kpi && t?.weight > 0
-      )
-      if (targetsValid && totalWeight === 100) {
+      // For draft, just save when user has started filling targets with any content
+      // Don't require 100% weight or all fields filled
+      if (watchedTargets && watchedTargets.length > 0) {
         setAutoSaveStatus('saving')
         onSaveDraft(watchedTargets as Target[])
           .then(() => {
@@ -137,7 +136,7 @@ export function TargetSettingForm({
     }, 3000)
 
     return () => clearTimeout(timer)
-  }, [watchedTargets, totalWeight, onSaveDraft])
+  }, [watchedTargets, onSaveDraft])
 
   const handleFormSubmit = async (data: FormData) => {
     await onSubmit(data.targets)

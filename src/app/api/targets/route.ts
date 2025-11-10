@@ -131,24 +131,37 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Parse and validate request body
+    // Parse request body
     const body = await request.json()
-    const validation = CreateTargetSettingSchema.safeParse(body)
+    const { targets, cycleYear, isDraft } = body
 
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          error: 'Validation failed',
-          details: validation.error.format(),
-        },
-        { status: 400 }
-      )
+    // For draft saves, use relaxed validation
+    if (isDraft) {
+      // Basic validation - just ensure targets is an array with objects
+      if (!Array.isArray(targets)) {
+        return NextResponse.json(
+          { error: 'Targets must be an array' },
+          { status: 400 }
+        )
+      }
+    } else {
+      // For final submission, use strict validation
+      const validation = CreateTargetSettingSchema.safeParse(body)
+      if (!validation.success) {
+        return NextResponse.json(
+          {
+            error: 'Validation failed',
+            details: validation.error.format(),
+          },
+          { status: 400 }
+        )
+      }
     }
 
-    const { targets, cycleYear } = validation.data
+    const targetCycleYearValue = cycleYear || new Date().getFullYear()
 
     // Use provided cycleYear or default to current year
-    const targetCycleYear = cycleYear || new Date().getFullYear()
+    const targetCycleYear = targetCycleYearValue
 
     // Check if target setting already exists for this employee and year
     const existingTarget = await prisma.targetSetting.findUnique({
