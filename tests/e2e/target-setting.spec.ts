@@ -144,16 +144,19 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
     await page.goto('/targets/new')
 
     // Check page title
-    await expect(page.locator('h1')).toContainText('Create Performance Targets')
+    await expect(page.getByRole('heading', { name: 'Target Setting (Step 1.1)' })).toBeVisible()
 
-    // Check initial 3 targets are visible
-    await expect(page.locator('text=Target 1')).toBeVisible()
-    await expect(page.locator('text=Target 2')).toBeVisible()
-    await expect(page.locator('text=Target 3')).toBeVisible()
+    // Check that 3 initial targets are present (table rows)
+    await expect(page.locator('tbody tr')).toHaveCount(3)
 
-    // Check all form fields exist
-    await expect(page.locator('textarea').first()).toBeVisible()
-    await expect(page.locator('input[type="number"]').first()).toBeVisible()
+    // Check all form fields exist for each target
+    const targets = page.locator('tbody tr')
+    for (let i = 0; i < 3; i++) {
+      await expect(targets.nth(i).locator('textarea').first()).toBeVisible() // task description
+      await expect(targets.nth(i).locator('textarea').nth(1)).toBeVisible() // KPI
+      await expect(targets.nth(i).locator('input[type="number"]')).toBeVisible() // weight
+      await expect(targets.nth(i).locator('button[role="combobox"]')).toBeVisible() // difficulty select
+    }
   })
 
   test('AC2 & AC3: Weight validation and 3-5 targets constraint', async ({ page }) => {
@@ -167,7 +170,7 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
     await page.goto('/targets/new')
 
     // Fill in 3 targets with incorrect total weight
-    const targets = page.locator('[class*="border rounded-lg"]')
+    const targets = page.locator('tbody tr')
     
     // Target 1
     await targets.nth(0).locator('textarea').fill('Implement core features for Q4 project delivery')

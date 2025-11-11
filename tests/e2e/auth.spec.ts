@@ -21,11 +21,11 @@ test.describe('Authentication Flow', () => {
   })
 
   test('should redirect to dashboard after successful login', async ({ page }) => {
-    // Use the seeded test user from prisma/seed.ts
+    // Use the seeded test HR admin user
     await page.goto('/login')
     
-    await page.fill('input[name="email"]', 'admin@prdcv.com')
-    await page.fill('input[name="password"]', 'Pr&dcv@2025')
+    await page.fill('input[name="email"]', 'hradmin.target@example.com')
+    await page.fill('input[name="password"]', 'HRAdmin@123')
     
     await page.click('button[type="submit"]')
     
