@@ -15,6 +15,12 @@ so that my annual goals are established for the review cycle.
 3. 3-5 targets per employee supported
 4. Manager review and approval workflow
 5. Target storage for year-long access
+6. Auto-save functionality saves drafts every 3 seconds after any field modification (current role, long-term goal, task description, KPI, weight, difficulty)
+7. Save Draft button enabled when form has unsaved changes, disabled when form is clean or during save operations
+8. Clear notifications for auto-save progress ("Auto-saving draft..."), success ("Draft auto-saved successfully"), and errors with specific messages
+9. Unsaved changes warning dialog when attempting to reload page or navigate to other pages (dashboard, profile)
+10. Page reload loads latest data from database with Save Draft button disabled (clean state)
+11. System handles concurrent saves from 200+ users without data loss or corruption, maintaining fast response times (<500ms average)
 
 ## Tasks / Subtasks
 

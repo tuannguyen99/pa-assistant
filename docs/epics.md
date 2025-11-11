@@ -131,6 +131,12 @@ So that my annual goals are established for the review cycle.
 3. 3-5 targets per employee supported
 4. Manager review and approval workflow
 5. Target storage for year-long access
+6. Auto-save functionality saves drafts every 3 seconds after field changes
+7. Save Draft button enabled/disabled based on unsaved changes state
+8. Clear notifications for auto-save progress, success, and errors
+9. Unsaved changes warning when navigating away or reloading page
+10. Page reload loads latest data with clean state (button disabled)
+11. System handles 200+ concurrent users without data loss or corruption
 
 **Prerequisites:** Story 1.3
 

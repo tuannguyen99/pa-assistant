@@ -113,6 +113,13 @@ These behaviours MUST be reflected in the RBAC implementation, UI microcopy, and
 **Target Setting Workflow**
 - **FR004**: Employees shall create 3-5 performance targets with task description, KPI, weight percentage (auto-validated to total 100%), and difficulty level (L1-L3), with ability to modify targets at mid-year and during self-evaluation (modifications flagged and sent to manager for review)
   - **Difficulty Levels:** L1 (highest complexity) = 1.25, L2 (moderate) = 1.0, L3 (lowest) = 0.75
+  - **Auto-Save Requirements:**
+    - **FR004a**: System shall automatically save target drafts every 3 seconds after any field modification (current role, long-term goal, task description, KPI, weight, difficulty) with clear visual feedback and notifications
+    - **FR004b**: Save Draft button shall be enabled when form has unsaved changes and disabled when form is clean or during save operations
+    - **FR004c**: System shall provide clear notifications for auto-save progress ("Auto-saving draft..."), success ("Draft auto-saved successfully"), and errors with specific messages
+    - **FR004d**: System shall warn users about unsaved changes when attempting to reload page or navigate to other pages (dashboard, profile) with confirmation dialog
+    - **FR004e**: Page reload shall load latest data from database with Save Draft button disabled (clean state)
+    - **FR004f**: System shall handle concurrent saves from 200+ users without data loss or corruption, maintaining data integrity and fast response times (<500ms average)
 - **FR005**: Managers shall review employee targets with ability to send feedback and request revisions, then submit department targets to HR for alignment verification
 - **FR005a**: HR shall review all department targets to verify quality and alignment with company targets, with ability to send feedback to managers for employee updates
 - **FR005b**: System shall support mid-year target setting period where all employees can update their targets following the same review workflow (employee → manager → HR)
