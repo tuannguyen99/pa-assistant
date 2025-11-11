@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { TargetSettingForm } from '@/components/targets/TargetSettingForm'
 import type { Target } from '@/lib/validations/target-schema'
+import { toast } from 'sonner'
 
 interface TargetCreationClientProps {
   currentUser?: {
@@ -102,7 +103,8 @@ export function TargetCreationClient({
       router.refresh()
     } catch (err) {
       console.error('Draft save error:', err)
-      // Don't throw - silently fail for auto-save to avoid blocking user input
+      // Re-throw to let the form component handle the error display
+      throw err
     }
   }
 

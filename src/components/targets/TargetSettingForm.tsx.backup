@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -20,9 +20,7 @@ import type {
   Target,
 } from '@/lib/validations/target-schema'
 import { z } from 'zod'
-import { Trash2, Plus, Save, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
-import { useUnsavedChangesWarning } from '@/hooks/use-unsaved-changes-warning'
+import { Trash2, Plus } from 'lucide-react'
 
 interface TargetSettingFormProps {
   initialTargets?: Target[]
@@ -87,8 +85,8 @@ export function TargetSettingForm({
   currentUser,
 }: TargetSettingFormProps) {
   const [totalWeight, setTotalWeight] = useState(0)
-  const [isSaving, setIsSaving] = useState(false)
-  const [lastSavedData, setLastSavedData] = useState<string>('')
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'idle'>('idle')
+  const [hasChanges, setHasChanges] = useState(false)
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null)
   const isInitialMount = useRef(true)
 
@@ -98,7 +96,6 @@ export function TargetSettingForm({
     handleSubmit,
     setValue,
     formState: { errors, isDirty },
-    reset,
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -132,22 +129,6 @@ export function TargetSettingForm({
     name: 'longTermGoal',
   })
 
-  // Check if form has actual changes by comparing with last saved data
-  const hasUnsavedChanges = useCallback(() => {
-    const currentData = JSON.stringify({
-      targets: watchedTargets,
-      currentRole: watchedCurrentRole,
-      longTermGoal: watchedLongTermGoal,
-    })
-    return isDirty || (currentData !== lastSavedData && lastSavedData !== '')
-  }, [isDirty, watchedTargets, watchedCurrentRole, watchedLongTermGoal, lastSavedData])
-
-  // Warn user about unsaved changes
-  useUnsavedChangesWarning(
-    hasUnsavedChanges(),
-    'You have unsaved changes in your target settings. Do you want to leave without saving?'
-  )
-
   // Calculate total weight
   useEffect(() => {
     const total = watchedTargets.reduce(
@@ -157,25 +138,22 @@ export function TargetSettingForm({
     setTotalWeight(total)
   }, [watchedTargets])
 
-  // Set initial saved data on mount
-  useEffect(() => {
-    if (isInitialMount.current) {
-      const initialData = JSON.stringify({
-        targets: initialTargets || [],
-        currentRole: initialCurrentRole || '',
-        longTermGoal: initialLongTermGoal || '',
-      })
-      setLastSavedData(initialData)
-      isInitialMount.current = false
-    }
-  }, [initialTargets, initialCurrentRole, initialLongTermGoal])
-
-  // Auto-save draft with 3-second debounce
+  // Auto-save draft with 5-second debounce interval
   useEffect(() => {
     if (!onSaveDraft) return
 
-    // Skip if no changes or initial mount or currently saving
-    if (!hasUnsavedChanges() || isSaving) {
+    // Only auto-save if form has changes (from isDirty or local changes)
+    if (!isDirty && !hasChanges) {
+      // Reset isInitialMount once we know form is clean
+      if (isInitialMount.current) {
+        isInitialMount.current = false
+      }
+      return
+    }
+
+    // Skip first trigger (initial mount with loaded data)
+    if (isInitialMount.current) {
+      isInitialMount.current = false
       return
     }
 
@@ -184,123 +162,62 @@ export function TargetSettingForm({
       clearTimeout(autoSaveTimer.current)
     }
 
-    // Set new timer for 3 seconds
-    autoSaveTimer.current = setTimeout(async () => {
+    // Set new timer for 5 seconds
+    autoSaveTimer.current = setTimeout(() => {
+      // Get current values from form state
       const currentTargets = watchedTargets
       const currentCurrentRole = watchedCurrentRole
       const currentLongTermGoal = watchedLongTermGoal
 
-      // Save if there's content
+      // For draft, just save when user has started filling targets with any content
+      // Don't require 100% weight or all fields filled
       if (currentTargets && currentTargets.length > 0) {
-        setIsSaving(true)
-        const toastId = toast.loading('Auto-saving draft...')
-        
-        try {
-          await onSaveDraft({
-            targets: currentTargets as Target[],
-            currentRole: currentCurrentRole,
-            longTermGoal: currentLongTermGoal,
+        setAutoSaveStatus('saving')
+        onSaveDraft({
+          targets: currentTargets as Target[],
+          currentRole: currentCurrentRole,
+          longTermGoal: currentLongTermGoal,
+        })
+          .then(() => {
+            setAutoSaveStatus('saved')
+            setHasChanges(false)
+            setTimeout(() => setAutoSaveStatus('idle'), 2000)
           })
-          
-          // Update last saved data
-          const savedData = JSON.stringify({
-            targets: currentTargets,
-            currentRole: currentCurrentRole,
-            longTermGoal: currentLongTermGoal,
-          })
-          setLastSavedData(savedData)
-          
-          // Reset form dirty state
-          reset({
-            targets: currentTargets as Target[],
-            currentRole: currentCurrentRole,
-            longTermGoal: currentLongTermGoal,
-          })
-          
-          toast.success(' Draft auto-saved successfully', { id: toastId, duration: 3000 })
-        } catch (error) {
-          console.error('Auto-save error:', error)
-          toast.error('Failed to auto-save draft. Please try manual save.', { id: toastId, duration: 5000 })
-        } finally {
-          setIsSaving(false)
-        }
+          .catch(() => setAutoSaveStatus('idle'))
       }
-    }, 3000) // 3-second interval
+    }, 5000) // 5-second interval
 
     return () => {
       if (autoSaveTimer.current) {
         clearTimeout(autoSaveTimer.current)
       }
     }
-  }, [isDirty, isSaving, onSaveDraft, watchedTargets, watchedCurrentRole, watchedLongTermGoal, hasUnsavedChanges, reset])
+  }, [isDirty, hasChanges, onSaveDraft, watchedTargets, watchedCurrentRole, watchedLongTermGoal])
 
   const handleFormSubmit = async (data: FormData) => {
-    // Clear auto-save timer if running
-    if (autoSaveTimer.current) {
-      clearTimeout(autoSaveTimer.current)
-    }
-
-    const toastId = toast.loading('Submitting to manager...')
-    
-    try {
-      await onSubmit({
-        targets: data.targets,
-        currentRole: data.currentRole,
-        longTermGoal: data.longTermGoal,
-      })
-      toast.success(' Target settings submitted successfully!', { id: toastId, duration: 4000 })
-    } catch (error) {
-      console.error('Submit error:', error)
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to submit target settings. Please try again.',
-        { id: toastId, duration: 5000 }
-      )
-      throw error
-    }
+    await onSubmit({
+      targets: data.targets,
+      currentRole: data.currentRole,
+      longTermGoal: data.longTermGoal,
+    })
   }
 
   const handleManualSaveDraft = async () => {
     if (!onSaveDraft) return
     
-    // Clear auto-save timer
-    if (autoSaveTimer.current) {
-      clearTimeout(autoSaveTimer.current)
-    }
-
-    setIsSaving(true)
-    const toastId = toast.loading('Saving draft...')
-    
+    setAutoSaveStatus('saving')
     try {
       await onSaveDraft({
         targets: watchedTargets as Target[],
         currentRole: watchedCurrentRole,
         longTermGoal: watchedLongTermGoal,
       })
-      
-      // Update last saved data
-      const savedData = JSON.stringify({
-        targets: watchedTargets,
-        currentRole: watchedCurrentRole,
-        longTermGoal: watchedLongTermGoal,
-      })
-      setLastSavedData(savedData)
-      
-      // Reset form dirty state
-      reset({
-        targets: watchedTargets as Target[],
-        currentRole: watchedCurrentRole,
-        longTermGoal: watchedLongTermGoal,
-      })
-      
-      toast.success(' Draft saved successfully', { id: toastId, duration: 3000 })
-    } catch (error) {
-      console.error('Manual save error:', error)
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to save draft. Please try again.',
-        { id: toastId, duration: 5000 }
-      )
-    } finally {
-      setIsSaving(false)
+      setAutoSaveStatus('saved')
+      setHasChanges(false)
+      setTimeout(() => setAutoSaveStatus('idle'), 2000)
+    } catch (err) {
+      console.error('Manual save error:', err)
+      setAutoSaveStatus('idle')
     }
   }
 
@@ -314,22 +231,16 @@ export function TargetSettingForm({
         <div className="flex items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
-              <span></span>
+              <span>📝</span>
               <span>Draft</span>
             </div>
             <span className="text-sm text-gray-600">Phase 1: Target Setting</span>
-            {isSaving && (
-              <span className="text-xs text-blue-600 flex items-center gap-1">
-                <Loader2 className="h-3 w-3 animate-spin" />
-                Auto-saving...
-              </span>
-            )}
           </div>
 
           {/* Timeline Steps */}
           <div className="hidden sm:flex items-center gap-4 flex-1 justify-center">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold"></div>
+              <div className="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">✓</div>
               <span className="text-xs text-gray-600">Basic Info</span>
             </div>
             <div className="h-0.5 w-8 bg-gray-300"></div>
@@ -350,28 +261,18 @@ export function TargetSettingForm({
               variant="outline" 
               size="sm" 
               onClick={handleManualSaveDraft}
-              disabled={!hasUnsavedChanges() || isSaving}
+              disabled={!isDirty && !hasChanges}
               className="flex items-center gap-2"
             >
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  Save Draft
-                </>
-              )}
+              💾 Save Draft
             </Button>
             <Button
               type="submit"
               size="sm"
-              disabled={isSubmitting || totalWeight !== 100 || isSaving}
+              disabled={isSubmitting || totalWeight !== 100}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
             >
-               Submit
+              📤 Submit
             </Button>
           </div>
         </div>
@@ -533,6 +434,7 @@ export function TargetSettingForm({
                         value={watchedTargets?.[index]?.difficulty || 'L2'}
                         onValueChange={(value) => {
                           setValue(`targets.${index}.difficulty`, value as 'L1' | 'L2' | 'L3')
+                          setHasChanges(true)
                         }}
                       >
                         <SelectTrigger className="text-xs border-gray-300 focus:ring-blue-500 focus:border-blue-500 w-full">
@@ -607,42 +509,41 @@ export function TargetSettingForm({
         </div>
       )}
 
+      {/* Auto-save Status */}
+      {onSaveDraft && autoSaveStatus !== 'idle' && (
+        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 flex items-center gap-2">
+          {autoSaveStatus === 'saving' && (
+            <>
+              <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+              💾 Saving draft...
+            </>
+          )}
+          {autoSaveStatus === 'saved' && (
+            <>
+              <span>✓</span>
+              Draft saved successfully
+            </>
+          )}
+        </div>
+      )}
+
       {/* Action Buttons */}
       <div className="flex gap-3 justify-center pt-6 border-t border-gray-200">
         <Button
           type="button"
           variant="outline"
           onClick={handleManualSaveDraft}
-          disabled={!hasUnsavedChanges() || isSaving}
-          className="px-6 flex items-center gap-2"
+          disabled={!isDirty && !hasChanges}
+          className="px-6"
         >
-          {isSaving ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4" />
-              Save Draft
-            </>
-          )}
+          💾 Save Draft
         </Button>
         <Button
           type="submit"
-          disabled={isSubmitting || totalWeight !== 100 || isSaving}
+          disabled={isSubmitting || totalWeight !== 100}
           className="px-8 bg-blue-600 hover:bg-blue-700 text-white font-medium flex items-center gap-2"
         >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Submitting...
-            </>
-          ) : (
-            <>
-               Submit to Manager
-            </>
-          )}
+          📤 Submit to Manager
         </Button>
       </div>
     </form>
