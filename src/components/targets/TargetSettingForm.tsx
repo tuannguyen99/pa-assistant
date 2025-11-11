@@ -91,6 +91,8 @@ export function TargetSettingForm({
   const [lastSavedData, setLastSavedData] = useState<string>('')
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null)
   const isInitialMount = useRef(true)
+  const lastChangeTime = useRef<number>(0)
+  const currentFormData = useRef<string>('')
 
   const {
     register,
@@ -170,19 +172,21 @@ export function TargetSettingForm({
     }
   }, [initialTargets, initialCurrentRole, initialLongTermGoal])
 
-  // Auto-save draft with 3-second debounce
+  // Update form data ref whenever watched fields change
   useEffect(() => {
-    if (!onSaveDraft || isSaving) return
-
-    // Check if there are changes
-    const currentData = JSON.stringify({
+    currentFormData.current = JSON.stringify({
       targets: watchedTargets,
       currentRole: watchedCurrentRole,
       longTermGoal: watchedLongTermGoal,
     })
+  }, [watchedTargets, watchedCurrentRole, watchedLongTermGoal])
+
+  // Auto-save draft with 3-second debounce
+  useEffect(() => {
+    if (!onSaveDraft || isSaving) return
 
     // Skip if no actual changes
-    if (currentData === lastSavedData) {
+    if (currentFormData.current === lastSavedData) {
       return
     }
 
@@ -191,37 +195,31 @@ export function TargetSettingForm({
       clearTimeout(autoSaveTimer.current)
     }
 
-    // Set new timer for 3 seconds
+    // Set new timer for 3 seconds from now
     autoSaveTimer.current = setTimeout(async () => {
-      const currentTargets = watchedTargets
-      const currentCurrentRole = watchedCurrentRole
-      const currentLongTermGoal = watchedLongTermGoal
+      const savedData = currentFormData.current
+      const parsedData = JSON.parse(savedData)
 
       // Save if there's content
-      if (currentTargets && currentTargets.length > 0) {
+      if (parsedData.targets && parsedData.targets.length > 0) {
         setIsSaving(true)
         const toastId = toast.loading('Auto-saving draft...')
         
         try {
           await onSaveDraft({
-            targets: currentTargets as Target[],
-            currentRole: currentCurrentRole,
-            longTermGoal: currentLongTermGoal,
+            targets: parsedData.targets as Target[],
+            currentRole: parsedData.currentRole,
+            longTermGoal: parsedData.longTermGoal,
           })
           
           // Update last saved data
-          const savedData = JSON.stringify({
-            targets: currentTargets,
-            currentRole: currentCurrentRole,
-            longTermGoal: currentLongTermGoal,
-          })
           setLastSavedData(savedData)
           
           // Reset form dirty state
           reset({
-            targets: currentTargets as Target[],
-            currentRole: currentCurrentRole,
-            longTermGoal: currentLongTermGoal,
+            targets: parsedData.targets as Target[],
+            currentRole: parsedData.currentRole,
+            longTermGoal: parsedData.longTermGoal,
           })
           
           toast.success('✓ Draft auto-saved successfully', { id: toastId, duration: 3000 })
@@ -239,7 +237,7 @@ export function TargetSettingForm({
         clearTimeout(autoSaveTimer.current)
       }
     }
-  }, [watchedTargets, watchedCurrentRole, watchedLongTermGoal, lastSavedData, onSaveDraft, isSaving, reset])
+  }, [lastSavedData, onSaveDraft, isSaving, reset])
 
   const handleFormSubmit = async (data: FormData) => {
     // Clear auto-save timer if running
