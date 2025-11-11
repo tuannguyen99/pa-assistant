@@ -172,10 +172,17 @@ export function TargetSettingForm({
 
   // Auto-save draft with 3-second debounce
   useEffect(() => {
-    if (!onSaveDraft) return
+    if (!onSaveDraft || isSaving) return
 
-    // Skip if no changes or initial mount or currently saving
-    if (!hasUnsavedChanges() || isSaving) {
+    // Check if there are changes
+    const currentData = JSON.stringify({
+      targets: watchedTargets,
+      currentRole: watchedCurrentRole,
+      longTermGoal: watchedLongTermGoal,
+    })
+
+    // Skip if no actual changes
+    if (currentData === lastSavedData) {
       return
     }
 
@@ -217,7 +224,7 @@ export function TargetSettingForm({
             longTermGoal: currentLongTermGoal,
           })
           
-          toast.success(' Draft auto-saved successfully', { id: toastId, duration: 3000 })
+          toast.success('✓ Draft auto-saved successfully', { id: toastId, duration: 3000 })
         } catch (error) {
           console.error('Auto-save error:', error)
           toast.error('Failed to auto-save draft. Please try manual save.', { id: toastId, duration: 5000 })
@@ -232,7 +239,7 @@ export function TargetSettingForm({
         clearTimeout(autoSaveTimer.current)
       }
     }
-  }, [isDirty, isSaving, onSaveDraft, watchedTargets, watchedCurrentRole, watchedLongTermGoal, hasUnsavedChanges, reset])
+  }, [watchedTargets, watchedCurrentRole, watchedLongTermGoal, lastSavedData, onSaveDraft, isSaving, reset])
 
   const handleFormSubmit = async (data: FormData) => {
     // Clear auto-save timer if running
