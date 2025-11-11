@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useEffect, useCallback } from 'react'
+import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 /**
@@ -13,6 +13,7 @@ export function useUnsavedChangesWarning(
   message: string = 'You have unsaved changes. Are you sure you want to leave?'
 ) {
   const router = useRouter()
+  const navigationBlockedRef = useRef(false)
 
   useEffect(() => {
     // Warn before page reload/close
@@ -24,20 +25,37 @@ export function useUnsavedChangesWarning(
       }
     }
 
+    // Intercept Next.js navigation
+    const originalPush = router.push
+    const originalReplace = router.replace
+
+    const wrapNavigation = (
+      originalMethod: (href: string) => void,
+      methodName: string
+    ) => {
+      return (href: string) => {
+        if (hasUnsavedChanges && !navigationBlockedRef.current) {
+          navigationBlockedRef.current = true
+          const confirmed = window.confirm(message)
+          navigationBlockedRef.current = false
+
+          if (!confirmed) {
+            return
+          }
+        }
+        originalMethod.call(router, href)
+      }
+    }
+
+    router.push = wrapNavigation(originalPush, 'push')
+    router.replace = wrapNavigation(originalReplace, 'replace')
+
     window.addEventListener('beforeunload', handleBeforeUnload)
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload)
+      router.push = originalPush
+      router.replace = originalReplace
     }
-  }, [hasUnsavedChanges, message])
-
-  // Return a function to check before navigation
-  const confirmNavigation = useCallback(() => {
-    if (hasUnsavedChanges) {
-      return window.confirm(message)
-    }
-    return true
-  }, [hasUnsavedChanges, message])
-
-  return { confirmNavigation }
+  }, [hasUnsavedChanges, message, router])
 }
