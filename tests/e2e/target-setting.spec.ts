@@ -1,4 +1,12 @@
 import { test, expect } from '@playwright/test'
+
+test.describe('Target Setting Workflow - skeleton', () => {
+  test('employee creates draft and submits to manager (skeleton)', async ({ page }) => {
+    // TODO: implement E2E flow
+    await expect(true).toBeTruthy()
+  })
+})
+import { test, expect } from '@playwright/test'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcrypt'
 

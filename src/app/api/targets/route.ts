@@ -1,3 +1,16 @@
+import { NextResponse } from 'next/server'
+
+// GET: list targets for current user or by query
+export async function GET(req: Request) {
+  // TODO: Implement authentication, query params, DB fetch
+  return NextResponse.json({ message: 'GET /api/targets - stub' })
+}
+
+// POST: create a draft target set
+export async function POST(req: Request) {
+  // TODO: Validate body and create TargetSetting record
+  return NextResponse.json({ message: 'POST /api/targets - stub' })
+}
 import { NextRequest, NextResponse } from 'next/server'
 import { AuthService } from '@/lib/auth/auth-service'
 import { prisma } from '@/lib/prisma'

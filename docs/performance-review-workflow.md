@@ -27,6 +27,8 @@ This document describes the complete performance review cycle workflow for pa-as
 - **Actor:** Employee
 - **Action:** Create 3-5 performance targets
 - **Fields:**
+  - Current role
+  - Long-term goal
   - Task description
   - KPI (Key Performance Indicator)
   - Weight percentage (must total 100%)

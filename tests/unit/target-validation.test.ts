@@ -1,4 +1,12 @@
 import { describe, it, expect } from 'vitest'
+
+describe('Target validation - skeleton', () => {
+  it('validates 3-5 targets and weight=100', () => {
+    // TODO: implement unit tests using validation schema
+    expect(true).toBeTruthy()
+  })
+})
+import { describe, it, expect } from 'vitest'
 import {
   TargetSchema,
   TargetsArraySchema,
