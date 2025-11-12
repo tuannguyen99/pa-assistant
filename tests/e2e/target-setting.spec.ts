@@ -41,60 +41,34 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
   let hrAdminId: string
 
   test.beforeAll(async () => {
-    // Clean up any existing test users first
-    await prisma.user.deleteMany({
-      where: {
-        email: { in: [TEST_MANAGER.email, TEST_EMPLOYEE.email, TEST_HR_ADMIN.email] },
-      },
+    // Get existing test users created by global setup
+    const manager = await prisma.user.findUnique({
+      where: { email: TEST_MANAGER.email },
     })
-
-    // Create test users
-    const managerHash = await bcrypt.hash(TEST_MANAGER.password, 10)
-    const manager = await prisma.user.create({
-      data: {
-        email: TEST_MANAGER.email,
-        passwordHash: managerHash,
-        fullName: TEST_MANAGER.fullName,
-        roles: JSON.parse(JSON.stringify(TEST_MANAGER.roles)),
-        employeeId: TEST_MANAGER.employeeId,
-        grade: TEST_MANAGER.grade,
-        department: TEST_MANAGER.department,
-      },
-    })
+    if (!manager) {
+      throw new Error(`Test manager not found: ${TEST_MANAGER.email}`)
+    }
     managerId = manager.id
 
-    const employeeHash = await bcrypt.hash(TEST_EMPLOYEE.password, 10)
-    const employee = await prisma.user.create({
-      data: {
-        email: TEST_EMPLOYEE.email,
-        passwordHash: employeeHash,
-        fullName: TEST_EMPLOYEE.fullName,
-        roles: JSON.parse(JSON.stringify(TEST_EMPLOYEE.roles)),
-        employeeId: TEST_EMPLOYEE.employeeId,
-        grade: TEST_EMPLOYEE.grade,
-        department: TEST_EMPLOYEE.department,
-        managerId: managerId,
-      },
+    const employee = await prisma.user.findUnique({
+      where: { email: TEST_EMPLOYEE.email },
     })
+    if (!employee) {
+      throw new Error(`Test employee not found: ${TEST_EMPLOYEE.email}`)
+    }
     employeeId = employee.id
 
-    const hrAdminHash = await bcrypt.hash(TEST_HR_ADMIN.password, 10)
-    const hrAdmin = await prisma.user.create({
-      data: {
-        email: TEST_HR_ADMIN.email,
-        passwordHash: hrAdminHash,
-        fullName: TEST_HR_ADMIN.fullName,
-        roles: JSON.parse(JSON.stringify(TEST_HR_ADMIN.roles)),
-        employeeId: TEST_HR_ADMIN.employeeId,
-        grade: TEST_HR_ADMIN.grade,
-        department: TEST_HR_ADMIN.department,
-      },
+    const hrAdmin = await prisma.user.findUnique({
+      where: { email: TEST_HR_ADMIN.email },
     })
+    if (!hrAdmin) {
+      throw new Error(`Test HR admin not found: ${TEST_HR_ADMIN.email}`)
+    }
     hrAdminId = hrAdmin.id
   })
 
   test.afterAll(async () => {
-    // Clean up test data
+    // Clean up test data but don't delete users (they're managed by global setup)
     if (employeeId) {
       await prisma.targetSetting.deleteMany({
         where: {
@@ -106,7 +80,7 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
           actorId: employeeId,
         },
       })
-      await prisma.user.delete({ where: { id: employeeId } })
+      // Don't delete user - it's managed by global setup
     }
     if (managerId) {
       await prisma.targetSetting.deleteMany({
@@ -119,7 +93,7 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
           actorId: managerId,
         },
       })
-      await prisma.user.delete({ where: { id: managerId } })
+      // Don't delete user - it's managed by global setup
     }
     if (hrAdminId) {
       await prisma.auditEntry.deleteMany({
@@ -127,7 +101,7 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
           actorId: hrAdminId,
         },
       })
-      await prisma.user.delete({ where: { id: hrAdminId } })
+      // Don't delete user - it's managed by global setup
     }
     await prisma.$disconnect()
   })
@@ -169,56 +143,58 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
 
     await page.goto('/targets/new')
 
-    // Fill in 3 targets with incorrect total weight
+    // Fill in 3 targets with correct total weight (100%)
     const targets = page.locator('tbody tr')
     
     // Target 1
-    await targets.nth(0).locator('textarea').fill('Implement core features for Q4 project delivery')
-    await targets.nth(0).locator('input[placeholder*="KPI"]').fill('Complete 5 major features')
-    await targets.nth(0).locator('input[type="number"]').fill('30')
+    await targets.nth(0).locator('textarea').first().fill('Implement core features for Q4 project delivery')
+    await targets.nth(0).locator('textarea').nth(1).fill('Complete 5 major features')
+    await targets.nth(0).locator('input[type="number"]').fill('40')
     
     // Target 2
-    await targets.nth(1).locator('textarea').fill('Improve code quality and test coverage metrics')
-    await targets.nth(1).locator('input[placeholder*="KPI"]').fill('Achieve 80% test coverage')
-    await targets.nth(1).locator('input[type="number"]').fill('30')
+    await targets.nth(1).locator('textarea').first().fill('Improve code quality and test coverage metrics')
+    await targets.nth(1).locator('textarea').nth(1).fill('Achieve 80% test coverage')
+    await targets.nth(1).locator('input[type="number"]').fill('35')
     
     // Target 3
-    await targets.nth(2).locator('textarea').fill('Mentor junior developers and conduct code reviews')
-    await targets.nth(2).locator('input[placeholder*="KPI"]').fill('Complete 20 code reviews')
-    await targets.nth(2).locator('input[type="number"]').fill('30')
+    await targets.nth(2).locator('textarea').first().fill('Mentor junior developers and conduct code reviews')
+    await targets.nth(2).locator('textarea').nth(1).fill('Complete 20 code reviews')
+    await targets.nth(2).locator('input[type="number"]').fill('25')
 
-    // Check weight indicator shows 90% (not 100%)
-    await expect(page.locator('text=90%')).toBeVisible()
-    await expect(page.locator('text=Under by 10%')).toBeVisible()
-
-    // Submit button should be disabled
-    await expect(page.locator('button[type="submit"]')).toBeDisabled()
-
-    // Add a 4th target to test max targets
-    await page.click('text=Add Target')
-    await expect(page.locator('text=Target 4')).toBeVisible()
-
-    // Try to add a 5th target
-    await page.click('text=Add Target')
-    await expect(page.locator('text=Target 5')).toBeVisible()
-
-    // Add Target button should now say "Maximum 5"
-    await expect(page.locator('text=Add Target (Maximum 5)')).toBeDisabled()
-
-    // Remove targets back to 3
-    const removeButtons = page.locator('button:has-text("Remove")')
-    await removeButtons.first().click()
-    await removeButtons.first().click()
-
-    // Adjust weight to equal 100%
-    await targets.nth(2).locator('input[type="number"]').fill('40')
+    // Wait for weight calculation
+    await page.waitForTimeout(1000)
     
     // Check weight indicator shows 100%
-    await page.waitForTimeout(500) // Wait for calculation
-    await expect(page.locator('text=100%')).toBeVisible()
+    await expect(page.locator('.text-green-600').filter({ hasText: '100%' })).toBeVisible()
 
-    // Submit button should now be enabled
-    await expect(page.locator('button[type="submit"]')).toBeEnabled()
+    // Submit button should be enabled
+    await expect(page.getByRole('button', { name: 'Submit to Manager' })).toBeEnabled()
+
+    // Test adding targets up to maximum
+    await page.click('text=Add Target')
+    await expect(page.locator('tbody tr')).toHaveCount(4)
+
+    // Check if button is still visible after first click
+    await expect(page.locator('text=Add Target')).toBeVisible()
+
+    await page.click('text=Add Target')
+    await expect(page.locator('tbody tr')).toHaveCount(5)
+
+    // Add Target button should now be hidden (Maximum 5 reached)
+    await expect(page.locator('text=Add Target')).not.toBeVisible()
+
+    // Test that we can have minimum 3 targets (remove buttons should be hidden when at minimum)
+    // With 5 targets, remove buttons should be visible
+    const removeButtons = page.locator('tbody tr td:last-child button')
+    await expect(removeButtons).toHaveCount(5) // All rows should have remove buttons since > 3
+
+    // Remove 2 targets to get back to 3
+    await removeButtons.first().click()
+    await removeButtons.first().click()
+    await expect(page.locator('tbody tr')).toHaveCount(3)
+
+    // With exactly 3 targets, remove buttons should be hidden
+    await expect(page.locator('tbody tr td:last-child button')).toHaveCount(0)
   })
 
   test('Complete workflow: Create, submit, and manager approve', async ({ page, context }) => {
@@ -232,29 +208,29 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
     await page.goto('/targets/new')
 
     // Fill in 3 targets with 100% weight
-    const targets = page.locator('[class*="border rounded-lg"]')
+    const targets = page.locator('tbody tr')
     
     // Target 1 - L1 difficulty
-    await targets.nth(0).locator('textarea').fill('Lead architecture design for new microservices platform')
-    await targets.nth(0).locator('input[placeholder*="KPI"]').fill('Complete architecture documentation and 3 services')
+    await targets.nth(0).locator('textarea').first().fill('Lead architecture design for new microservices platform')
+    await targets.nth(0).locator('textarea').nth(1).fill('Complete architecture documentation and 3 services')
     await targets.nth(0).locator('input[type="number"]').fill('40')
     
     // Target 2 - L2 difficulty
-    await targets.nth(1).locator('textarea').fill('Improve system performance and reduce latency by 30%')
-    await targets.nth(1).locator('input[placeholder*="KPI"]').fill('Achieve sub-100ms response times')
+    await targets.nth(1).locator('textarea').first().fill('Improve system performance and reduce latency by 30%')
+    await targets.nth(1).locator('textarea').nth(1).fill('Achieve sub-100ms response times')
     await targets.nth(1).locator('input[type="number"]').fill('35')
     
     // Target 3 - L3 difficulty
-    await targets.nth(2).locator('textarea').fill('Conduct weekly team meetings and maintain documentation')
-    await targets.nth(2).locator('input[placeholder*="KPI"]').fill('100% attendance and updated docs')
+    await targets.nth(2).locator('textarea').first().fill('Conduct weekly team meetings and maintain documentation')
+    await targets.nth(2).locator('textarea').nth(1).fill('100% attendance and updated docs')
     await targets.nth(2).locator('input[type="number"]').fill('25')
 
     // Wait for 100% weight
     await page.waitForTimeout(500)
-    await expect(page.locator('text=100%')).toBeVisible()
+    await expect(page.locator('.text-green-600').filter({ hasText: '100%' })).toBeVisible()
 
     // Submit to manager
-    await page.click('button[type="submit"]')
+    await page.click('text=Submit to Manager')
 
     // Should redirect to target detail page
     await page.waitForURL(/\/targets\/[a-f0-9-]+/)
@@ -428,27 +404,27 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
       await page.fill('textarea[placeholder*="career goals"]', 'Advance to Tech Lead position within 2 years')
 
       // Fill in 4 targets with correct weights (total = 100%)
-      const targets = page.locator('[class*="border rounded-lg"]')
+      const targets = page.locator('tbody tr')
       
-      await targets.nth(0).locator('textarea').fill('Design and implement microservices architecture')
-      await targets.nth(0).locator('input[placeholder*="KPI"]').fill('Complete 3 core services with 90% test coverage')
+      await targets.nth(0).locator('textarea').first().fill('Design and implement microservices architecture')
+      await targets.nth(0).locator('textarea').nth(1).fill('Complete 3 core services with 90% test coverage')
       await targets.nth(0).locator('input[type="number"]').fill('35')
       await targets.nth(0).locator('select').selectOption('L1')
       
-      await targets.nth(1).locator('textarea').fill('Improve system performance and reliability')
-      await targets.nth(1).locator('input[placeholder*="KPI"]').fill('Reduce API response time by 40% and achieve 99.9% uptime')
+      await targets.nth(1).locator('textarea').first().fill('Improve system performance and reliability')
+      await targets.nth(1).locator('textarea').nth(1).fill('Reduce API response time by 40% and achieve 99.9% uptime')
       await targets.nth(1).locator('input[type="number"]').fill('30')
       await targets.nth(1).locator('select').selectOption('L2')
       
-      await targets.nth(2).locator('textarea').fill('Mentor junior developers and conduct code reviews')
-      await targets.nth(2).locator('input[placeholder*="KPI"]').fill('Conduct 40+ code reviews and mentor 2 junior developers')
+      await targets.nth(2).locator('textarea').first().fill('Mentor junior developers and conduct code reviews')
+      await targets.nth(2).locator('textarea').nth(1).fill('Conduct 40+ code reviews and mentor 2 junior developers')
       await targets.nth(2).locator('input[type="number"]').fill('20')
       await targets.nth(2).locator('select').selectOption('L3')
 
       // Add 4th target
       await page.click('text=Add Target')
-      await targets.nth(3).locator('textarea').fill('Document system architecture and processes')
-      await targets.nth(3).locator('input[placeholder*="KPI"]').fill('Create comprehensive documentation with 100% API coverage')
+      await targets.nth(3).locator('textarea').first().fill('Document system architecture and processes')
+      await targets.nth(3).locator('textarea').nth(1).fill('Create comprehensive documentation with 100% API coverage')
       await targets.nth(3).locator('input[type="number"]').fill('15')
       await targets.nth(3).locator('select').selectOption('L3')
 
@@ -493,8 +469,8 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
       
       // Edit the target
       await page.goto('/targets/new')
-      const updatedTargets = page.locator('[class*="border rounded-lg"]')
-      await updatedTargets.nth(0).locator('textarea').fill('Design and implement 3 microservices (User Service, Payment Service, Notification Service) by Q2 end')
+      const updatedTargets = page.locator('tbody tr')
+      await updatedTargets.nth(0).locator('textarea').first().fill('Design and implement 3 microservices (User Service, Payment Service, Notification Service) by Q2 end')
       
       // Resubmit
       await page.click('button[type="submit"]')
@@ -563,9 +539,9 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
 
       // Employee updates targets
       await page.goto('/targets/new')
-      const hrUpdatedTargets = page.locator('[class*="border rounded-lg"]')
-      await hrUpdatedTargets.nth(0).locator('textarea').fill('Design and implement 3 microservices (User Service, Payment Service, Notification Service) by June 30th, 2025')
-      await hrUpdatedTargets.nth(0).locator('input[placeholder*="KPI"]').fill('Complete 3 services with 90% test coverage, each with 95%+ user acceptance')
+      const hrUpdatedTargets = page.locator('tbody tr')
+      await hrUpdatedTargets.nth(0).locator('textarea').first().fill('Design and implement 3 microservices (User Service, Payment Service, Notification Service) by June 30th, 2025')
+      await hrUpdatedTargets.nth(0).locator('textarea').nth(1).fill('Complete 3 services with 90% test coverage, each with 95%+ user acceptance')
 
       // Resubmit to manager
       await page.click('button[type="submit"]')
@@ -607,19 +583,19 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
 
       await page.goto('/targets/new')
 
-      const targets = page.locator('[class*="border rounded-lg"]')
+      const targets = page.locator('tbody tr')
       
       // Fill with incorrect total (90%)
-      await targets.nth(0).locator('textarea').fill('Task 1')
-      await targets.nth(0).locator('input[placeholder*="KPI"]').fill('KPI 1')
+      await targets.nth(0).locator('textarea').first().fill('Task 1')
+      await targets.nth(0).locator('textarea').nth(1).fill('KPI 1')
       await targets.nth(0).locator('input[type="number"]').fill('30')
       
-      await targets.nth(1).locator('textarea').fill('Task 2')
-      await targets.nth(1).locator('input[placeholder*="KPI"]').fill('KPI 2')
+      await targets.nth(1).locator('textarea').first().fill('Task 2')
+      await targets.nth(1).locator('textarea').nth(1).fill('KPI 2')
       await targets.nth(1).locator('input[type="number"]').fill('30')
       
-      await targets.nth(2).locator('textarea').fill('Task 3')
-      await targets.nth(2).locator('input[placeholder*="KPI"]').fill('KPI 3')
+      await targets.nth(2).locator('textarea').first().fill('Task 3')
+      await targets.nth(2).locator('textarea').nth(1).fill('KPI 3')
       await targets.nth(2).locator('input[type="number"]').fill('30')
 
       // Verify warning message
@@ -644,7 +620,7 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
       const removeButton = removeButtons.first()
       
       // Initially should have 3 targets minimum
-      const targetsCount = await page.locator('[class*="border rounded-lg"]').count()
+      const targetsCount = await page.locator('tbody tr').count()
       expect(targetsCount).toBeGreaterThanOrEqual(3)
     })
 
@@ -662,7 +638,7 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
       await page.click('text=Add Target')
       
       // Verify we have 5 targets
-      const targetsCount = await page.locator('[class*="border rounded-lg"]').count()
+      const targetsCount = await page.locator('tbody tr').count()
       expect(targetsCount).toBe(5)
 
       // Add Target button should be disabled
@@ -726,8 +702,8 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
       await page.goto('/targets/new')
 
       // Fill in a target
-      const targets = page.locator('[class*="border rounded-lg"]')
-      await targets.nth(0).locator('textarea').fill('Test auto-save functionality')
+      const targets = page.locator('tbody tr')
+      await targets.nth(0).locator('textarea').first().fill('Test auto-save functionality')
 
       // Wait for auto-save (should trigger after 3 seconds)
       await page.waitForTimeout(4000)
@@ -787,18 +763,18 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
 
       // Create and submit target
       await page.goto('/targets/new')
-      const targets = page.locator('[class*="border rounded-lg"]')
+      const targets = page.locator('tbody tr')
       
-      await targets.nth(0).locator('textarea').fill('Audit test target')
-      await targets.nth(0).locator('input[placeholder*="KPI"]').fill('Test KPI')
+      await targets.nth(0).locator('textarea').first().fill('Audit test target')
+      await targets.nth(0).locator('textarea').nth(1).fill('Test KPI')
       await targets.nth(0).locator('input[type="number"]').fill('40')
       
-      await targets.nth(1).locator('textarea').fill('Audit test target 2')
-      await targets.nth(1).locator('input[placeholder*="KPI"]').fill('Test KPI 2')
+      await targets.nth(1).locator('textarea').first().fill('Audit test target 2')
+      await targets.nth(1).locator('textarea').nth(1).fill('Test KPI 2')
       await targets.nth(1).locator('input[type="number"]').fill('30')
       
-      await targets.nth(2).locator('textarea').fill('Audit test target 3')
-      await targets.nth(2).locator('input[placeholder*="KPI"]').fill('Test KPI 3')
+      await targets.nth(2).locator('textarea').first().fill('Audit test target 3')
+      await targets.nth(2).locator('textarea').nth(1).fill('Test KPI 3')
       await targets.nth(2).locator('input[type="number"]').fill('30')
 
       await page.waitForTimeout(500)
@@ -823,7 +799,7 @@ test.describe('Target Setting Workflow - Story 1.4', () => {
 
       await page.goto('/targets/new')
 
-      const targets = page.locator('[class*="border rounded-lg"]')
+      const targets = page.locator('tbody tr')
       
       // Test L1 (highest complexity)
       await targets.nth(0).locator('select').selectOption('L1')
