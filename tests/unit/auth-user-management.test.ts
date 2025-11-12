@@ -111,7 +111,8 @@ describe('AuthService User Management', () => {
           fullName: 'Test User',
           roles: ['employee'] as any,
           grade: 'Senior',
-          department: 'Engineering'
+          department: 'Engineering',
+          managerId: null
         }
       })
       expect(result).toEqual(mockUser)
@@ -146,7 +147,8 @@ describe('AuthService User Management', () => {
           fullName: 'Test User',
           roles: ['employee'] as any,
           grade: 'TBD',
-          department: 'TBD'
+          department: 'TBD',
+          managerId: null
         }
       })
     })

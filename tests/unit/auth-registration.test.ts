@@ -46,7 +46,8 @@ describe('AuthService.registerUser', () => {
         fullName: 'Test User',
         roles: ['employee'] as any,
         grade: 'TBD',
-        department: 'TBD'
+        department: 'TBD',
+        managerId: null
       }
     })
     expect(result).toEqual(mockUser)

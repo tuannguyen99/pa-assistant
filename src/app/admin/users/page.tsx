@@ -139,7 +139,7 @@ export default function UserManagementPage() {
       grade: '',
       department: '',
       employeeId: '',
-      managerId: 'none'
+      managerId: ''
     }
   })
 
@@ -152,7 +152,7 @@ export default function UserManagementPage() {
       department: '',
       employeeId: '',
       password: '',
-      managerId: 'none'
+      managerId: ''
     }
   })
 
@@ -239,7 +239,7 @@ export default function UserManagementPage() {
         setUsers(usersWithParsedRoles)
         
         // Set managers list (users with manager role or higher)
-        const potentialManagers = usersWithParsedRoles.filter(user => 
+        const potentialManagers = usersWithParsedRoles.filter((user: User) => 
           user.roles.includes('manager') || 
           user.roles.includes('hr_admin') || 
           user.roles.includes('general_director') || 
@@ -326,7 +326,7 @@ export default function UserManagementPage() {
       department: user.department || '',
       employeeId: user.employeeId || '',
       password: '',
-      managerId: user.managerId || 'none'
+      managerId: user.managerId || ''
     })
     setShowEditDialog(true)
   }
