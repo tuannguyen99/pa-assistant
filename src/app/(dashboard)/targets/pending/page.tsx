@@ -1,3 +1,13 @@
+import React from 'react'
+
+export default function ManagerPendingPage() {
+  return (
+    <div>
+      <h1>Manager Pending Targets - TODO</h1>
+      <p>Stub for manager review dashboard.</p>
+    </div>
+  )
+}
 import { redirect } from 'next/navigation'
 import { AuthService } from '@/lib/auth/auth-service'
 import { prisma } from '@/lib/prisma'

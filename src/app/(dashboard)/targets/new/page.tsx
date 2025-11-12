@@ -1,3 +1,13 @@
+import React from 'react'
+
+export default function TargetNewPage() {
+  return (
+    <div>
+      <h1>Target Creation - TODO</h1>
+      <p>This page is a stub for the target creation UI. Implement TargetSettingForm here.</p>
+    </div>
+  )
+}
 import { redirect } from 'next/navigation'
 import { AuthService } from '@/lib/auth/auth-service'
 import { TargetCreationClient } from './TargetCreationClient'

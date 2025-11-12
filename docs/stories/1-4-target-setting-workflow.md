@@ -21,6 +21,7 @@ so that my annual goals are established for the review cycle.
 9. Unsaved changes warning dialog when attempting to reload page or navigate to other pages (dashboard, profile)
 10. Page reload loads latest data from database with Save Draft button disabled (clean state)
 11. System handles concurrent saves from 200+ users without data loss or corruption, maintaining fast response times (<500ms average)
+12. Submitted target sets are immediately visible to the employee's Manager and HR Admin in a read-only review mode; Manager may review/approve/request revisions, HR Admin may view/flag and request updates. All visibility and state-transition actions create AuditEntry records capturing actorId, actorRole, action, targetRecord, and timestamp.
 
 ## Tasks / Subtasks
 
@@ -30,6 +31,7 @@ so that my annual goals are established for the review cycle.
   - [ ] Implement POST /api/targets/create endpoint for draft creation
   - [ ] Implement PUT /api/targets/[id] endpoint for updating targets
   - [ ] Implement POST /api/targets/[id]/submit endpoint for manager submission
+  - [ ] Implement POST /api/departments/{deptId}/submit-to-hr endpoint for manager department-level submission (aggregates approved targets and creates DepartmentSubmission record)
   - [ ] Implement validation middleware for target data (3-5 targets, fields required)
   - [ ] Add unit tests for target validation logic
   - [ ] Add unit tests for target API endpoints
@@ -46,6 +48,20 @@ so that my annual goals are established for the review cycle.
   - [ ] Implement real-time weight validation showing total = 100%
   - [ ] Add visual feedback for validation errors
   - [ ] Add auto-save draft functionality
+    - [ ] Implement autosave debounce/interval = 3000ms (3s) with safe retry/backoff
+    - [ ] Unit test for autosave timing, debounce, and server error handling
+  - [ ] Add Save Draft button behaviors
+    - [ ] Implement Save Draft enable/disable rules: enabled when local changes exist and no save in progress; disabled when clean or during save operations
+    - [ ] Unit test asserting button state transitions and UI accessibility
+  - [ ] Add notification microcopy and UX states
+    - [ ] Implement messages: "Auto-saving draft...", "Draft auto-saved successfully", and error messages with actionable instructions
+    - [ ] E2E tests asserting notification presence and content
+  - [ ] Implement unsaved-changes navigation guard
+    - [ ] Use beforeunload and SPA navigation guard to prompt when unsaved changes exist
+    - [ ] E2E test that attempts navigation/reload and expects confirmation dialog
+  - [ ] Add page-load clean-state behavior
+    - [ ] On page load fetch latest target set from GET /api/targets and set Save Draft button to disabled (clean state)
+    - [ ] E2E test asserting Save Draft disabled on fresh load
   - [ ] Add E2E test for target creation form
 
 - [ ] Task 3: Implement manager review and approval workflow (AC: 4)
@@ -54,11 +70,31 @@ so that my annual goals are established for the review cycle.
   - [ ] Implement side-by-side target review view
   - [ ] Add manager approval action with POST /api/targets/[id]/approve
   - [ ] Add "Request Revisions" action with feedback textarea
+  - [ ] Add manager feedback/comment input
+    - [ ] Implement POST /api/targets/[id]/manager-feedback to save manager comments and mark target set with latestManagerComment metadata
+    - [ ] UI: Manager review detail view includes a feedback/comment box with optional attachments and clear "Send to Employee" action
+    - [ ] Notification: On manager feedback, employee receives a notification with link to review comments
+    - [ ] E2E test: manager posts feedback → employee views feedback and updates targets
   - [ ] Implement state transitions (draft  submitted_to_manager  manager_approved)
   - [ ] Add notification system for employee when manager approves/requests changes
   - [ ] Update src/app/(dashboard)/targets/[id]/page.tsx for employee to view status
+  - [ ] Employee feedback review UI
+    - [ ] UI: Employee target detail page shows manager feedback thread and status badges; allow employee to acknowledge feedback or reply (comment only, not edit manager text)
+    - [ ] API: GET /api/targets/[id]/comments returns threaded comments (manager/HR/employee)
+    - [ ] E2E test: employee receives manager feedback, replies, and preserves audit trail
   - [ ] Add unit tests for approval workflow logic
   - [ ] Add E2E test for complete manager approval workflow
+  - [ ] Implement HR and shared-visibility access (AC: 12)
+    - [ ] API: Ensure GET /api/targets/[id] returns role-scoped view; include audit metadata and read-only flag for Manager/HR views
+    - [ ] UI: Manager pending list shows submitted items; HR Admin view shows department/company aggregated submissions and can drill into individual target sets (read-only)
+    - [ ] RBAC: Middleware updates to allow HR Admin read access to any submitted target and Manager access to direct reports only
+    - [ ] Audit: Create AuditEntry on submit/approve/request actions; unit test for AuditEntry creation and content
+    - [ ] E2E tests: Manager can view/approve/request; HR Admin can view/flag and request department-level updates
+    - [ ] HR feedback/comment input
+      - [ ] Implement POST /api/departments/{deptId}/submissions/{submissionId}/hr-feedback to attach HR comments to a DepartmentSubmission and optionally flag individual target sets for update
+      - [ ] UI: HR Consolidation view includes comment box, per-target flags, and actions: "Request Updates" (sends to Manager) and "Approve Submission"
+      - [ ] Notification: On HR request, Manager receives notification with HR comments and link to department submission
+      - [ ] E2E test: HR requests updates → Manager sees HR comments and target sets are transitioned to `hr_feedback_requested` for specific targets
 
 - [ ] Task 4: Implement target storage and retrieval (AC: 5)
   - [ ] Create GET /api/targets?cycleYear=YYYY endpoint for retrieving employee targets
@@ -67,6 +103,9 @@ so that my annual goals are established for the review cycle.
   - [ ] Add audit logging for target creation, submission, and approval actions
   - [ ] Add unit tests for retrieval logic
   - [ ] Add E2E test for year-long target access verification
+  - [ ] Integrate load test for concurrent saves (AC: 11)
+    - [ ] Reference and maintain `tests/load/target-save-load-test.js` as part of Story 1.4 tasks
+    - [ ] Add documentation for running load test locally and CI job reference
 
 ## Dev Notes
 

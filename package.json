@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:test": "cross-env DATABASE_URL=\"file:C:/Users/Admin/Desktop/ai/pa-assistant/prisma/test.db\" NEXTAUTH_SECRET=\"test-secret-key\" next dev",
+    "dev:test": "next dev",
+    "dev:testdata": "cross-env DATABASE_URL=\"file:C:/Users/Admin/Desktop/ai/pa-assistant/prisma/test.db\" NEXTAUTH_SECRET=\"test-secret-key\" next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

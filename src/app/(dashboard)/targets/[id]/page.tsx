@@ -1,3 +1,13 @@
+import React from 'react'
+
+export default function TargetDetailPage() {
+  return (
+    <div>
+      <h1>Target Detail - TODO</h1>
+      <p>Stub for target detail/status view and feedback thread.</p>
+    </div>
+  )
+}
 import { redirect } from 'next/navigation'
 import { AuthService } from '@/lib/auth/auth-service'
 import { prisma } from '@/lib/prisma'

@@ -7,9 +7,6 @@ const testDbPath = path.join(process.cwd(), 'prisma', 'test.db')
 async function globalSetup() {
   console.log('🔧 Setting up test database...')
 
-  // Set test environment variables
-  process.env.DATABASE_URL = `file:${testDbPath}`
-
   try {
     // Remove existing test database if it exists
     if (existsSync(testDbPath)) {

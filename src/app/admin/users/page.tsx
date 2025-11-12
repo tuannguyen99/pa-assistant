@@ -65,7 +65,7 @@ const userFormSchema = z.object({
   grade: z.string().optional(),
   department: z.string().optional(),
   employeeId: z.string().min(1, 'Employee ID is required'),
-  managerId: z.string().optional()
+  managerId: z.string().nullable().optional()
 })
 
 const editUserFormSchema = z.object({
@@ -75,7 +75,7 @@ const editUserFormSchema = z.object({
   department: z.string().optional(),
   employeeId: z.string().min(1, 'Employee ID is required'),
   password: z.string().optional(),
-  managerId: z.string().optional()
+  managerId: z.string().nullable().optional()
 })
 
 type UserFormData = z.infer<typeof userFormSchema>
@@ -139,7 +139,7 @@ export default function UserManagementPage() {
       grade: '',
       department: '',
       employeeId: '',
-      managerId: 'none'
+      managerId: ''
     }
   })
 
@@ -152,7 +152,7 @@ export default function UserManagementPage() {
       department: '',
       employeeId: '',
       password: '',
-      managerId: 'none'
+      managerId: ''
     }
   })
 
@@ -239,7 +239,7 @@ export default function UserManagementPage() {
         setUsers(usersWithParsedRoles)
         
         // Set managers list (users with manager role or higher)
-        const potentialManagers = usersWithParsedRoles.filter(user => 
+        const potentialManagers = usersWithParsedRoles.filter((user: User) => 
           user.roles.includes('manager') || 
           user.roles.includes('hr_admin') || 
           user.roles.includes('general_director') || 
@@ -326,7 +326,7 @@ export default function UserManagementPage() {
       department: user.department || '',
       employeeId: user.employeeId || '',
       password: '',
-      managerId: user.managerId || 'none'
+      managerId: user.managerId || ''
     })
     setShowEditDialog(true)
   }
