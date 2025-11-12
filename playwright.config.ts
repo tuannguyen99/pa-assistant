@@ -23,7 +23,7 @@ export default defineConfig({
   globalSetup: './tests/setup/global-setup.ts',
 
   webServer: {
-    command: 'npm run dev:test',
+    command: 'cross-env DATABASE_URL="file:C:/Users/Admin/Desktop/ai/pa-assistant/prisma/test.db" NEXTAUTH_SECRET="test-secret-key" npm run dev:test',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
   },

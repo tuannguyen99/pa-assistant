@@ -65,7 +65,7 @@ const userFormSchema = z.object({
   grade: z.string().optional(),
   department: z.string().optional(),
   employeeId: z.string().min(1, 'Employee ID is required'),
-  managerId: z.string().optional()
+  managerId: z.string().nullable().optional()
 })
 
 const editUserFormSchema = z.object({
@@ -75,7 +75,7 @@ const editUserFormSchema = z.object({
   department: z.string().optional(),
   employeeId: z.string().min(1, 'Employee ID is required'),
   password: z.string().optional(),
-  managerId: z.string().optional()
+  managerId: z.string().nullable().optional()
 })
 
 type UserFormData = z.infer<typeof userFormSchema>

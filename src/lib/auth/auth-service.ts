@@ -99,7 +99,7 @@ export class AuthService {
     grade?: string
     department?: string
     employeeId?: string
-    managerId?: string
+    managerId?: string | null
   }): Promise<User> {
     const { email, password, fullName, roles, grade, department, employeeId, managerId } = data
 
