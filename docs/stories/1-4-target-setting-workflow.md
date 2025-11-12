@@ -32,6 +32,7 @@ so that my annual goals are established for the review cycle.
   - [ ] Implement PUT /api/targets/[id] endpoint for updating targets
   - [ ] Implement POST /api/targets/[id]/submit endpoint for manager submission
   - [ ] Implement POST /api/departments/{deptId}/submit-to-hr endpoint for manager department-level submission (aggregates approved targets and creates DepartmentSubmission record)
+  - [ ] Implement export for DepartmentSubmission (CSV/HTML/PDF) to generate a human-readable department target summary report and add E2E/unit tests for report contents
   - [ ] Implement validation middleware for target data (3-5 targets, fields required)
   - [ ] Add unit tests for target validation logic
   - [ ] Add unit tests for target API endpoints
@@ -95,6 +96,7 @@ so that my annual goals are established for the review cycle.
       - [ ] UI: HR Consolidation view includes comment box, per-target flags, and actions: "Request Updates" (sends to Manager) and "Approve Submission"
       - [ ] Notification: On HR request, Manager receives notification with HR comments and link to department submission
       - [ ] E2E test: HR requests updates → Manager sees HR comments and target sets are transitioned to `hr_feedback_requested` for specific targets
+    - [ ] Implement POST /api/departments/{deptId}/submissions/{submissionId}/approve to allow HR Admin to approve a DepartmentSubmission, transition state to `hr_approved`, and create an AuditEntry (include actorId, actorRole, action, targetRecord, timestamp); add unit tests for the endpoint and audit payload
 
 - [ ] Task 4: Implement target storage and retrieval (AC: 5)
   - [ ] Create GET /api/targets?cycleYear=YYYY endpoint for retrieving employee targets
